@@ -343,6 +343,16 @@
           that does not require posterior samples, while remaining competitive in fidelity with strong sampling-based
           baselines.
         </p>
+        <p class="muted">
+          Terminology: “gold reference” refers to the high-quality signal used to score fidelity (correlation). Separately,
+          some curves in the plots are labeled “oracle”—these are specialized, model-specific ceiling baselines, not
+          general-purpose estimators.
+        </p>
+        <p class="muted">
+          The ceiling baselines exploit analytic structure or very expensive, problem-tailored importance schemes. They’re
+          included to show a credible upper bound on what’s achievable if you allow custom methods and pay oracle-level
+          costs, not as something you’d deploy in a scalable design loop.
+        </p>
 
         <div class="stack-tight">
           <figure>
@@ -353,7 +363,7 @@
               decoding="async"
             >
             <figcaption>
-              <strong>Linear-Gaussian model.</strong> Top row: correlation with an oracle reference vs batch size (k) for
+              <strong>Linear-Gaussian model.</strong> Top row: correlation with the gold reference vs batch size (k) for
               posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs (k). With a fixed
               refinement budget, best-first adaptive partitioning keeps runtime essentially flat as (k) grows while
               maintaining strong correlation.
@@ -441,7 +451,7 @@
         </p>
         <p class="muted">
           To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent posterior
-          draw stream (not shared across methods or with the oracle reference).
+          draw stream (not shared across methods or with the gold reference).
         </p>
       </section>
 
@@ -483,10 +493,15 @@
           </p>
         </details>
         <details>
-          <summary>Oracle references (HMC / analytic / exhaustive importance)</summary>
+          <summary>Ceiling references (“oracle” baselines)</summary>
           <p>
-            “Best case” ceilings that rely on heavy compute or strong structural assumptions. Included to show what’s
-            achievable if you’re allowed to pay oracle costs.
+            These are not drop-in estimators you’d deploy in a generic design loop. They are custom, model-specific
+            reference computations that either exploit analytic structure or use very expensive, problem-tailored
+            importance schemes (often alongside HMC) to approximate MI as accurately as practical for these benchmarks.
+          </p>
+          <p>
+            They’re included to ground the comparisons: rather than arguing against weak baselines, the figures show how
+            close each scalable method gets to a credible ceiling when you’re allowed to spend ceiling-level effort.
           </p>
         </details>
       </section>
