@@ -157,12 +157,14 @@
       margin-top: 2.75rem;
       display: grid;
       gap: 1.5rem;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .stack-tight {
       margin-top: 1.5rem;
       display: grid;
       gap: 1.5rem;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .grid {
@@ -178,6 +180,7 @@
       padding: 1.75rem;
       box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
       position: relative;
+      min-width: 0;
     }
 
     .panel::before {
@@ -219,6 +222,9 @@
       border: 1px solid rgba(31, 42, 55, 0.12);
       background: rgba(31, 42, 55, 0.04);
       overflow-x: auto;
+      max-width: 100%;
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
     }
 
     code {
@@ -239,6 +245,10 @@
 
     .code-grid pre {
       margin: 0;
+    }
+
+    .code-grid > * {
+      min-width: 0;
     }
 
     .code-title {
@@ -263,6 +273,15 @@
     .math-block {
       margin: 0.5rem 0 0;
       overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    mjx-container[jax="SVG"][display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     figure {
