@@ -397,15 +397,15 @@
       <section class="panel">
         <h2>Motivation</h2>
         <p>
-          A common applied workflow: collect data, train a model, then deploy it when it is sufficiently accurate. Optimal 
-          experiment design (OED) interrupts that process. In Bayesian inference, a model represents the current state 
-          of knowledge with honest uncertainty; while data collection is ongoing, an OED framework uses the current uncertain 
-          state of the model to evaluate which data to collect so that the model uncertainty falls fastest. The model can 
+          A common applied workflow: collect data, train a model, then deploy it when it is sufficiently accurate. In Bayesian 
+          inference, a model represents the current state of knowledge (likewise, the current state of uncertainty). During 
+          data collection, an Optimal Experiment Design (OED) framework uses the current state of the model to evaluate 
+          which data to collect so that the model uncertainty falls fastest. This allows the model to 
           learn with dramatically fewer data points, reach useful performance sooner, and the user spends fewer resources or 
           opportunity cost on uninformative observations.
         </p>
         <p class="muted">
-          This is especially valuable when the pool of possible observations is much larger than what will ever be used
+          OED is especially valuable when the pool of possible observations is much larger than what will ever be used
           for training (clinical trials, A/B testing, ad experiments, surveys): it can be worth spending real compute to
           choose informative data rather than selecting blindly, because the opportunity cost of collecting the “wrong”
           data (and delaying decisions) is often larger than the cost of the selection algorithm.
