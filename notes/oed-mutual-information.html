@@ -436,12 +436,17 @@
           efficient local updates).
         </p>
         <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
-        <pre><code># Typical sampling-based loop (inference first, then MI)
+        <pre><code># Typical sampling-based deployment (separate inference + MI scoring)
+# (1) model/inference service (often on a different machine)
 observed_data += new_observations
-posterior_samples = run_inference(model_spec, observed_data)  # e.g., HMC/MCMC
-score = mi_estimate(posterior_samples, candidate_batch)       # sample-based scoring
+posterior_samples = run_inference(model_spec, observed_data)   # e.g., HMC/MCMC
+artifact_uri = write_to_storage(posterior_samples)             # serialize + publish state
 
-# Best-first adaptive partitioning (MI + updating together)
+# (2) MI scoring service (called repeatedly during batch search)
+posterior_samples = read_from_storage(artifact_uri)
+score = mi_estimate(posterior_samples, candidate_batch)        # sample-based scoring
+
+# Best-first adaptive partitioning (single scoring function)
 observed_data += new_observations
 score = information_gain(model_spec, observed_data, candidate_batch)</code></pre>
         <p class="muted">
@@ -500,13 +505,26 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           <figure>
             <img
               src="assets/mi_spread_summary.png"
-              alt="Spread summary: box and whisker plots summarizing variability across batch sizes for correlation and runtime."
+              alt="Posterior-MI spread summary: box and whisker plots summarizing variability across batch sizes for correlation and runtime."
               loading="lazy"
               decoding="async"
             >
             <figcaption>
-              <strong>Across-(k) variability.</strong> Box/whisker summaries for correlation and time highlight stability
-              and predictable compute for all of the batch sizes tested.
+              <strong>Across-(k) variability (posterior MI).</strong> Box/whisker summaries for correlation and time
+              highlight stability and predictable compute for all of the batch sizes tested.
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="assets/mi_spread_summary_predictive.png"
+              alt="Predictive-MI spread summary: box and whisker plots summarizing variability across batch sizes for correlation and runtime."
+              loading="lazy"
+              decoding="async"
+            >
+            <figcaption>
+              <strong>Across-(k) variability (predictive MI).</strong> The same spread summaries for the predictive-MI
+              objective.
             </figcaption>
           </figure>
         </div>
