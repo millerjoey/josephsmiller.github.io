@@ -226,6 +226,30 @@
       font-size: 0.95em;
     }
 
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .code-grid.single {
+      grid-template-columns: 1fr;
+    }
+
+    .code-grid pre {
+      margin: 0;
+    }
+
+    .code-title {
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.75rem;
+      color: var(--accent-strong);
+      font-weight: 600;
+      margin: 0 0 0.55rem;
+    }
+
     .bullets {
       margin: 0;
       padding-left: 1.25rem;
@@ -307,6 +331,10 @@
 
     @media (max-width: 900px) {
       .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .code-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -436,19 +464,26 @@
           efficient local updates).
         </p>
         <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
-        <pre><code># Typical sampling-based deployment (separate inference + MI scoring)
-# (1) model/inference service (often on a different machine)
-observed_data += new_observations
+        <div class="code-grid">
+          <div>
+            <div class="code-title">Machine A · Inference Service</div>
+            <pre><code>observed_data += new_observations
 posterior_samples = run_inference(model_spec, observed_data)   # e.g., HMC/MCMC
-artifact_uri = write_to_storage(posterior_samples)             # serialize + publish state
-
-# (2) MI scoring service (called repeatedly during batch search)
-posterior_samples = read_from_storage(artifact_uri)
-score = mi_estimate(posterior_samples, candidate_batch)        # sample-based scoring
-
-# Best-first adaptive partitioning (single scoring function)
-observed_data += new_observations
+artifact_uri = write_to_storage(posterior_samples)             # serialize + publish state</code></pre>
+          </div>
+          <div>
+            <div class="code-title">Machine B · MI Scoring Service</div>
+            <pre><code>posterior_samples = read_from_storage(artifact_uri)
+score = mi_estimate(posterior_samples, candidate_batch)        # repeated many times during batch search</code></pre>
+          </div>
+        </div>
+        <div class="code-grid single">
+          <div>
+            <div class="code-title">Single Function · Best-First Adaptive Partitioning</div>
+            <pre><code>observed_data += new_observations
 score = information_gain(model_spec, observed_data, candidate_batch)</code></pre>
+          </div>
+        </div>
         <p class="muted">
           No posterior samples, no probabilistic programming stack, and no separate inference service to maintain—just raw
           data in and an interpretable score out. Dependencies can be minimal: standard numerical linear algebra plus your
