@@ -8,6 +8,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+      svg: {
+        fontCache: 'global',
+      },
+    };
+  </script>
+  <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <style>
     :root {
       color-scheme: light;
@@ -210,6 +222,11 @@
       margin: 0.35rem 0;
     }
 
+    .math-block {
+      margin: 0.5rem 0 0;
+      overflow-x: auto;
+    }
+
     figure {
       margin: 0;
       display: grid;
@@ -315,16 +332,62 @@
       <section class="panel">
         <h2>Motivation</h2>
         <p>
-          In principle, information gain can be used continuously: score candidate experiments in real time, provision the
-          next batch, incorporate the new data, then re-score again after every model update. In practice, MI-driven
-          experimentation rarely runs this way because “one MI query” is often too expensive, too brittle, or too
-          dependent on heavyweight Bayesian infrastructure.
+          A common applied workflow is: collect data, train a model, then deploy it. Optimal experiment design interrupts
+          that process. While the model is still being trained, you use what it currently knows to select the next data to
+          collect—so the model learns faster, reaches useful performance sooner, and you spend fewer resources on
+          uninformative observations.
         </p>
+        <p class="muted">
+          This is especially valuable when the pool of possible observations is much larger than what will ever be used
+          for training (clinical trials, A/B testing, ad experiments, surveys): it can be worth spending real compute to
+          choose informative data rather than selecting blindly, because the opportunity cost of collecting the “wrong”
+          data (and delaying decisions) is often larger than the cost of the selection algorithm.
+        </p>
+        <p>
+          In Bayesian optimal experiment design, this idea is formalized by scoring candidate designs by <em>expected
+          information gain</em>. A common choice is mutual information (MI): the “best” experiment is the one expected to
+          reduce uncertainty the most about whatever you care about (parameters, predictions, or another derived random
+          variable).
+        </p>
+        <p class="muted">
+          Mutual information can be written as an expected reduction in entropy. For a proposed batch design
+          $\mathcal{D}_{1:k}$ and outcomes $y_{1:k}$, the parameter-learning objective is:
+        </p>
+        <div class="math-block">
+          $$I(\theta; y_{1:k} \mid \mathcal{D}_{1:k})
+          = H\!\left[p(\theta)\right]
+          - \mathrm{E}_{y_{1:k} \sim p(\cdot \mid \mathcal{D}_{1:k})}
+            \left[H\!\left[p(\theta \mid \mathcal{D}_{1:k}, y_{1:k})\right]\right].$$
+        </div>
+        <p class="muted">
+          Here $\theta$ denotes the current uncertain state of the model at the moment you score designs (e.g., a current
+          posterior state). Intuitively: start from your current uncertainty, then subtract the expected uncertainty
+          after running the batch and updating the model.
+        </p>
+        <p class="muted">
+          Predictive MI uses the same form, replacing $\theta$ with the predictive quantity of interest.
+        </p>
+        <p class="muted">
+          Small modifications are useful when the relevant notion of “uncertainty” isn’t purely Shannon entropy—for
+          example, using similarity-sensitive entropy to encode which distinctions matter for your downstream goal. See
+          <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
+          Induced Kernels and Data-Processing Inequalities (arXiv:2601.03064)</a> for a framework that helps clarify
+          whether the uncertainty you care about is parameter uncertainty, predictive uncertainty, or uncertainty in some
+          other derived random variable.
+        </p>
+        <p>
+          In principle, you can run this continuously: score designs in real time, collect the next batch, update the
+          model, then re-score after every update.
+        </p>
+        <p class="muted">In practice, routinely computing MI inside a live data pipeline is hard:</p>
         <ul class="bullets">
-          <li><strong>Compute:</strong> nested Monte Carlo and outcome enumeration get expensive fast.</li>
-          <li><strong>Expertise:</strong> few teams have the bandwidth to implement and tune MI estimators.</li>
-          <li><strong>Infrastructure:</strong> MCMC pipelines, sample management, and latency constraints don’t fit many products.</li>
-          <li><strong>Modeling constraints:</strong> if you don’t already have posterior samples (or a Bayesian model), MI is a non-starter.</li>
+          <li>
+            <strong>Two coupled uncertainty problems:</strong> you need the current model state (which changes as data
+            arrives) and you must average over uncertain future outcomes $y_{1:k}$.
+          </li>
+          <li><strong>Expensive estimators:</strong> enumeration scales as $2^k$, while nested Monte Carlo can be variance-limited without large inner loops.</li>
+          <li><strong>Inference dependency:</strong> many estimators assume posterior samples exist (HMC/MCMC) and must be managed and refreshed.</li>
+          <li><strong>Engineering friction:</strong> implementing, tuning, and serving MI under latency constraints doesn’t fit many teams.</li>
         </ul>
         <p class="muted">
           Best-first adaptive partitioning addresses these bottlenecks by making MI evaluation budgeted and predictable,
