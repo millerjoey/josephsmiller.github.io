@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Constant-time mutual information for Bayesian experimental design · Joseph S. Miller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A budgeted best-first adaptive partitioning estimator that performs Bayesian updating and mutual-information estimation together.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Crimson Pro", "Times New Roman", serif;
+      --ink: #1f2a37;
+      --muted: #5b6673;
+      --bg: #eef1f5;
+      --panel: #ffffff;
+      --accent: #8b3a3a;
+      --accent-strong: #6d2b2b;
+      --accent-soft: rgba(139, 58, 58, 0.14);
+      --line: rgba(31, 42, 55, 0.12);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
+        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--ink);
+    }
+
+    .shell {
+      width: min(1000px, 100%);
+      background: #ffffff;
+      border-radius: 26px;
+      padding: 3rem;
+      border: 1px solid rgba(31, 42, 55, 0.08);
+      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(31, 42, 55, 0.08);
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .hero {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.7rem;
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.25rem, 4.2vw, 3.3rem);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 78ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .button {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.65rem 1.3rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 10px 18px rgba(31, 42, 55, 0.16);
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      background: var(--accent-strong);
+      box-shadow: 0 14px 24px rgba(31, 42, 55, 0.2);
+    }
+
+    a {
+      color: var(--accent-strong);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: var(--accent);
+    }
+
+    .text-link {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .text-link:hover,
+    .text-link:focus-visible {
+      color: var(--accent-strong);
+    }
+
+    .stack {
+      margin-top: 2.75rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .stack-tight {
+      margin-top: 1.5rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
+      position: relative;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      left: 1.75rem;
+      top: 0.85rem;
+      width: 42px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .panel h2 {
+      margin: 0 0 1rem;
+      font-size: 0.92rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .panel p + p {
+      margin-top: 0.9rem;
+    }
+
+    .panel p + .bullets {
+      margin-top: 0.9rem;
+    }
+
+    .panel .bullets + p {
+      margin-top: 0.9rem;
+    }
+
+    .bullets {
+      margin: 0;
+      padding-left: 1.25rem;
+      line-height: 1.7;
+    }
+
+    .bullets li {
+      margin: 0.35rem 0;
+    }
+
+    figure {
+      margin: 0;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    figure img {
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(31, 42, 55, 0.08);
+      background: #ffffff;
+    }
+
+    figcaption {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    figcaption strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    details {
+      padding-top: 0.9rem;
+      border-top: 1px solid rgba(31, 42, 55, 0.08);
+    }
+
+    details:first-of-type {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details p {
+      margin-top: 0.65rem;
+      color: var(--muted);
+    }
+
+    .callout {
+      background: rgba(139, 58, 58, 0.04);
+      border-color: rgba(139, 58, 58, 0.18);
+    }
+
+    .callout::before {
+      background: var(--accent-strong);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .shell {
+        padding: 2.25rem 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav class="top-nav">
+      <a class="text-link" href="../index.html">← Home</a>
+      <div class="nav-right">
+        <a class="text-link" href="index.html">Notes</a>
+        <a class="text-link" href="mailto:joe@josephsmiller.com">Email</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="eyebrow">Technical note</div>
+      <h1>Constant-time mutual information for Bayesian experimental design</h1>
+      <p class="lede">
+        A budgeted, best-first adaptive partitioning estimator that performs Bayesian updating and mutual-information
+        estimation together—delivering stable, tunable, constant-time MI for differentiable models without requiring
+        separate posterior sampling.
+      </p>
+      <div class="actions">
+        <a class="button" href="mailto:joe@josephsmiller.com?subject=Optimal%20experiment%20design%20MI">Discuss a project</a>
+        <a class="text-link" href="#results">Jump to results</a>
+      </div>
+    </header>
+
+    <main class="stack">
+      <section class="panel">
+        <h2>Motivation</h2>
+        <p>
+          In principle, information gain can be used continuously: score candidate experiments in real time, provision the
+          next batch, incorporate the new data, then re-score again after every model update. In practice, MI-driven
+          experimentation rarely runs this way because “one MI query” is often too expensive, too brittle, or too
+          dependent on heavyweight Bayesian infrastructure.
+        </p>
+        <ul class="bullets">
+          <li><strong>Compute:</strong> nested Monte Carlo and outcome enumeration get expensive fast.</li>
+          <li><strong>Expertise:</strong> few teams have the bandwidth to implement and tune MI estimators.</li>
+          <li><strong>Infrastructure:</strong> MCMC pipelines, sample management, and latency constraints don’t fit many products.</li>
+          <li><strong>Modeling constraints:</strong> if you don’t already have posterior samples (or a Bayesian model), MI is a non-starter.</li>
+        </ul>
+        <p class="muted">
+          Best-first adaptive partitioning addresses these bottlenecks by making MI evaluation budgeted and predictable,
+          and by performing Bayesian updating as part of MI estimation—so inference and information gain come as one
+          package that can run in production even for small teams and small businesses without dedicated Bayesian
+          infrastructure.
+        </p>
+      </section>
+
+      <section class="panel" id="results">
+        <h2>Results</h2>
+        <p class="muted">
+          These figures compare multiple estimators of mutual information (MI) used for Bayesian experimental design,
+          across two representative model families (a linear-Gaussian baseline and a nonconjugate ridge-logistic model).
+          The headline: best-first adaptive partitioning delivers an anytime, tunable, constant-time-in-(k) MI estimator
+          that does not require posterior samples, while remaining competitive in fidelity with strong sampling-based
+          baselines.
+        </p>
+
+        <div class="stack-tight">
+          <figure>
+            <img
+              src="assets/mi_all_summary_linear.png"
+              alt="Linear-Gaussian results: correlation and runtime versus batch size for posterior MI and predictive MI."
+              loading="lazy"
+              decoding="async"
+            >
+            <figcaption>
+              <strong>Linear-Gaussian model.</strong> Top row: correlation with an oracle reference vs batch size (k) for
+              posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs (k). With a fixed
+              refinement budget, best-first adaptive partitioning keeps runtime essentially flat as (k) grows while
+              maintaining strong correlation.
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="assets/mi_all_summary_ridge_logistic.png"
+              alt="Ridge-logistic results: correlation and runtime versus batch size for posterior MI and predictive MI."
+              loading="lazy"
+              decoding="async"
+            >
+            <figcaption>
+              <strong>Ridge-logistic model.</strong> The same story holds in a nonconjugate setting: competitive fidelity
+              without posterior samples, and predictable compute thanks to explicit global refinement budgets.
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="assets/mi_spread_summary.png"
+              alt="Spread summary: box and whisker plots summarizing variability across batch sizes for correlation and runtime."
+              loading="lazy"
+              decoding="async"
+            >
+            <figcaption>
+              <strong>Across-(k) variability.</strong> Box/whisker summaries for correlation and time highlight stability
+              and predictable compute—especially important when MI is queried repeatedly inside design loops.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>What’s measured</h2>
+          <ul class="bullets">
+            <li>
+              For each model, we estimate MI for batches of experiments of size (k), averaged over many randomly chosen
+              design subsets (apples-to-apples across methods at each (k)).
+            </li>
+            <li>
+              Two objectives: posterior MI (learning parameters) and predictive MI (learning predictions at target
+              inputs).
+            </li>
+            <li>
+              Timing reports average time per MI evaluation (given whatever cached data the method uses), which is the
+              relevant cost when selecting designs by evaluating MI many times.
+            </li>
+          </ul>
+        </section>
+
+        <section class="panel">
+          <h2>Why it matters</h2>
+          <ul class="bullets">
+            <li><strong>Predictable compute:</strong> fixed budgets make runtime effectively constant in (k).</li>
+            <li><strong>Anytime:</strong> usable early estimates that improve monotonically with more budget.</li>
+            <li><strong>Global refinement:</strong> spends compute on high-impact outcome regions.</li>
+            <li><strong>No posterior sampling:</strong> Bayesian updating happens inside the MI estimator.</li>
+            <li><strong>Unified objectives:</strong> the same machinery supports posterior and predictive MI.</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>How it works</h2>
+        <p>
+          Best-first adaptive partitioning is a tree-based adaptive quadrature over the discrete outcome space. It starts
+          with a coarse partition, maintains an approximate posterior state per region, and repeatedly refines the
+          regions with the highest estimated global impact—subject to a strict compute budget.
+        </p>
+        <p class="muted">
+          Holding the budget fixed makes compute predictable as batch size grows, which is exactly what you want in
+          experiment design loops that evaluate MI repeatedly across many candidate designs.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Fair comparisons</h2>
+        <p>
+          Sampling-based baselines typically require posterior samples (e.g., via HMC/MCMC). That inference can be a large
+          one-time fixed-data cost, but it’s still a practical barrier in real workflows. Best-first adaptive partitioning
+          avoids that dependency by updating posterior state as part of MI estimation.
+        </p>
+        <p class="muted">
+          To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent posterior
+          draw stream (not shared across methods or with the oracle reference).
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Methods compared</h2>
+        <details open>
+          <summary>Best-first adaptive partitioning</summary>
+          <p>
+            Budgeted best-first refinement over outcome partitions, with approximate posterior updates attached to each
+            region. Anytime, tunable compute, and no posterior samples required.
+          </p>
+        </details>
+        <details>
+          <summary>Nested Monte Carlo (NMC)</summary>
+          <p>
+            General-purpose MI estimator with nested sampling loops. Broadly applicable but can be expensive and
+            variance-limited unless inner sample sizes grow.
+          </p>
+        </details>
+        <details>
+          <summary>Variational nested Monte Carlo (VNMC)</summary>
+          <p>
+            Uses variational approximations to tighten bounds and reduce variance relative to NMC, but remains
+            sample-based and still relies on inference machinery.
+          </p>
+        </details>
+        <details>
+          <summary>Variational posterior bound (Laplace)</summary>
+          <p>
+            Fast approximation via a bound and local posterior geometry; performance depends on how well the approximation
+            matches the true posterior (often weaker in nonconjugate regimes).
+          </p>
+        </details>
+        <details>
+          <summary>Importance sampling (y-sampled)</summary>
+          <p>
+            Avoids exhaustive outcome enumeration by sampling outcomes with a proposal distribution; can be brittle when
+            outcomes are imbalanced or proposals mismatch the predictive distribution.
+          </p>
+        </details>
+        <details>
+          <summary>Oracle references (HMC / analytic / exhaustive importance)</summary>
+          <p>
+            “Best case” ceilings that rely on heavy compute or strong structural assumptions. Included to show what’s
+            achievable if you’re allowed to pay oracle costs.
+          </p>
+        </details>
+      </section>
+
+      <section class="panel callout">
+        <h2>Want this in your workflow?</h2>
+        <p>
+          If you’re selecting experiments with MI (or need a fast, stable way to score designs without maintaining an
+          MCMC pipeline), I’m happy to talk through your setup and whether a budgeted estimator is a good fit.
+        </p>
+        <div class="actions">
+          <a class="button" href="mailto:joe@josephsmiller.com?subject=Mutual%20information%20design%20inquiry">Email me</a>
+          <a class="text-link" href="../index.html">Back to homepage</a>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
