@@ -344,14 +344,11 @@
           baselines.
         </p>
         <p class="muted">
-          Terminology: “gold reference” refers to the high-quality signal used to score fidelity (correlation). Separately,
-          some curves in the plots are labeled “oracle”—these are specialized, model-specific ceiling baselines, not
-          general-purpose estimators.
-        </p>
-        <p class="muted">
-          The ceiling baselines exploit analytic structure or very expensive, problem-tailored importance schemes. They’re
-          included to show a credible upper bound on what’s achievable if you allow custom methods and pay oracle-level
-          costs, not as something you’d deploy in a scalable design loop.
+          Terminology: “Oracle” refers to the high-quality reference used to score fidelity (correlation). In addition,
+          the figures include a couple of problem-specific ceiling baselines (“MC analytic” in the linear-Gaussian case
+          and “Exhaustive importance” in the ridge-logistic case). These are not general-purpose estimators—many models
+          don’t admit shortcuts like these—and they are included to show what’s achievable when you’re willing to write
+          custom, model-tailored machinery.
         </p>
 
         <div class="stack-tight">
@@ -363,7 +360,7 @@
               decoding="async"
             >
             <figcaption>
-              <strong>Linear-Gaussian model.</strong> Top row: correlation with the gold reference vs batch size (k) for
+              <strong>Linear-Gaussian model.</strong> Top row: correlation with the Oracle reference vs batch size (k) for
               posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs (k). With a fixed
               refinement budget, best-first adaptive partitioning keeps runtime essentially flat as (k) grows while
               maintaining strong correlation.
@@ -451,7 +448,7 @@
         </p>
         <p class="muted">
           To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent posterior
-          draw stream (not shared across methods or with the gold reference).
+          draw stream (not shared across methods or with the Oracle reference).
         </p>
       </section>
 
@@ -493,7 +490,7 @@
           </p>
         </details>
         <details>
-          <summary>Ceiling references (“oracle” baselines)</summary>
+          <summary>Problem-specific ceiling baselines (MC analytic / exhaustive importance)</summary>
           <p>
             These are not drop-in estimators you’d deploy in a generic design loop. They are custom, model-specific
             reference computations that either exploit analytic structure or use very expensive, problem-tailored
@@ -501,7 +498,7 @@
           </p>
           <p>
             They’re included to ground the comparisons: rather than arguing against weak baselines, the figures show how
-            close each scalable method gets to a credible ceiling when you’re allowed to spend ceiling-level effort.
+            close each scalable method gets to a credible ceiling when custom, model-tailored tools are available.
           </p>
         </details>
       </section>
