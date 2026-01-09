@@ -212,6 +212,20 @@
       margin-top: 0.9rem;
     }
 
+    pre {
+      margin: 0.9rem 0;
+      padding: 1rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(31, 42, 55, 0.12);
+      background: rgba(31, 42, 55, 0.04);
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+
     .bullets {
       margin: 0;
       padding-left: 1.25rem;
@@ -320,7 +334,7 @@
       <p class="lede">
         A budgeted, best-first adaptive partitioning estimator that performs Bayesian updating and mutual-information
         estimation together—delivering stable, tunable, constant-time MI for differentiable models without requiring
-        separate posterior sampling.
+        separate posterior sampling or an MCMC pipeline.
       </p>
       <div class="actions">
         <a class="button" href="mailto:joe@josephsmiller.com?subject=Optimal%20experiment%20design%20MI">Discuss a project</a>
@@ -375,6 +389,15 @@
           whether the uncertainty you care about is parameter uncertainty, predictive uncertainty, or uncertainty in some
           other derived random variable.
         </p>
+        <p class="muted">
+          Here $k$ is the batch size. The design $\mathcal{D}_{1:k}$ represents a set of $k$ candidate experiments (design
+          points, treatments, prompts, etc.), and $y_{1:k}$ is the corresponding batch of outcomes you will observe.
+        </p>
+        <p>
+          When you can run multiple experiments, selecting the single best experiment (repeatedly choosing $k{=}1$) can be
+          suboptimal: you want a batch that is informative <em>together</em>, avoiding redundancy and covering the space of
+          uncertainty efficiently.
+        </p>
         <p>
           In principle, you can run this continuously: score designs in real time, collect the next batch, update the
           model, then re-score after every update.
@@ -382,18 +405,49 @@
         <p class="muted">In practice, routinely computing MI inside a live data pipeline is hard:</p>
         <ul class="bullets">
           <li>
-            <strong>Two coupled uncertainty problems:</strong> you need the current model state (which changes as data
-            arrives) and you must average over uncertain future outcomes $y_{1:k}$.
+            <strong>Batch combinatorics:</strong> if you have $n$ candidate experiments and you choose batches of size $k$,
+            there are $\binom{n}{k}$ possible batches. Even with greedy or heuristic search, you end up calling the MI
+            estimator many times.
           </li>
-          <li><strong>Expensive estimators:</strong> enumeration scales as $2^k$, while nested Monte Carlo can be variance-limited without large inner loops.</li>
-          <li><strong>Inference dependency:</strong> many estimators assume posterior samples exist (HMC/MCMC) and must be managed and refreshed.</li>
-          <li><strong>Engineering friction:</strong> implementing, tuning, and serving MI under latency constraints doesn’t fit many teams.</li>
+          <li>
+            <strong>$k$-dimensional averaging:</strong> the expectation over $y_{1:k}$ is a $k$-dimensional sum/integral.
+            Naive enumeration can scale as $2^k$ for binary outcomes, and straightforward quadrature becomes intractable as
+            $k$ grows.
+          </li>
+          <li>
+            <strong>Posterior refresh + state handoff:</strong> many estimators assume posterior samples exist (HMC/MCMC).
+            As new data arrives, you pay an inference cost to refresh the model state, ship samples/state to the MI
+            evaluator, score candidate batches, then repeat.
+          </li>
+          <li>
+            <strong>Engineering friction:</strong> implementing, tuning, and serving MI under latency constraints doesn’t
+            fit many teams.
+          </li>
         </ul>
         <p class="muted">
-          Best-first adaptive partitioning addresses these bottlenecks by making MI evaluation budgeted and predictable,
-          and by performing Bayesian updating as part of MI estimation—so inference and information gain come as one
-          package that can run in production even for small teams and small businesses without dedicated Bayesian
-          infrastructure.
+          Best-first adaptive partitioning addresses these bottlenecks by using explicit global refinement budgets (so
+          per-query compute can be held essentially flat as $k$ grows), and by performing Bayesian updating <em>inside</em>
+          the MI computation (so you can append new data and re-score without maintaining posterior samples).
+        </p>
+        <p class="muted">
+          In integration terms, you can treat it as a single scoring function: given your regression model specification,
+          observed data, and a candidate batch $\mathcal{D}_{1:k}$, it returns an information-gain score for that batch.
+          In practice, “model specification” can be as simple as a likelihood (and, when available, gradients/Hessians for
+          efficient local updates).
+        </p>
+        <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
+        <pre><code># Typical sampling-based loop (inference first, then MI)
+observed_data += new_observations
+posterior_samples = run_inference(model_spec, observed_data)  # e.g., HMC/MCMC
+score = mi_estimate(posterior_samples, candidate_batch)       # sample-based scoring
+
+# Best-first adaptive partitioning (MI + updating together)
+observed_data += new_observations
+score = information_gain(model_spec, observed_data, candidate_batch)</code></pre>
+        <p class="muted">
+          No posterior samples, no probabilistic programming stack, and no separate inference service to maintain—just raw
+          data in and an interpretable score out. Dependencies can be minimal: standard numerical linear algebra plus your
+          likelihood/model code.
         </p>
       </section>
 
@@ -452,7 +506,7 @@
             >
             <figcaption>
               <strong>Across-(k) variability.</strong> Box/whisker summaries for correlation and time highlight stability
-              and predictable compute—especially important when MI is queried repeatedly inside design loops.
+              and predictable compute for all of the batch sizes tested.
             </figcaption>
           </figure>
         </div>
@@ -480,11 +534,12 @@
         <section class="panel">
           <h2>Why it matters</h2>
           <ul class="bullets">
-            <li><strong>Predictable compute:</strong> fixed budgets make runtime effectively constant in (k).</li>
+            <li><strong>Predictable compute:</strong> fixed budgets make runtime effectively constant in the size of the data batch (k).</li>
             <li><strong>Anytime:</strong> usable early estimates that improve monotonically with more budget.</li>
             <li><strong>Global refinement:</strong> spends compute on high-impact outcome regions.</li>
             <li><strong>No posterior sampling:</strong> Bayesian updating happens inside the MI estimator.</li>
             <li><strong>Unified objectives:</strong> the same machinery supports posterior and predictive MI.</li>
+            <li><strong>Drop-in scorer:</strong> raw data + candidate batch in, information-gain score out.</li>
           </ul>
         </section>
       </div>
@@ -499,6 +554,11 @@
         <p class="muted">
           Holding the budget fixed makes compute predictable as batch size grows, which is exactly what you want in
           experiment design loops that evaluate MI repeatedly across many candidate designs.
+        </p>
+        <p class="muted">
+          Practically, you don’t need to stand up Bayesian infrastructure to use it: given a model likelihood and raw data,
+          the estimator produces information-gain scores directly, and the internal posterior updates happen inside the
+          computation.
         </p>
       </section>
 
@@ -521,7 +581,8 @@
           <summary>Best-first adaptive partitioning</summary>
           <p>
             Budgeted best-first refinement over outcome partitions, with approximate posterior updates attached to each
-            region. Anytime, tunable compute, and no posterior samples required.
+            region. Anytime, tunable compute, and no posterior samples required. From an integration perspective, it can
+            be exposed as a single scoring function from (model spec, observed data, candidate batch) to information gain.
           </p>
         </details>
         <details>
@@ -570,7 +631,9 @@
         <h2>Want this in your workflow?</h2>
         <p>
           If you’re selecting experiments with MI (or need a fast, stable way to score designs without maintaining an
-          MCMC pipeline), I’m happy to talk through your setup and whether a budgeted estimator is a good fit.
+          MCMC pipeline), I’m happy to talk through your setup and whether a budgeted estimator is a good fit. If you can
+          specify the regression model you’re using, I can deliver this as a drop-in scoring component that works directly
+          on your data.
         </p>
         <div class="actions">
           <a class="button" href="mailto:joe@josephsmiller.com?subject=Mutual%20information%20design%20inquiry">Email me</a>
