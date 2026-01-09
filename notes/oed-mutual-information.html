@@ -364,6 +364,11 @@
         estimation together—delivering stable, tunable, constant-time MI for differentiable models without requiring
         separate posterior sampling or an MCMC pipeline.
       </p>
+      <ul class="bullets muted">
+        <li><strong>Predictable compute:</strong> with a fixed refinement budget, per-query runtime stays approximately flat as batch size $k$ grows.</li>
+        <li><strong>Anytime estimates:</strong> usable early scores that improve monotonically as you spend more budget.</li>
+        <li><strong>Simpler integration:</strong> no posterior samples or separate inference/scoring services to maintain.</li>
+      </ul>
       <div class="actions">
         <a class="button" href="mailto:joe@josephsmiller.com?subject=Optimal%20experiment%20design%20MI">Discuss a project</a>
         <a class="text-link" href="#results">Jump to results</a>
@@ -453,41 +458,45 @@
           </li>
         </ul>
         <p class="muted">
-          Best-first adaptive partitioning addresses these bottlenecks by using explicit global refinement budgets (so
-          per-query compute can be held essentially flat as $k$ grows), and by performing Bayesian updating <em>inside</em>
-          the MI computation (so you can append new data and re-score without maintaining posterior samples).
+          <strong>When it fits:</strong> repeated MI queries inside a design loop (especially batch search) where you need a reliable
+          per-query latency budget and don’t want to maintain a posterior-sampling pipeline. <strong>When it doesn’t:</strong> settings
+          where you already have high-quality posterior samples on hand and offline MI scoring latency is not a constraint.
+        </p>
+        <p class="muted">
+          “Constant-time in $k$” here means: with a fixed global refinement budget, runtime per MI query is approximately
+          independent of $k$. Increasing the budget trades runtime for fidelity.
         </p>
         <p class="muted">
           In integration terms, you can treat it as a single scoring function: given your regression model specification,
           observed data, and a candidate batch $\mathcal{D}_{1:k}$, it returns an information-gain score for that batch.
-          In practice, “model specification” can be as simple as a likelihood (and, when available, gradients/Hessians for
-          efficient local updates).
+          “Model specification” can be as simple as a likelihood (and, when available, gradients/Hessians for efficient
+          local updates).
         </p>
         <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
+        <p class="muted"><strong>Integration view:</strong> before (two-service pipeline) vs after (single scoring call).</p>
         <div class="code-grid">
           <div>
-            <div class="code-title">Machine A · Inference Service</div>
+            <div class="code-title">Before · Inference Service</div>
             <pre><code>observed_data += new_observations
 posterior_samples = run_inference(model_spec, observed_data)   # e.g., HMC/MCMC
 artifact_uri = write_to_storage(posterior_samples)             # serialize + publish state</code></pre>
           </div>
           <div>
-            <div class="code-title">Machine B · MI Scoring Service</div>
+            <div class="code-title">Before · MI Scoring Service</div>
             <pre><code>posterior_samples = read_from_storage(artifact_uri)
 score = mi_estimate(posterior_samples, candidate_batch)        # repeated many times during batch search</code></pre>
           </div>
         </div>
         <div class="code-grid single">
           <div>
-            <div class="code-title">Single Function · Best-First Adaptive Partitioning</div>
+            <div class="code-title">After · Single Scoring Call</div>
             <pre><code>observed_data += new_observations
 score = information_gain(model_spec, observed_data, candidate_batch)</code></pre>
           </div>
         </div>
         <p class="muted">
-          No posterior samples, no probabilistic programming stack, and no separate inference service to maintain—just raw
-          data in and an interpretable score out. Dependencies can be minimal: standard numerical linear algebra plus your
-          likelihood/model code.
+          No posterior samples and no separate inference/scoring service to maintain—just raw data in and an interpretable
+          score out. Dependencies can be minimal: standard numerical linear algebra plus your likelihood/model code.
         </p>
       </section>
 
@@ -496,7 +505,7 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
         <p class="muted">
           These figures compare multiple estimators of mutual information (MI) used for Bayesian experimental design,
           across two representative model families (a linear-Gaussian baseline and a nonconjugate ridge-logistic model).
-          The headline: best-first adaptive partitioning delivers an anytime, tunable, constant-time-in-(k) MI estimator
+          The headline: best-first adaptive partitioning delivers an anytime, tunable, constant-time-in-$k$ MI estimator
           that does not require posterior samples, while remaining competitive in fidelity with strong sampling-based
           baselines.
         </p>
@@ -512,22 +521,28 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           <figure>
             <img
               src="assets/mi_all_summary_linear.png"
-              alt="Linear-Gaussian results: correlation and runtime versus batch size for posterior MI and predictive MI."
+              alt="Linear-Gaussian results: correlation and runtime versus batch size k for posterior MI and predictive MI."
+              width="2600"
+              height="1400"
               loading="lazy"
               decoding="async"
             >
             <figcaption>
-              <strong>Linear-Gaussian model.</strong> Top row: correlation with the Oracle reference vs batch size (k) for
-              posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs (k). With a fixed
-              refinement budget, best-first adaptive partitioning keeps runtime essentially flat as (k) grows while
+              <strong>Linear-Gaussian model.</strong> Top row: correlation with the Oracle reference vs batch size $k$ for
+              posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs $k$. With a fixed
+              refinement budget, best-first adaptive partitioning keeps runtime essentially flat as $k$ grows while
               maintaining strong correlation.
             </figcaption>
           </figure>
 
+          <p class="muted"><strong>Takeaway:</strong> you can hold a strict per-query budget fixed as $k$ grows without giving up strong ranking fidelity.</p>
+
           <figure>
             <img
               src="assets/mi_all_summary_ridge_logistic.png"
-              alt="Ridge-logistic results: correlation and runtime versus batch size for posterior MI and predictive MI."
+              alt="Ridge-logistic results: correlation and runtime versus batch size k for posterior MI and predictive MI."
+              width="2600"
+              height="1400"
               loading="lazy"
               decoding="async"
             >
@@ -540,12 +555,14 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           <figure>
             <img
               src="assets/mi_spread_summary.png"
-              alt="Posterior-MI spread summary: box and whisker plots summarizing variability across batch sizes for correlation and runtime."
+              alt="Posterior-MI spread summary: box and whisker plots summarizing variability across batch sizes k for correlation and runtime."
+              width="2200"
+              height="1600"
               loading="lazy"
               decoding="async"
             >
             <figcaption>
-              <strong>Across-(k) variability (posterior MI).</strong> Box/whisker summaries for correlation and time
+              <strong>Across-$k$ variability (posterior MI).</strong> Box/whisker summaries for correlation and time
               highlight stability and predictable compute for all of the batch sizes tested.
             </figcaption>
           </figure>
@@ -553,12 +570,14 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           <figure>
             <img
               src="assets/mi_spread_summary_predictive.png"
-              alt="Predictive-MI spread summary: box and whisker plots summarizing variability across batch sizes for correlation and runtime."
+              alt="Predictive-MI spread summary: box and whisker plots summarizing variability across batch sizes k for correlation and runtime."
+              width="2200"
+              height="1600"
               loading="lazy"
               decoding="async"
             >
             <figcaption>
-              <strong>Across-(k) variability (predictive MI).</strong> The same spread summaries for the predictive-MI
+              <strong>Across-$k$ variability (predictive MI).</strong> The same spread summaries for the predictive-MI
               objective.
             </figcaption>
           </figure>
@@ -570,8 +589,8 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           <h2>What’s measured</h2>
           <ul class="bullets">
             <li>
-              For each model, we estimate MI for batches of experiments of size (k), averaged over many randomly chosen
-              design subsets (apples-to-apples across methods at each (k)).
+              For each model, we estimate MI for batches of experiments of size $k$, averaged over many randomly chosen
+              design subsets (apples-to-apples across methods at each $k$).
             </li>
             <li>
               Two objectives: posterior MI (learning parameters) and predictive MI (learning predictions at target
@@ -587,8 +606,8 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
         <section class="panel">
           <h2>Why it matters</h2>
           <ul class="bullets">
-            <li><strong>Predictable compute:</strong> fixed budgets make runtime effectively constant in the size of the data batch (k).</li>
-            <li><strong>Anytime:</strong> usable early estimates that improve monotonically with more budget.</li>
+            <li><strong>Predictable compute:</strong> fixed refinement budgets keep per-query runtime approximately flat as batch size $k$ grows.</li>
+            <li><strong>Anytime:</strong> usable early scores that improve monotonically as you spend more budget.</li>
             <li><strong>Global refinement:</strong> spends compute on high-impact outcome regions.</li>
             <li><strong>No posterior sampling:</strong> Bayesian updating happens inside the MI estimator.</li>
             <li><strong>Unified objectives:</strong> the same machinery supports posterior and predictive MI.</li>
@@ -605,8 +624,8 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           regions with the highest estimated global impact—subject to a strict compute budget.
         </p>
         <p class="muted">
-          Holding the budget fixed makes compute predictable as batch size grows, which is exactly what you want in
-          experiment design loops that evaluate MI repeatedly across many candidate designs.
+          The refinement budget is the knob: you trade runtime for fidelity, and you can keep a strict per-query latency
+          target as $k$ grows.
         </p>
         <p class="muted">
           Practically, you don’t need to stand up Bayesian infrastructure to use it: given a model likelihood and raw data,
@@ -634,8 +653,9 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           <summary>Best-first adaptive partitioning</summary>
           <p>
             Budgeted best-first refinement over outcome partitions, with approximate posterior updates attached to each
-            region. Anytime, tunable compute, and no posterior samples required. From an integration perspective, it can
-            be exposed as a single scoring function from (model spec, observed data, candidate batch) to information gain.
+            region. Tunable compute via a global refinement budget; no posterior samples required. From an integration
+            perspective, it can be exposed as a single scoring function from (model spec, observed data, candidate batch)
+            to information gain.
           </p>
         </details>
         <details>
