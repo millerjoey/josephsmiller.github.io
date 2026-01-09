@@ -371,7 +371,6 @@
       </ul>
       <div class="actions">
         <a class="button" href="mailto:joe@josephsmiller.com?subject=Optimal%20experiment%20design%20MI">Discuss a project</a>
-        <a class="text-link" href="#results">Jump to results</a>
       </div>
     </header>
 
@@ -379,10 +378,12 @@
       <section class="panel">
         <h2>Motivation</h2>
         <p>
-          A common applied workflow is: collect data, train a model, then deploy it. Optimal experiment design interrupts
-          that process. While the model is still being trained, you use what it currently knows to select the next data to
-          collect—so the model learns faster, reaches useful performance sooner, and you spend fewer resources on
-          uninformative observations.
+          A common applied workflow: collect data, train a model, then deploy it when it is sufficiently accurate. Optimal 
+          experiment design (OED) interrupts that process. In Bayesian inference, a model represents the current state 
+          of knowledge with honest uncertainty; while data collection is ongoing, an OED framework uses the current uncertain 
+          state of the model to evaluate which data to collect so that the model uncertainty falls fastest. The model can 
+          learn with dramatically fewer data points, reach useful performance sooner, and the user spends fewer resources or 
+          opportunity cost on uninformative observations.
         </p>
         <p class="muted">
           This is especially valuable when the pool of possible observations is much larger than what will ever be used
@@ -391,7 +392,7 @@
           data (and delaying decisions) is often larger than the cost of the selection algorithm.
         </p>
         <p>
-          In Bayesian optimal experiment design, this idea is formalized by scoring candidate designs by <em>expected
+          In typical variants of optimal experiment design, this idea is formalized by scoring candidate designs by <em>expected
           information gain</em>. A common choice is mutual information (MI): the “best” experiment is the one expected to
           reduce uncertainty the most about whatever you care about (parameters, predictions, or another derived random
           variable).
@@ -424,7 +425,8 @@
         </p>
         <p class="muted">
           Here $k$ is the batch size. The design $\mathcal{D}_{1:k}$ represents a set of $k$ candidate experiments (design
-          points, treatments, prompts, etc.), and $y_{1:k}$ is the corresponding batch of outcomes you will observe.
+          points, treatments, prompts, etc.), and $y_{1:k}$ is the corresponding batch of outcomes you will observe. Before
+          data collection, they are unknown, but depend on your model’s predictive distribution and $\mathcal{D}_{1:k}$.
         </p>
         <p>
           When you can run multiple experiments, selecting the single best experiment (repeatedly choosing $k{=}1$) can be
@@ -456,13 +458,17 @@
             <strong>Engineering friction:</strong> implementing, tuning, and serving MI under latency constraints doesn’t
             fit many teams.
           </li>
-        </ul>
-        <p class="muted">
-          <strong>When it fits:</strong> repeated MI queries inside a design loop (especially batch search) where you need a reliable
-          per-query latency budget and don’t want to maintain a posterior-sampling pipeline. <strong>When it doesn’t:</strong> settings
-          where you already have high-quality posterior samples on hand and offline MI scoring latency is not a constraint.
-        </p>
-        <p class="muted">
+        </ul>      </section>
+
+      <section class="panel">
+        <h2>Best-first adaptive partitioning</h2>
+        <p>
+          Best-first adaptive partitioning addresses these bottlenecks directly. It's a tree-based adaptive quadrature over
+          the discrete outcome space that performs Bayesian updating <em>inside</em> the MI computation—so you can score
+          candidate batches without maintaining posterior samples or a separate inference service. By using an explicit
+          global refinement budget, per-query compute stays approximately flat as batch size $k$ grows, making it practical
+          to evaluate MI repeatedly in a live design loop.
+        </p>        <p class="muted">
           “Constant-time in $k$” here means: with a fixed global refinement budget, runtime per MI query is approximately
           independent of $k$. Increasing the budget trades runtime for fidelity.
         </p>
@@ -473,6 +479,16 @@
           local updates).
         </p>
         <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
+        <p class="muted">
+          <strong>Where this estimator shines:</strong> repeated MI evaluations inside a design loop (especially batch search), where you
+          need a reliable per-query latency budget and don’t want to maintain posterior samples or a separate inference service, or you don't
+          have an inference service at all yet (it comes for free). If you have a highly complex or non-Bayesian model but want to experiment
+          with scoring designs, this can also be a low-overhead way to get started.
+        </p>
+        <p class="muted">
+          <strong>Where it’s less compelling:</strong> settings where you already have high-quality posterior draws on hand, have highly complex
+          models without analytic likelihoods, or are not bottlenecked by latency.
+        </p>
         <p class="muted"><strong>Integration view:</strong> before (two-service pipeline) vs after (single scoring call).</p>
         <div class="code-grid">
           <div>
@@ -510,11 +526,15 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           baselines.
         </p>
         <p class="muted">
+          For context: on these small benchmarks, refreshing the sampling-based baselines via HMC/MCMC takes about 0.1s
+          (~100ms) per inference run.
+        </p>
+        <p class="muted">
           Terminology: “Oracle” refers to the high-quality reference used to score fidelity (correlation). In addition,
           the figures include a couple of problem-specific ceiling baselines (“MC analytic” in the linear-Gaussian case
           and “Exhaustive importance” in the ridge-logistic case). These are not general-purpose estimators—many models
           don’t admit shortcuts like these—and they are included to show what’s achievable when you’re willing to write
-          custom, model-tailored machinery.
+          custom, model-tailored machinery for these convenient model classes.
         </p>
 
         <div class="stack-tight">
@@ -586,11 +606,15 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
 
       <div class="grid">
         <section class="panel">
-          <h2>What’s measured</h2>
+          <h2>Evaluation</h2>
           <ul class="bullets">
             <li>
               For each model, we estimate MI for batches of experiments of size $k$, averaged over many randomly chosen
               design subsets (apples-to-apples across methods at each $k$).
+            </li>
+            <li>
+              <strong>Fidelity (correlation):</strong> Pearson correlation across 20 candidate batches between a method’s MI
+              estimates and the Oracle MI values (higher means better MI-based ranking).
             </li>
             <li>
               Two objectives: posterior MI (learning parameters) and predictive MI (learning predictions at target
@@ -604,7 +628,7 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
         </section>
 
         <section class="panel">
-          <h2>Why it matters</h2>
+          <h2>Key takeaways</h2>
           <ul class="bullets">
             <li><strong>Predictable compute:</strong> fixed refinement budgets keep per-query runtime approximately flat as batch size $k$ grows.</li>
             <li><strong>Anytime:</strong> usable early scores that improve monotonically as you spend more budget.</li>
@@ -617,9 +641,9 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
       </div>
 
       <section class="panel">
-        <h2>How it works</h2>
+        <h2>Estimator overview</h2>
         <p>
-          Best-first adaptive partitioning is a tree-based adaptive quadrature over the discrete outcome space. It starts
+          Best-first adaptive partitioning is a tree-based adaptive quadrature over a discretized outcome space. It starts
           with a coarse partition, maintains an approximate posterior state per region, and repeatedly refines the
           regions with the highest estimated global impact—subject to a strict compute budget.
         </p>
@@ -627,19 +651,18 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           The refinement budget is the knob: you trade runtime for fidelity, and you can keep a strict per-query latency
           target as $k$ grows.
         </p>
-        <p class="muted">
-          Practically, you don’t need to stand up Bayesian infrastructure to use it: given a model likelihood and raw data,
-          the estimator produces information-gain scores directly, and the internal posterior updates happen inside the
-          computation.
-        </p>
       </section>
 
       <section class="panel">
-        <h2>Fair comparisons</h2>
+        <h2>Comparison protocol</h2>
         <p>
           Sampling-based baselines typically require posterior samples (e.g., via HMC/MCMC). That inference can be a large
           one-time fixed-data cost, but it’s still a practical barrier in real workflows. Best-first adaptive partitioning
           avoids that dependency by updating posterior state as part of MI estimation.
+        </p>
+        <p class="muted">
+          On these benchmarks the HMC/MCMC inference step is about 0.1s (~100ms), even though the models are small. My estimator
+          takes about 1ms for inference <strong>and</strong> MI estimation.
         </p>
         <p class="muted">
           To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent posterior
@@ -648,7 +671,7 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
       </section>
 
       <section class="panel">
-        <h2>Methods compared</h2>
+        <h2>Baselines</h2>
         <details open>
           <summary>Best-first adaptive partitioning</summary>
           <p>
