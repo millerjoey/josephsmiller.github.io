@@ -644,6 +644,22 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
               relevant cost when selecting designs by evaluating MI many times.
             </li>
           </ul>
+          <p class="muted"><strong>Comparison protocol:</strong></p>
+          <ul class="bullets muted">
+            <li>
+              Sampling-based baselines typically require posterior samples (e.g., via HMC/MCMC). That inference can be a
+              large (though one-time) fixed-data cost, and a practical barrier in real workflows. Best-first adaptive
+              partitioning avoids that dependency by updating posterior state as part of MI estimation.
+            </li>
+            <li>
+              On these benchmarks the HMC/MCMC inference step is about 0.1s (~100ms), even though the models are small. My
+              estimator takes about 1ms for inference <strong>and</strong> MI estimation.
+            </li>
+            <li>
+              To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent
+              posterior draw stream (not shared across methods or with the Oracle reference).
+            </li>
+          </ul>
         </section>
 
         <section class="panel">
@@ -660,44 +676,19 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
       </div>
 
       <section class="panel">
-        <h2>Estimator overview</h2>
-        <p>
-          Best-first adaptive partitioning is a tree-based adaptive quadrature over a discretized outcome space. It starts
-          with a coarse partition, maintains an approximate posterior state per region, and repeatedly refines the
-          regions with the highest estimated global impact—subject to a strict compute budget.
-        </p>
-        <p class="muted">
-          The refinement budget is the knob: you trade runtime for fidelity, and you can keep a strict per-query latency
-          target as $k$ grows.
-        </p>
-      </section>
-
-      <section class="panel">
-        <h2>Comparison protocol</h2>
-        <p>
-          Sampling-based baselines typically require posterior samples (e.g., via HMC/MCMC). That inference can be a large
-          one-time fixed-data cost, but it’s still a practical barrier in real workflows. Best-first adaptive partitioning
-          avoids that dependency by updating posterior state as part of MI estimation.
-        </p>
-        <p class="muted">
-          On these benchmarks the HMC/MCMC inference step is about 0.1s (~100ms), even though the models are small. My estimator
-          takes about 1ms for inference <strong>and</strong> MI estimation.
-        </p>
-        <p class="muted">
-          To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent posterior
-          draw stream (not shared across methods or with the Oracle reference).
-        </p>
-      </section>
-
-      <section class="panel">
-        <h2>Baselines</h2>
+        <h2>MI Algorithms</h2>
         <details open>
           <summary>Best-first adaptive partitioning</summary>
           <p>
-            Budgeted best-first refinement over outcome partitions, with approximate posterior updates attached to each
-            region. Tunable compute via a global refinement budget; no posterior samples required. From an integration
-            perspective, it can be exposed as a single scoring function from (model spec, observed data, candidate batch)
-            to information gain.
+            Tree-based adaptive quadrature over a discretized outcome space. It starts with a coarse partition, maintains
+            an approximate posterior state per region, and repeatedly refines the regions with the highest estimated
+            global impact—subject to a strict compute budget. Tunable compute via a global refinement budget; no posterior
+            samples required.
+          </p>
+          <p class="muted">
+            From an integration perspective, it can be exposed as a single scoring function from (model spec, observed
+            data, candidate batch) to information gain. The refinement budget is the knob: you trade runtime for fidelity,
+            and you can keep a strict per-query latency target as $k$ grows.
           </p>
         </details>
         <details>
