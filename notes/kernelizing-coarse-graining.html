@@ -340,12 +340,14 @@
       <div class="eyebrow">Technical note</div>
       <h1>Kernalized coarse graining</h1>
       <p class="lede">
-        An algebraic reframing of shannon-style entropy motivates much of similarity-sensitive entropy: keep the uniform measure $U \sim \mathrm{Unif}[0,1]$, and interpret a many-to-one observation map by a kernel that encodes indistinguishability.
+        A small algebraic restatement gives rise to similarity-sensitive entropy: keep a latent uniform seed
+        $U \sim \mathrm{Unif}[0,1]$, and represent what you can (and can’t) distinguish using a kernel rather than only a
+        pushed-forward variable.
       </p>
       <ul class="bullets muted">
         <li><strong>Uniform noise + structure:</strong> represent a law as $X=\psi(U)$ with $U\sim\mathrm{Unif}[0,1]$.</li>
-        <li><strong>Coarse maps → kernels:</strong> a partition map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
-        <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,du'$.</li>
+        <li><strong>Coarse observation → partition kernel:</strong> a many-to-one map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
+        <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,d\lambda(u')$.</li>
       </ul>
       <div class="actions">
         <a class="button" href="mailto:joe@josephsmiller.com?subject=Kernalized%20coarse%20graining">Discuss a project</a>
@@ -365,7 +367,7 @@
           see Shannon and differential entropy as special cases and interpolate between them, while improving our notion of statistical information.
         </p>
         <p>
-          The key step is to replace the many-to-one map by an indistinguishability kernel
+          The key step is to replace the many-to-one map by a similarity kernel encoding how distinguishable points are.
           $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$. Its mass
           $\tau_f(u)=\int_0^1 K_f(u,u')\,du'$ is the size of the fiber containing $u$ (the preimage of $f(u)$), and Shannon entropy becomes an
           expected logarithm of typicality:
@@ -458,7 +460,7 @@
         </div>
         <p class="muted">
           We don’t push the measure to $\{1,\dots,m\}$; keep the base measure on $[0,1]$ and move
-          the coarse map “inside” the logarithm as a kernel.
+          the coarse map “inside” the logarithm as a kernel. Now, we have a kernalized form of Shannon entropy!
         </p>
 
         <h3>From partitions to SS-entropy</h3>
