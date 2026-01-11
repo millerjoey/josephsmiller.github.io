@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kernelizing coarse-graining · Joseph S. Miller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How a many-to-one observation map can be rewritten as an indistinguishability kernel, turning entropy into expected surprisal of typicality and motivating similarity-sensitive entropy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+      svg: {
+        fontCache: 'global',
+      },
+    };
+  </script>
+  <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Crimson Pro", "Times New Roman", serif;
+      --ink: #1f2a37;
+      --muted: #5b6673;
+      --bg: #eef1f5;
+      --panel: #ffffff;
+      --accent: #8b3a3a;
+      --accent-strong: #6d2b2b;
+      --accent-soft: rgba(139, 58, 58, 0.14);
+      --line: rgba(31, 42, 55, 0.12);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
+        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--ink);
+    }
+
+    .shell {
+      width: min(1000px, 100%);
+      background: #ffffff;
+      border-radius: 26px;
+      padding: 3rem;
+      border: 1px solid rgba(31, 42, 55, 0.08);
+      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(31, 42, 55, 0.08);
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .hero {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.7rem;
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.25rem, 4.2vw, 3.3rem);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 78ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .button {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.65rem 1.3rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 10px 18px rgba(31, 42, 55, 0.16);
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      background: var(--accent-strong);
+      box-shadow: 0 14px 24px rgba(31, 42, 55, 0.2);
+    }
+
+    a {
+      color: var(--accent-strong);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: var(--accent);
+    }
+
+    .text-link {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .text-link:hover,
+    .text-link:focus-visible {
+      color: var(--accent-strong);
+    }
+
+    .stack {
+      margin-top: 2.75rem;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
+      position: relative;
+      min-width: 0;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      left: 1.75rem;
+      top: 0.85rem;
+      width: 42px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .panel h2 {
+      margin: 0 0 1rem;
+      font-size: 0.92rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .panel h3 {
+      margin: 1.85rem 0 0.85rem;
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .panel h3:first-of-type {
+      margin-top: 0.5rem;
+    }
+
+    .panel p + p {
+      margin-top: 0.9rem;
+    }
+
+    .panel p + .bullets {
+      margin-top: 0.9rem;
+    }
+
+    .panel .bullets + p {
+      margin-top: 0.9rem;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+
+    .bullets {
+      margin: 0;
+      padding-left: 1.25rem;
+      line-height: 1.7;
+    }
+
+    .bullets li {
+      margin: 0.35rem 0;
+    }
+
+    .math-block {
+      margin: 0.5rem 0 0;
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    mjx-container[jax="SVG"][display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    figure {
+      margin: 0;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .figure-placeholder {
+      border-radius: 14px;
+      border: 1px dashed rgba(31, 42, 55, 0.18);
+      background: rgba(31, 42, 55, 0.03);
+      padding: 1.25rem 1.35rem;
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    figcaption {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    figcaption strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    details {
+      padding-top: 0.9rem;
+      border-top: 1px solid rgba(31, 42, 55, 0.08);
+    }
+
+    details:first-of-type {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details p {
+      margin-top: 0.65rem;
+      color: var(--muted);
+    }
+
+    .callout {
+      background: rgba(139, 58, 58, 0.04);
+      border-color: rgba(139, 58, 58, 0.18);
+    }
+
+    .callout::before {
+      background: var(--accent-strong);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .shell {
+        padding: 2.25rem 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav class="top-nav">
+      <a class="text-link" href="../index.html">← Home</a>
+      <div class="nav-right">
+        <a class="text-link" href="index.html">Notes</a>
+        <a class="text-link" href="mailto:joe@josephsmiller.com">Email</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="eyebrow">Technical note</div>
+      <h1>Kernelizing coarse-graining</h1>
+      <p class="lede">
+        An algebraic reframing of shannon-style entropy motivates much of similarity-sensitive entropy: keep the uniform measure $U \sim \mathrm{Unif}[0,1]$, and interpret a many-to-one observation map by a kernel that encodes indistinguishability.
+      </p>
+      <ul class="bullets muted">
+        <li><strong>Uniform noise + structure:</strong> represent a law as $X=\psi(U)$ with $U\sim\mathrm{Unif}[0,1]$.</li>
+        <li><strong>Coarse maps → kernels:</strong> a partition map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
+        <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,du'$.</li>
+      </ul>
+      <div class="actions">
+        <a class="button" href="mailto:joe@josephsmiller.com?subject=Kernelizing%20coarse-graining">Discuss a project</a>
+      </div>
+    </header>
+
+    <main class="stack">
+      <section class="panel callout">
+        <h2>Takeaway</h2>
+        <p>
+          Any probability distribution can be generated from a uniform seed $U\sim\mathrm{Unif}[0,1]$ and a map $X=\psi(U)$. 
+          If $\psi$ is invertible, then observing $X$ is equivalent to observing $U$ exactly. It is natural to conceive of $\psi$ 
+          as a relabeling of each event of $U$, but in contrast to Shannon entropy, differential entropy doesn't express this semantic.
+            In many other cases, what we observe or model is often a "coarsening"—some information is lost and the exact value of $U$ can't be recovered. 
+          Using $Z = f(U)$ to denote this coarsening-measurement, $f$ encodes which distinctions you can make about $U$ when observing $Z$. 
+          If we encode that loss of resolution explicitly, we can motivate the entirety of the similarity-sensitive entropy framework, 
+          see Shannon and differential entropy as special cases and interpolate between them, while improving our notion of statistical information.
+        </p>
+        <p>
+          The key step is to replace the many-to-one map by an indistinguishability kernel
+          $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$. Its mass
+          $\tau_f(u)=\int_0^1 K_f(u,u')\,du'$ is the size of the fiber containing $u$ (the preimage of $f(u)$), and Shannon entropy becomes an
+          expected logarithm of typicality:
+        </p>
+        <div class="math-block">
+          $$H(f(U))=\int_0^1 -\log \tau_f(u)\,du.$$
+        </div>
+        <p>
+          Similarity-sensitive entropy keeps the same template but allows graded kernels $K(x,x')\in[0,1]$, making
+          “resolution” explicit and letting you interpolate between infinite and finite distinguishability.
+        </p>
+        <p class="muted">
+          Related: <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
+          Induced Kernels and Data-Processing Inequalities (arXiv:2601.03064)</a>.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>In more detail</h2>
+
+        <h3>1. A universal noise source</h3>
+        <p>
+          The starting point is the classical “uniform representation” idea: distributions can be generated
+          from a single random seed. Let
+        </p>
+        <div class="math-block">
+          $$U \sim \mathrm{Unif}[0,1], \qquad X = \psi(U).$$
+        </div>
+        <p class="muted">
+          In one dimension, $\psi$ is often the quantile map $F^{-1}$, so $X=F^{-1}(U)$. More generally, you can treat
+          $\psi$ as a measurable map that pushes Lebesgue measure forward to whatever law you want.
+        </p>
+        <p>
+          Any law can be read as
+          <em>uniform randomness plus structure</em> (the map $\psi$).
+        </p>
+
+        <h3>2. Coarse observation as a partition map</h3>
+        <p>
+          Suppose we don’t observe $U$ precisely; we only observe which “bucket” it falls into. Formally, let
+          $f:[0,1]\to\{1,\dots,m\}$ and define
+          $Y := f(U)$. The fibers $A_j := f^{-1}(j)$ form a partition of $[0,1]$.
+        </p>
+        <div class="math-block">
+          $$\mathbb P(Y=j)=\lambda(A_j)=:p_j,\qquad H(Y) = -\sum_{j=1}^m p_j \log p_j.$$
+        </div>
+        <details open>
+          <summary>Fiber-size form of Shannon entropy</summary>
+          <p>
+            Because $U$ is uniform, the probability of “being indistinguishable from $u$ under $f$” is literally the
+            Lebesgue measure of the fiber that contains $u$:
+          </p>
+          <div class="math-block">
+            $$\mathbb P\!\left(f(U)=f(u)\right)=\lambda\!\left(f^{-1}(f(u))\right).$$
+          </div>
+          <p>
+            Plugging this into the definition yields an integral identity:
+          </p>
+          <div class="math-block">
+            $$H(Y)=\int_0^1 -\log\Big(\lambda\big(f^{-1}(f(u))\big)\Big)\,du.$$
+          </div>
+          <p>
+            Read informally: Shannon entropy is the average surprisal of the size (mass) of the indistinguishability
+            class containing the state.
+          </p>
+        </details>
+
+        <h3>3. Kernelizing the coarse-graining</h3>
+        <p>
+          Define the partition (equivalence) kernel induced by $f$:
+        </p>
+        <div class="math-block">
+          $$K_f(u,u') := \mathbf 1\{f(u)=f(u')\}.$$
+        </div>
+        <p class="muted">
+          Interpretation: $K_f(u,u')=1$ exactly when the observation $f$ cannot tell $u$ and $u'$ apart.
+        </p>
+        <p>
+          From a kernel, a natural notion of “typicality” is just the kernel mass around a point:
+        </p>
+        <div class="math-block">
+          $$\tau_f(u) := \int_0^1 K_f(u,u')\,du'.$$
+        </div>
+        <p>
+          Since $K_f(u,u')$ is $1$ precisely on the fiber $f^{-1}(f(u))$, this reduces to
+          $\tau_f(u)=\lambda(f^{-1}(f(u)))=p_{f(u)}$. Substitute into the fiber-size identity:
+        </p>
+        <div class="math-block">
+          $$H(Y)=\int_0^1 -\log \tau_f(u)\,du.$$
+        </div>
+        <p class="muted">
+          This is the reorganization: don’t push the measure to $\{1,\dots,m\}$; keep the base measure on $[0,1]$ and move
+          the coarse map “inside” the integral as a kernel.
+        </p>
+
+        <h3>4. From crisp partitions to SS-entropy</h3>
+        <p>
+          Partition kernels are $0$–$1$. Similarity-sensitive entropy generalizes by allowing a graded similarity
+          kernel $K(x,x')\in[0,1]$ (with $K(x,x)=1$) on a state space with distribution $\mu$.
+        </p>
+        <div class="math-block">
+          $$\tau(x):=\int K(x,x')\,d\mu(x'), \qquad H_K(\mu):=\int -\log \tau(x)\,d\mu(x).$$
+        </div>
+        <p>
+          In words: SS-entropy is expected surprisal of being typical under the similarity notion $K$. Partition kernels
+          recover ordinary Shannon entropy for the corresponding coarse variable, while intermediate kernels interpolate
+          between “everything is distinct” and “many things count as similar.”
+        </p>
+        <details>
+          <summary>Remark: why “infinite resolution” blows up</summary>
+          <p>
+            On an atomless continuous space, the identity-like notion of similarity (“only identical points match”) pushes
+            typicality toward $0$ almost everywhere, so $-\log \tau$ diverges. That’s less a pathology than an operational
+            statement: if you demand arbitrarily fine resolution, you can extract unbounded information.
+          </p>
+          <p>
+            Differential entropy can be viewed as a renormalized refinement limit that subtracts a diverging
+            resolution-dependent baseline; SS-entropy keeps the resolution notion explicit in $K$.
+          </p>
+        </details>
+
+        <h3>5. Example: Gaussian quantile + pulled-back resolution</h3>
+        <p>
+          The latent-uniform picture is especially transparent for one-dimensional continuous distributions. Here’s a
+          compact example that repeats the same kernelizing move, but now for measurement resolution.
+        </p>
+        <p>
+          <strong>Step 1:</strong> generate a Gaussian from a quantile map. Let $U\sim\mathrm{Unif}[0,1]$ and define
+          $\psi(u)=\mu+\sigma\,\Phi^{-1}(u)$ so that $X=\psi(U)\sim\mathcal N(\mu,\sigma^2)$.
+        </p>
+        <p>
+          <strong>Step 2:</strong> choose a resolution kernel on $\mathbb R$. Fix $\varepsilon&gt;0$ and define
+          $K_\varepsilon(x,x') := \mathbf 1\{|x-x'|\le \varepsilon/2\}$. Typicality is the probability mass within an
+          $\varepsilon$-window:
+        </p>
+        <div class="math-block">
+          $$\tau_\varepsilon(x)=\int \mathbf 1\{|x'-x|\le \varepsilon/2\}\,d\mu(x').$$
+        </div>
+        <p class="muted">
+          For small $\varepsilon$ and smooth density $f$, $\tau_\varepsilon(x)\approx \varepsilon f(x)$, so
+        </p>
+        <div class="math-block">
+          $$H_{K_\varepsilon}(\mu)\approx \log(1/\varepsilon) + h(X).$$
+        </div>
+        <p class="muted">
+          For a Gaussian, $h(X)=\tfrac12\log(2\pi e\,\sigma^2)$, hence
+        </p>
+        <div class="math-block">
+          $$H_{K_\varepsilon}(\mu)\approx \log(1/\varepsilon) + \tfrac12\log(2\pi e\,\sigma^2).$$
+        </div>
+        <p>
+          <strong>Step 3:</strong> pull the kernel back to $[0,1]$ through the quantile map:
+        </p>
+        <div class="math-block">
+          $$\widetilde K_\varepsilon(u,u') := K_\varepsilon(\psi(u),\psi(u')).$$
+        </div>
+        <p class="muted">
+          This is no longer a fixed-width band in $u$-space. Near the Gaussian tails, tiny changes in $u$ correspond to
+          large changes in $x$, so “within $\varepsilon$ in $x$” becomes a very thin notion of indistinguishability in $u$.
+        </p>
+        <figure>
+          <div class="figure-placeholder">
+            <div><strong>Quantile map + fixed-$\varepsilon$ bands (TODO)</strong></div>
+            <div class="muted">Plot $x=\Phi^{-1}(u)$ and draw horizontal bands of height $\varepsilon$ at a few $x_0$ values.</div>
+          </div>
+          <figcaption>
+            The latent width of an $\varepsilon$-band around $x_0$ is
+            $$\Delta u(x_0)=\Phi(x_0+\varepsilon/2)-\Phi(x_0-\varepsilon/2)\approx \varepsilon\,\varphi(x_0).$$
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
