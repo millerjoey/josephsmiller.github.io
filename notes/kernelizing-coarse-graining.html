@@ -361,7 +361,7 @@
           as a relabeling of each event of $U$, but in contrast to Shannon entropy, differential entropy doesn't express this semantic.
             In many other cases, what we observe or model is often a "coarsening"—some information is lost and the exact value of $U$ can't be recovered. 
           Using $Z = f(U)$ to denote this coarsening-measurement, $f$ encodes which distinctions you can make about $U$ when observing $Z$. 
-          If we encode that loss of resolution explicitly, we can motivate the entirety of the similarity-sensitive entropy framework, 
+          If we encode that loss of distinguishability explicitly, we can motivate the entirety of the similarity-sensitive entropy framework, 
           see Shannon and differential entropy as special cases and interpolate between them, while improving our notion of statistical information.
         </p>
         <p>
@@ -375,7 +375,7 @@
         </div>
         <p>
           Similarity-sensitive entropy keeps the same template but allows graded kernels $K(x,x')\in[0,1]$, making
-          “resolution” explicit and letting you interpolate between infinite and finite distinguishability.
+          distinguishability explicit and letting you interpolate between infinite and finite distinguishability.
         </p>
         <p class="muted">
           For more: <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
@@ -479,63 +479,56 @@
           through a change of variables by pulling the kernel back.
         </p>
 
-        <h3>Example: an even kernel on $\mathbb R$, pulled back to $[0,1]$</h3>
+        <h3>Example: a partition kernel on $\mathbb R$, pulled back to $[0,1]$</h3>
         <p>
-          For a one-dimensional continuous distribution, the CDF gives a clean bridge between a “native” space and a
-          uniform latent space. Let $X\sim\mathcal N(0,1)$ with CDF $\Phi$, and define $U:=\Phi(X)$. By the probability
-          integral transform, $U\sim\mathrm{Unif}[0,1]$ (and conversely $X=\Phi^{-1}(U)$).
+          To match the latent-uniform story above, represent the Gaussian as $X=\psi(U)$ with $U\sim\mathrm{Unif}[0,1]$.
+          Here $\psi$ is a quantile map: if $F$ is the CDF of $X$, then one choice is $\psi=F^{-1}$ (and $U=F(X)$).
         </p>
         <p>
-          Choose an even similarity kernel on $\mathbb R$—for example, a translation-invariant one:
+          Now “set the distinguishability scale” in $x$-space by binning. Fix a bin width $\Delta=0.4\sigma$ and let
+          $g_\Delta:\mathbb R\to\mathbb Z$ record which interval of length $\Delta$ contains $x$ (anchored at the mean).
+          Define the coarse variable
+          $$Y:=g_\Delta(X)=g_\Delta(\psi(U)).$$
+        </p>
+        <p>
+          This induces a partition kernel on $\mathbb R$:
         </p>
         <div class="math-block">
-          $$K_\varepsilon(x,x') := \kappa\!\left(\frac{x-x'}{\varepsilon}\right), \qquad \kappa(t)=\kappa(-t), \qquad \kappa(0)=1.$$
+          $$K_\Delta(x,x') := \mathbf 1\{g_\Delta(x)=g_\Delta(x')\}.$$
         </div>
+        <p>
+          Typicality is the probability mass of your bin,
+          $\tau_\Delta(x)=\mathbb P(g_\Delta(X')=g_\Delta(x))$, so SS-entropy reduces to an ordinary Shannon entropy:
+          $$H_{K_\Delta}(\mu_X)=H(Y).$$
+        </p>
+        <p>
+          To express the same coarse-graining on the latent space, define $f_\Delta(u):=g_\Delta(\psi(u))$ and pull the
+          kernel back:
+          $$\widetilde K_\Delta(u,u') := \mathbf 1\{f_\Delta(u)=f_\Delta(u')\}=K_\Delta(\psi(u),\psi(u')).$$
+          Since $\psi$ pushes Lebesgue measure $\lambda$ forward to $\mu_X$, this is just a change of variables, so the
+          entropy is unchanged:
+          $$H_{K_\Delta}(\mu_X)=H_{\widetilde K_\Delta}(\lambda).$$
+        </p>
         <p class="muted">
-          Think of $\varepsilon$ as the measurement scale in $x$-units: shrinking $\varepsilon$ demands finer resolution.
-          The specific shape of $\kappa$ matters less than the fact that it encodes “closeness” in $x$.
-        </p>
-        <p>
-          Typicality and SS-entropy on $(\mathbb R,\mu)$ (here $\mu$ is the law of $X$) are
-        </p>
-        <div class="math-block">
-          $$\tau_\varepsilon(x):=\int K_\varepsilon(x,x')\,d\mu(x'), \qquad H_{K_\varepsilon}(\mu):=\int -\log\tau_\varepsilon(x)\,d\mu(x).$$
-        </div>
-        <p>
-          Now move to the latent space. Pull the kernel back through the CDF/quantile maps:
-        </p>
-        <div class="math-block">
-          $$\widetilde K_\varepsilon(u,u') := K_\varepsilon(\Phi^{-1}(u),\Phi^{-1}(u')), \qquad \widetilde\tau_\varepsilon(u):=\int_0^1 \widetilde K_\varepsilon(u,u')\,du'.$$
-        </div>
-        <p>
-          Because $\Phi^{-1}$ pushes Lebesgue measure $\lambda$ on $[0,1]$ forward to $\mu$, this is just a change of
-          variables: the entropy is unchanged, but it can be written entirely as an integral over the uniform measure:
-        </p>
-        <div class="math-block">
-          $$H_{K_\varepsilon}(\mu)=\int_0^1 -\log \widetilde\tau_\varepsilon(u)\,du = H_{\widetilde K_\varepsilon}(\lambda).$$
-        </div>
-        <p class="muted">
-          Nothing here is special to Gaussians of course: any continuous $F$ gives $U=F(X)\sim\mathrm{Unif}[0,1]$ and the same
-          pullback identity. The Gaussian case is just a clean picture because $\Phi^{-1}$ is familiar and easy to plot.
+          In $u$-space the bin boundaries become quantiles $u_j=\psi^{-1}(m+j\Delta)=F(m+j\Delta)$, which crowd near $0$
+          and $1$ because the Gaussian tails have low density.
         </p>
         <figure>
-          <div class="figure-placeholder">
-            <div><strong>Quantile slices: uniform bins ↔ Gaussian intervals (TODO)</strong></div>
-            <div class="muted">
-              Draw $u\in[0,1]$ split into equal-width bins, map them through $x=\Phi^{-1}(u)$, and shade the corresponding
-              intervals under the Gaussian density.
-            </div>
-          </div>
+          <img src="assets/partition_kernel_pullback.svg" alt="Partition kernel bins on a Gaussian pdf and their pullback under the CDF to a uniform density.">
           <figcaption>
-            Equal-width bins in $u$ correspond to equal-probability slices of $X$:
-            $$u \in [(j-1)/m, j/m] \quad \Longleftrightarrow \quad x \in [\Phi^{-1}((j-1)/m), \Phi^{-1}(j/m)].$$
-            The widths in $x$ vary, but each slice has mass $1/m$.
+            A fixed-width partition in $x$ (top left) maps to a nonuniform partition in $u$ (top right); near the tails the
+            mapped boundaries squeeze together. (The $u$ panel includes additional tail boundaries from the same $\Delta$-spaced
+            partition.) The bottom panel shows the resulting discrete distribution of $Y=g_\Delta(X)$. Let $\widetilde K_\Delta$
+            be the pulled-back partition kernel on $[0,1]$. Then:
+            $$H_{K_\Delta}(\mu_X)=H_{\widetilde K_\Delta}(\lambda)=H(Y).$$ That is, the SS-entropy with either kernel equals 
+            the Shannon entropy of the coarse variable because all are representations of the same event, up to the kernel's
+            distinguishability structure.
           </figcaption>
         </figure>
 
         <h3>Relationship to differential entropy</h3>
         <p>
-          The “infinite resolution” limit corresponds to a kernel that only matches a point to itself:
+          The “infinite distinguishability" limit corresponds to a kernel that only matches a point to itself:
         </p>
         <div class="math-block">
           $$K_{\mathrm{id}}(x,x') := \mathbf 1\{x=x'\}, \qquad \tau(x)=\int K_{\mathrm{id}}(x,x')\,d\mu(x')=\mu(\{x\}).$$
@@ -546,10 +539,12 @@
           unbounded surprisal.
         </p>
         <p>
-          Differential entropy can be understood as what remains after you subtract the <em>resolution baseline</em> from a
-          finite-resolution family of kernels like $K_\varepsilon$. For many “local” kernels of the form above and smooth
-          densities $f$, typicality behaves like $\tau_\varepsilon(x)\approx \varepsilon f(x)$ up to a
-          kernel-dependent constant, so
+          Differential entropy can be understood as what remains after you subtract a kernel-dependent <em>distinguishability baseline</em>
+          from a finite-distinguishability family of kernels with a shrinking scale $\varepsilon$. For example, take a translation-invariant
+          kernel
+          $$K_\varepsilon(x,x') := \kappa\!\left(\frac{x-x'}{\varepsilon}\right), \qquad \kappa(t)=\kappa(-t), \qquad \kappa(0)=1.$$
+          For many “local” choices and smooth densities $f$, typicality behaves like $\tau_\varepsilon(x)\approx \varepsilon f(x)$
+          up to a kernel-dependent constant, so
         </p>
         <div class="math-block">
           $$H_{K_\varepsilon}(\mu)=\mathbb E[-\log \tau_\varepsilon(X)] \approx \log(1/\varepsilon) + \mathbb E[-\log f(X)] + \text{const}.$$
@@ -557,7 +552,7 @@
         <p class="muted">
           SS-entropy keeps the kernel (and therefore the baseline) explicit; differential entropy is the distribution part
           you get by renormalizing away that baseline as $\varepsilon\to 0$. By the pullback identity above, you can
-          compute the same high-resolution behavior either on $(\mathbb R,\mu)$ or on $([0,1],\lambda)$ with the pulled-back
+          compute the same small-scale behavior either on $(\mathbb R,\mu)$ or on $([0,1],\lambda)$ with the pulled-back
           kernel.
         </p>
       </section>
