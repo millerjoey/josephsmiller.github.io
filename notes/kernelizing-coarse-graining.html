@@ -386,7 +386,7 @@
       <section class="panel">
         <h2>In more detail</h2>
 
-        <h3>1. A universal noise source</h3>
+        <h3>A universal noise source</h3>
         <p>
           The starting point is the classical “uniform representation” idea: distributions can be generated
           from a single random seed. Let
@@ -403,7 +403,7 @@
           <em>uniform randomness plus structure</em> (the map $\psi$).
         </p>
 
-        <h3>2. Coarse observation as a partition map</h3>
+        <h3>Coarse observation as a partition map</h3>
         <p>
           Suppose we don’t observe $U$ precisely; we only observe which “bucket” it falls into. Formally, let
           $f:[0,1]\to\{1,\dots,m\}$ and define
@@ -433,7 +433,7 @@
           </p>
         </details>
 
-        <h3>3. Kernelizing the coarse-graining</h3>
+        <h3>Kernelizing the coarse-graining</h3>
         <p>
           Define the partition (equivalence) kernel induced by $f$:
         </p>
@@ -457,11 +457,11 @@
           $$H(Y)=\int_0^1 -\log \tau_f(u)\,du.$$
         </div>
         <p class="muted">
-          This is the reorganization: don’t push the measure to $\{1,\dots,m\}$; keep the base measure on $[0,1]$ and move
-          the coarse map “inside” the integral as a kernel.
+          We don’t push the measure to $\{1,\dots,m\}$; keep the base measure on $[0,1]$ and move
+          the coarse map “inside” the logarithm as a kernel.
         </p>
 
-        <h3>4. From crisp partitions to SS-entropy</h3>
+        <h3>From crisp partitions to SS-entropy</h3>
         <p>
           Partition kernels are $0$–$1$. Similarity-sensitive entropy generalizes by allowing a graded similarity
           kernel $K(x,x')\in[0,1]$ (with $K(x,x)=1$) on a state space with distribution $\mu$.
@@ -470,7 +470,7 @@
           $$\tau(x):=\int K(x,x')\,d\mu(x'), \qquad H_K(\mu):=\int -\log \tau(x)\,d\mu(x).$$
         </div>
         <p>
-          In words: SS-entropy is expected surprisal of being typical under the similarity notion $K$. Partition kernels
+          In words, SS-entropy is expected surprisal of being typical under the similarity notion $K$. Partition kernels
           recover ordinary Shannon entropy for the corresponding coarse variable, while intermediate kernels interpolate
           between “everything is distinct” and “many things count as similar.”
         </p>
@@ -487,10 +487,10 @@
           </p>
         </details>
 
-        <h3>5. Example: Gaussian quantile + pulled-back resolution</h3>
+        <h3>Example: Gaussian quantile + pulled-back resolution</h3>
         <p>
           The latent-uniform picture is especially transparent for one-dimensional continuous distributions. Here’s a
-          compact example that repeats the same kernelizing move, but now for measurement resolution.
+          compact example that repeats the same kernelizing step, but now for measurement resolution.
         </p>
         <p>
           <strong>Step 1:</strong> generate a Gaussian from a quantile map. Let $U\sim\mathrm{Unif}[0,1]$ and define
@@ -524,9 +524,10 @@
         </div>
         <p class="muted">
           This is no longer a fixed-width band in $u$-space. Near the Gaussian tails, tiny changes in $u$ correspond to
-          large changes in $x$, so “within $\varepsilon$ in $x$” becomes a very thin notion of indistinguishability in $u$.
+          large changes in $x$, so “within $\varepsilon$ in $x$” becomes a very precise notion of distinguishability in $u$,
+          which denotes the same distribution of typicality as in the $x$-space.
         </p>
-        <figure>
+        <!-- <figure>
           <div class="figure-placeholder">
             <div><strong>Quantile map + fixed-$\varepsilon$ bands (TODO)</strong></div>
             <div class="muted">Plot $x=\Phi^{-1}(u)$ and draw horizontal bands of height $\varepsilon$ at a few $x_0$ values.</div>
@@ -535,7 +536,7 @@
             The latent width of an $\varepsilon$-band around $x_0$ is
             $$\Delta u(x_0)=\Phi(x_0+\varepsilon/2)-\Phi(x_0-\varepsilon/2)\approx \varepsilon\,\varphi(x_0).$$
           </figcaption>
-        </figure>
+        </figure> -->
       </section>
     </main>
   </div>
