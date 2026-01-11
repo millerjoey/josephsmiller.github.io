@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Kernelizing coarse-graining · Joseph S. Miller</title>
+  <title>Kernalized coarse graining · Joseph S. Miller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="How a many-to-one observation map can be rewritten as an indistinguishability kernel, turning entropy into expected surprisal of typicality and motivating similarity-sensitive entropy.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -338,7 +338,7 @@
 
     <header class="hero">
       <div class="eyebrow">Technical note</div>
-      <h1>Kernelizing coarse-graining</h1>
+      <h1>Kernalized coarse graining</h1>
       <p class="lede">
         An algebraic reframing of shannon-style entropy motivates much of similarity-sensitive entropy: keep the uniform measure $U \sim \mathrm{Unif}[0,1]$, and interpret a many-to-one observation map by a kernel that encodes indistinguishability.
       </p>
@@ -348,7 +348,7 @@
         <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,du'$.</li>
       </ul>
       <div class="actions">
-        <a class="button" href="mailto:joe@josephsmiller.com?subject=Kernelizing%20coarse-graining">Discuss a project</a>
+        <a class="button" href="mailto:joe@josephsmiller.com?subject=Kernalized%20coarse%20graining">Discuss a project</a>
       </div>
     </header>
 
@@ -378,7 +378,7 @@
           “resolution” explicit and letting you interpolate between infinite and finite distinguishability.
         </p>
         <p class="muted">
-          Related: <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
+          For more: <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
           Induced Kernels and Data-Processing Inequalities (arXiv:2601.03064)</a>.
         </p>
       </section>
@@ -433,7 +433,7 @@
           </p>
         </details>
 
-        <h3>Kernelizing the coarse-graining</h3>
+        <h3>Kernalized coarse graining</h3>
         <p>
           Define the partition (equivalence) kernel induced by $f$:
         </p>
@@ -461,7 +461,7 @@
           the coarse map “inside” the logarithm as a kernel.
         </p>
 
-        <h3>From crisp partitions to SS-entropy</h3>
+        <h3>From partitions to SS-entropy</h3>
         <p>
           Partition kernels are $0$–$1$. Similarity-sensitive entropy generalizes by allowing a graded similarity
           kernel $K(x,x')\in[0,1]$ (with $K(x,x)=1$) on a state space with distribution $\mu$.
@@ -474,69 +474,92 @@
           recover ordinary Shannon entropy for the corresponding coarse variable, while intermediate kernels interpolate
           between “everything is distinct” and “many things count as similar.”
         </p>
-        <details>
-          <summary>Remark: why “infinite resolution” blows up</summary>
-          <p>
-            On an atomless continuous space, the identity-like notion of similarity (“only identical points match”) pushes
-            typicality toward $0$ almost everywhere, so $-\log \tau$ diverges. That’s less a pathology than an operational
-            statement: if you demand arbitrarily fine resolution, you can extract unbounded information.
-          </p>
-          <p>
-            Differential entropy can be viewed as a renormalized refinement limit that subtracts a diverging
-            resolution-dependent baseline; SS-entropy keeps the resolution notion explicit in $K$.
-          </p>
-        </details>
+        <p class="muted">
+          A benefit of this formulation is that you can define similarity where the semantics live, then transport it
+          through a change of variables by pulling the kernel back.
+        </p>
 
-        <h3>Example: Gaussian quantile + pulled-back resolution</h3>
+        <h3>Example: an even kernel on $\mathbb R$, pulled back to $[0,1]$</h3>
         <p>
-          The latent-uniform picture is especially transparent for one-dimensional continuous distributions. Here’s a
-          compact example that repeats the same kernelizing step, but now for measurement resolution.
+          For a one-dimensional continuous distribution, the CDF gives a clean bridge between a “native” space and a
+          uniform latent space. Let $X\sim\mathcal N(0,1)$ with CDF $\Phi$, and define $U:=\Phi(X)$. By the probability
+          integral transform, $U\sim\mathrm{Unif}[0,1]$ (and conversely $X=\Phi^{-1}(U)$).
         </p>
         <p>
-          <strong>Step 1:</strong> generate a Gaussian from a quantile map. Let $U\sim\mathrm{Unif}[0,1]$ and define
-          $\psi(u)=\mu+\sigma\,\Phi^{-1}(u)$ so that $X=\psi(U)\sim\mathcal N(\mu,\sigma^2)$.
-        </p>
-        <p>
-          <strong>Step 2:</strong> choose a resolution kernel on $\mathbb R$. Fix $\varepsilon&gt;0$ and define
-          $K_\varepsilon(x,x') := \mathbf 1\{|x-x'|\le \varepsilon/2\}$. Typicality is the probability mass within an
-          $\varepsilon$-window:
+          Choose an even similarity kernel on $\mathbb R$—for example, a translation-invariant one:
         </p>
         <div class="math-block">
-          $$\tau_\varepsilon(x)=\int \mathbf 1\{|x'-x|\le \varepsilon/2\}\,d\mu(x').$$
+          $$K_\varepsilon(x,x') := \kappa\!\left(\frac{x-x'}{\varepsilon}\right), \qquad \kappa(t)=\kappa(-t), \qquad \kappa(0)=1.$$
         </div>
         <p class="muted">
-          For small $\varepsilon$ and smooth density $f$, $\tau_\varepsilon(x)\approx \varepsilon f(x)$, so
+          Think of $\varepsilon$ as the measurement scale in $x$-units: shrinking $\varepsilon$ demands finer resolution.
+          The specific shape of $\kappa$ matters less than the fact that it encodes “closeness” in $x$.
+        </p>
+        <p>
+          Typicality and SS-entropy on $(\mathbb R,\mu)$ (here $\mu$ is the law of $X$) are
         </p>
         <div class="math-block">
-          $$H_{K_\varepsilon}(\mu)\approx \log(1/\varepsilon) + h(X).$$
-        </div>
-        <p class="muted">
-          For a Gaussian, $h(X)=\tfrac12\log(2\pi e\,\sigma^2)$, hence
-        </p>
-        <div class="math-block">
-          $$H_{K_\varepsilon}(\mu)\approx \log(1/\varepsilon) + \tfrac12\log(2\pi e\,\sigma^2).$$
+          $$\tau_\varepsilon(x):=\int K_\varepsilon(x,x')\,d\mu(x'), \qquad H_{K_\varepsilon}(\mu):=\int -\log\tau_\varepsilon(x)\,d\mu(x).$$
         </div>
         <p>
-          <strong>Step 3:</strong> pull the kernel back to $[0,1]$ through the quantile map:
+          Now move to the latent space. Pull the kernel back through the CDF/quantile maps:
         </p>
         <div class="math-block">
-          $$\widetilde K_\varepsilon(u,u') := K_\varepsilon(\psi(u),\psi(u')).$$
+          $$\widetilde K_\varepsilon(u,u') := K_\varepsilon(\Phi^{-1}(u),\Phi^{-1}(u')), \qquad \widetilde\tau_\varepsilon(u):=\int_0^1 \widetilde K_\varepsilon(u,u')\,du'.$$
+        </div>
+        <p>
+          Because $\Phi^{-1}$ pushes Lebesgue measure $\lambda$ on $[0,1]$ forward to $\mu$, this is just a change of
+          variables: the entropy is unchanged, but it can be written entirely as an integral over the uniform measure:
+        </p>
+        <div class="math-block">
+          $$H_{K_\varepsilon}(\mu)=\int_0^1 -\log \widetilde\tau_\varepsilon(u)\,du = H_{\widetilde K_\varepsilon}(\lambda).$$
         </div>
         <p class="muted">
-          This is no longer a fixed-width band in $u$-space. Near the Gaussian tails, tiny changes in $u$ correspond to
-          large changes in $x$, so “within $\varepsilon$ in $x$” becomes a very precise notion of distinguishability in $u$,
-          which denotes the same distribution of typicality as in the $x$-space.
+          Nothing here is special to Gaussians of course: any continuous $F$ gives $U=F(X)\sim\mathrm{Unif}[0,1]$ and the same
+          pullback identity. The Gaussian case is just a clean picture because $\Phi^{-1}$ is familiar and easy to plot.
         </p>
-        <!-- <figure>
+        <figure>
           <div class="figure-placeholder">
-            <div><strong>Quantile map + fixed-$\varepsilon$ bands (TODO)</strong></div>
-            <div class="muted">Plot $x=\Phi^{-1}(u)$ and draw horizontal bands of height $\varepsilon$ at a few $x_0$ values.</div>
+            <div><strong>Quantile slices: uniform bins ↔ Gaussian intervals (TODO)</strong></div>
+            <div class="muted">
+              Draw $u\in[0,1]$ split into equal-width bins, map them through $x=\Phi^{-1}(u)$, and shade the corresponding
+              intervals under the Gaussian density.
+            </div>
           </div>
           <figcaption>
-            The latent width of an $\varepsilon$-band around $x_0$ is
-            $$\Delta u(x_0)=\Phi(x_0+\varepsilon/2)-\Phi(x_0-\varepsilon/2)\approx \varepsilon\,\varphi(x_0).$$
+            Equal-width bins in $u$ correspond to equal-probability slices of $X$:
+            $$u \in [(j-1)/m, j/m] \quad \Longleftrightarrow \quad x \in [\Phi^{-1}((j-1)/m), \Phi^{-1}(j/m)].$$
+            The widths in $x$ vary, but each slice has mass $1/m$.
           </figcaption>
-        </figure> -->
+        </figure>
+
+        <h3>Relationship to differential entropy</h3>
+        <p>
+          The “infinite resolution” limit corresponds to a kernel that only matches a point to itself:
+        </p>
+        <div class="math-block">
+          $$K_{\mathrm{id}}(x,x') := \mathbf 1\{x=x'\}, \qquad \tau(x)=\int K_{\mathrm{id}}(x,x')\,d\mu(x')=\mu(\{x\}).$$
+        </div>
+        <p>
+          If $\mu$ is atomless (no point masses), then $\mu(\{x\})=0$ for every $x$, so $\tau(x)=0$ almost everywhere and
+          $-\log \tau(x)=+\infty$. In SS-entropy terms: considering each event on a continuous space as uniquely distinct leads to
+          unbounded surprisal.
+        </p>
+        <p>
+          Differential entropy can be understood as what remains after you subtract the <em>resolution baseline</em> from a
+          finite-resolution family of kernels like $K_\varepsilon$. For many “local” kernels of the form above and smooth
+          densities $f$, typicality behaves like $\tau_\varepsilon(x)\approx \varepsilon f(x)$ up to a
+          kernel-dependent constant, so
+        </p>
+        <div class="math-block">
+          $$H_{K_\varepsilon}(\mu)=\mathbb E[-\log \tau_\varepsilon(X)] \approx \log(1/\varepsilon) + \mathbb E[-\log f(X)] + \text{const}.$$
+        </div>
+        <p class="muted">
+          SS-entropy keeps the kernel (and therefore the baseline) explicit; differential entropy is the distribution part
+          you get by renormalizing away that baseline as $\varepsilon\to 0$. By the pullback identity above, you can
+          compute the same high-resolution behavior either on $(\mathbb R,\mu)$ or on $([0,1],\lambda)$ with the pulled-back
+          kernel.
+        </p>
       </section>
     </main>
   </div>
