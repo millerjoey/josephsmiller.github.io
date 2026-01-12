@@ -340,7 +340,7 @@
       <div class="eyebrow">Technical note</div>
       <h1>Kernalized coarse graining</h1>
       <p class="lede">
-        A small algebraic restatement gives rise to similarity-sensitive entropy: keep a latent uniform seed
+        A small algebraic restatement motivates similarity-sensitive entropy: keep a latent uniform seed
         $U \sim \mathrm{Unif}[0,1]$, and represent what you can (and can’t) distinguish using a kernel rather than only a
         pushed-forward variable.
       </p>
@@ -519,8 +519,7 @@
           <img src="assets/partition_kernel_pullback.svg" alt="Partition kernel bins on a Gaussian pdf and their pullback under the CDF to a uniform density.">
           <figcaption>
             A fixed-width partition in $x$ (top left) maps to a nonuniform partition in $u$ (top right); near the tails the
-            mapped boundaries squeeze together. (The $u$ panel includes additional tail boundaries from the same $\Delta$-spaced
-            partition.) The bottom panel shows the resulting discrete distribution of $Y=g_\Delta(X)$. Let $\widetilde K_\Delta$
+            mapped boundaries squeeze together. The bottom plot shows the resulting discrete distribution of $Y=g_\Delta(X)$. Let $\widetilde K_\Delta$
             be the pulled-back partition kernel on $[0,1]$. Then:
             $$H_{K_\Delta}(\mu_X)=H_{\widetilde K_\Delta}(\lambda)=H(Y).$$ That is, the SS-entropy with either kernel equals 
             the Shannon entropy of the coarse variable because all are representations of the same event, up to what the kernel considers indistinguishable.
