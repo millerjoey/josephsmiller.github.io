@@ -388,9 +388,9 @@
       <section class="panel">
         <h2>In more detail</h2>
 
-        <h3>A universal noise source</h3>
+        <h3>Randomness from a universal noise source</h3>
         <p>
-          The starting point is the classical “uniform representation” idea: distributions can be generated
+          The starting point is the “uniform representation” idea: distributions can be generated
           from a single random seed. Let
         </p>
         <div class="math-block">
@@ -398,14 +398,14 @@
         </div>
         <p class="muted">
           In one dimension, $\psi$ is often the quantile map $F^{-1}$, so $X=F^{-1}(U)$. More generally, you can treat
-          $\psi$ as a measurable map that pushes Lebesgue measure forward to whatever law you want.
+          $\psi$ as a measurable map that pushes the Lebesgue measure forward to whatever law you want.
         </p>
         <p>
           Any law can be read as
-          <em>uniform randomness plus structure</em> (the map $\psi$).
+          <em>uniform randomness plus a reorganizing structure (the map $\psi$).
         </p>
 
-        <h3>Coarse observation as a partition map</h3>
+        <h3>Coarse observation are a partition map</h3>
         <p>
           Suppose we don’t observe $U$ precisely; we only observe which “bucket” it falls into. Formally, let
           $f:[0,1]\to\{1,\dots,m\}$ and define
@@ -424,18 +424,17 @@
             $$\mathbb P\!\left(f(U)=f(u)\right)=\lambda\!\left(f^{-1}(f(u))\right).$$
           </div>
           <p>
-            Plugging this into the definition yields an integral identity:
+            Plugging this into the definition yields the identity:
           </p>
           <div class="math-block">
             $$H(Y)=\int_0^1 -\log\Big(\lambda\big(f^{-1}(f(u))\big)\Big)\,du.$$
           </div>
           <p>
-            Read informally: Shannon entropy is the average surprisal of the size (mass) of the indistinguishability
-            class containing the state.
+            Read informally: Shannon entropy is the average surprisal of the size (mass) of the indistinguishability class containing the state.
           </p>
         </details>
 
-        <h3>Kernalized coarse graining</h3>
+        <h3>Kernelized coarse graining</h3>
         <p>
           Define the partition (equivalence) kernel induced by $f$:
         </p>
@@ -460,7 +459,7 @@
         </div>
         <p class="muted">
           We don’t push the measure to $\{1,\dots,m\}$; keep the base measure on $[0,1]$ and move
-          the coarse map “inside” the logarithm as a kernel. Now, we have a kernalized form of Shannon entropy!
+          the coarse map “inside” the logarithm as a kernel. Now, we have a kernelized form of Shannon entropy!
         </p>
 
         <h3>From partitions to SS-entropy</h3>
