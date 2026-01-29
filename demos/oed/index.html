@@ -15,12 +15,11 @@
     <main class="shell">
       <header class="hero" id="top">
         <div class="nav">
-          <div class="nav-brand">Optimal experiment design</div>
+          <div class="nav-brand">Demos</div>
           <nav class="nav-links" aria-label="Primary">
             <a href="https://josephsmiller.com/">Home</a>
             <a href="#demos">Demos</a>
-            <a href="#how">How it works</a>
-            <a href="#interactive">Interactive</a>
+            <a href="#method">Method</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
           </nav>
@@ -63,117 +62,11 @@
         </p>
       </section>
 
-      <section class="section" id="audience">
-        <div class="section-header">
-          <h2>Where it works</h2>
-          <p class="muted small">
-            Practical sequential design that runs fast, even with large candidate spaces.
-          </p>
-        </div>
-        <p class="muted small">
-          Best fit: when each measurement has real cost (time, money, risk) and you can choose what to
-          measure next.
-        </p>
-        <div class="grid">
-          <div class="card">
-            <div class="card-title">Record linkage and deduplication</div>
-            <p class="muted">Label fewer pairs and recover clusters faster.</p>
-          </div>
-          <div class="card">
-            <div class="card-title">A/B tests and bandits</div>
-            <p class="muted">Learn heterogeneous effects across customer features and choose the next best test instead of sampling uniformly.</p>
-          </div>
-          <div class="card">
-            <div class="card-title">Pricing and demand estimation</div>
-            <p class="muted">Choose price probes that learn revenue curves quickly.</p>
-          </div>
-          <div class="card">
-            <div class="card-title">Surveys and measurement design</div>
-            <p class="muted">Ask fewer questions while preserving inference quality.</p>
-          </div>
-          <div class="card">
-            <div class="card-title">Expensive measurements</div>
-            <p class="muted">Pick the next lab run, simulation, or review that moves the posterior most.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="services">
-        <div class="section-header">
-          <h2>Work</h2>
-          <p class="muted small">If you want this on your data, I can help with a prototype or integration.</p>
-        </div>
-        <div class="grid">
-          <div class="card">
-            <div class="card-title">Prototype / pilot</div>
-            <p class="muted">
-              Define the decision, implement an acquisition rule and baseline comparison, and ship a working
-              selection loop you can test on real data.
-            </p>
-            <p class="muted small">
-              Deliverable: selector + baseline comparison + stopping rule.
-            </p>
-          </div>
-          <div class="card">
-            <div class="card-title">Productionization</div>
-            <p class="muted">
-              Turn the prototype into a service with monitoring, stopping rules, and pipeline integrations.
-            </p>
-            <p class="muted small">
-              Deliverable: API endpoints + dashboards + auditability.
-            </p>
-          </div>
-          <div class="card">
-            <div class="card-title">Training + playbook</div>
-            <p class="muted">
-              Leave your team with a reusable template: objectives, priors, constraints, and metrics tailored
-              to your domain.
-            </p>
-            <p class="muted small">Deliverable: internal doc + templates your team can reuse.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="how">
-        <h2>How it works</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="step-number">01</div>
-            <div class="step-title">Define the decision and budget</div>
-            <p class="muted">
-              Clarify the outcome, cost, and what it means to stop, so everyone agrees what "done" means.
-            </p>
-          </div>
-          <div class="step">
-            <div class="step-number">02</div>
-            <div class="step-title">Model uncertainty</div>
-            <p class="muted">
-              Bayesian or approximate Bayesian models, so uncertainty is explicit, not guessed.
-            </p>
-          </div>
-          <div class="step">
-            <div class="step-number">03</div>
-            <div class="step-title">Choose the next data</div>
-            <p class="muted">
-              Maximize expected information or utility under constraints, so each new measurement is worth the cost.
-            </p>
-          </div>
-          <div class="step">
-            <div class="step-number">04</div>
-            <div class="step-title">Stop early with confidence</div>
-            <p class="muted">
-              Act when uncertainty is low enough to make the call, so you stop spending once the decision
-              is clear.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section class="section" id="demos">
         <div class="section-header">
           <h2>Demos</h2>
           <p class="muted small">
-            Demonstrations of the sequential design loop: model uncertainty, select the next measurement, update, and stop.
+            Precomputed visualizations and local interactive tools.
           </p>
         </div>
         <div class="grid">
@@ -210,71 +103,43 @@
         </div>
       </section>
 
-      <section class="section" id="interactive">
+      <section class="section" id="method">
         <div class="section-header">
-          <h2>Interactive</h2>
-          <p class="muted small">How interactive demos work on a static site.</p>
+          <h2>Method</h2>
+          <p class="muted small">A high-level view of sequential design.</p>
         </div>
         <p class="muted">
-          This site is static. Interactive demos either (1) run entirely in the browser or (2) call a separate API service.
+          Sequential design treats data collection as a control problem: choose the next measurement to
+          maximize expected utility (or information) with respect to a target quantity of interest, while accounting
+          for uncertainty and constraints.
         </p>
-        <p class="muted small" style="margin-top: 0.75rem">
-          Example: the record linkage demo calls a small API service. The hosted site does not run this backend;
-          the demo is intended for local use.
+        <p class="muted" style="margin-top: 0.75rem">
+          In practice, this is implemented by maintaining an uncertainty-aware model, evaluating candidate measurements
+          via an acquisition objective (e.g., expected information gain about a decision boundary), and iterating until
+          the remaining uncertainty is below a chosen tolerance.
         </p>
         <details class="details">
-          <summary>Using the record linkage demo locally</summary>
+          <summary>Hosted vs local demos</summary>
           <p class="muted small">
-            Start the backend service, then set the API endpoint on the demo page. If you'd like setup instructions,
-            email <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
+            The A/B demo is fully static (precomputed plots). The record linkage demo is intended for local use and
+            requires a backend service; set the API endpoint on the demo page. For setup instructions, email
+            <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
           </p>
         </details>
       </section>
 
       <section class="section" id="about">
         <div class="section-header">
-          <h2>Why this approach</h2>
-          <p class="muted small">Better experiments when data collection is expensive.</p>
+          <h2>About</h2>
+          <p class="muted small">Background and contact.</p>
         </div>
         <p>
-          Most teams collect data uniformly because it is simple. The problem is that not all data points are
-          equally valuable. Adaptive experiment and labeling systems quantify uncertainty and pick the next
-          most informative measurement so you learn faster and stop earlier.
-        </p>
-        <p class="muted">
-          Fewer labels to reach the same accuracy. Faster decisions under budget. Clear uncertainty about
-          whether more data is worth it.
+          These demos are maintained by Joseph S. Miller. For publications and technical notes, see
+          <a class="text-link" href="https://josephsmiller.com/">josephsmiller.com</a>.
         </p>
         <p class="muted small">
           Privacy note: when you run the demos locally, your files stay on your machine.
         </p>
-      </section>
-
-      <section class="section" id="faq">
-        <div class="section-header">
-          <h2>FAQ</h2>
-          <p class="muted small">Quick answers to common pilot questions.</p>
-        </div>
-        <details class="details">
-          <summary>Do we have to be fully Bayesian?</summary>
-          <p class="muted small">No. We can use approximate posteriors or uncertainty proxies when needed.</p>
-        </details>
-        <details class="details">
-          <summary>Does this work with my existing model?</summary>
-          <p class="muted small">
-            Usually yes: we wrap your model with an acquisition rule and stopping criteria.
-          </p>
-        </details>
-        <details class="details">
-          <summary>What data do you need for a pilot?</summary>
-          <p class="muted small">
-            A candidate pool to sample from, a labeling/measurement mechanism, and a decision metric.
-          </p>
-        </details>
-        <details class="details">
-          <summary>Can we run locally and keep data private?</summary>
-          <p class="muted small">Yes. Demos run locally; production deployments can be private.</p>
-        </details>
       </section>
 
       <section class="section panel cta-panel" id="contact">
