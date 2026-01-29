@@ -219,14 +219,14 @@
           This site is static. Interactive demos either (1) run entirely in the browser or (2) call a separate API service.
         </p>
         <p class="muted small" style="margin-top: 0.75rem">
-          Example: the record linkage demo uses a Julia API (see <code>FuzzyMatchingService/server.jl</code>).
-          Run it locally, or deploy it as a separate service and configure the frontend to point to it.
+          Example: the record linkage demo calls a small API service. The hosted site does not run this backend;
+          the demo is intended for local use.
         </p>
         <details class="details">
-          <summary>Run the local backend</summary>
+          <summary>Using the record linkage demo locally</summary>
           <p class="muted small">
-            From <code>FuzzyMatchingService</code>: <code>julia --project=. server.jl</code> then open
-            <code>http://localhost:8080</code>.
+            Start the backend service, then set the API endpoint on the demo page. If you'd like setup instructions,
+            email <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
           </p>
         </details>
       </section>
