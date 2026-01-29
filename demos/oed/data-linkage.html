@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Record Linkage · Active Learning</title>
+    <meta
+      name="description"
+      content="Upload CSVs, label a small number of pairs, and see active learning select the next most-informative match decisions."
+    />
+    <meta name="theme-color" content="#8b3a3a" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <div class="topbar">
+        <a class="text-link" href="index.html">&larr; Demos</a>
+        <div class="topbar-links">
+          <a class="text-link" href="https://josephsmiller.com/">Home</a>
+          <div class="muted small" id="apiStatus"></div>
+        </div>
+      </div>
+
+      <header>
+        <div class="eyebrow">Record linkage demo</div>
+        <h1>Record linkage with active learning</h1>
+        <p class="lede">
+          Upload CSVs, label informative pairs, and see how many labels you did not need.
+        </p>
+      </header>
+
+      <section class="panel" aria-label="Local backend note">
+        <div class="tag tag--local">Local demo</div>
+        <p class="muted">
+          This page calls a small backend API. If you're viewing it from a static site, run the backend locally.
+        </p>
+        <p class="muted small" style="margin-top: 0.6rem">
+          From <code>FuzzyMatchingService</code>: <code>julia --project=. server.jl</code>, then open
+          <code>http://localhost:8080/data-linkage.html</code> (or set the API endpoint below).
+        </p>
+      </section>
+
+      <section class="panel" aria-label="Connect and upload">
+        <h2>Connect + upload</h2>
+        <div class="row">
+          <label class="field">
+            <span>API endpoint</span>
+            <input id="apiBase" type="url" inputmode="url" placeholder="http://localhost:8080" />
+          </label>
+          <button id="apiBaseApply" class="button secondary small" type="button">Use endpoint</button>
+          <button id="apiBaseReset" class="button secondary small" type="button">Reset</button>
+        </div>
+
+        <div class="row" style="margin-top: 1rem">
+          <label class="field">
+            <span>Left CSV (required)</span>
+            <input id="leftFile" type="file" accept=".csv" />
+          </label>
+          <label class="field">
+            <span>Right CSV (optional)</span>
+            <input id="rightFile" type="file" accept=".csv" />
+          </label>
+          <button id="upload" class="button" type="button">Upload</button>
+        </div>
+
+        <p class="muted small" style="margin-top: 0.6rem">
+          Use one CSV for deduplication. Add a right CSV for cross-linkage.
+        </p>
+
+        <p id="uploadStatus" class="muted small" style="margin-top: 0.9rem"></p>
+        <input id="jobId" type="hidden" />
+      </section>
+
+      <section class="panel" aria-label="Label pairs">
+        <h2>Label</h2>
+        <div class="row">
+          <label class="field compact">
+            <span>Batch size</span>
+            <input id="batchSize" type="number" min="1" max="100" step="1" value="10" />
+          </label>
+          <label class="field compact">
+            <span>Auto-suggest threshold (prob)</span>
+            <input id="autoThresh" type="number" min="0" max="1" step="0.05" value="0.5" />
+          </label>
+          <button id="loadBatch" class="button secondary" type="button" disabled>Load batch</button>
+          <button id="submitLabels" class="button" type="button" disabled>Submit labels</button>
+        </div>
+
+        <p id="labelStatus" class="muted small" style="margin-top: 0.75rem"></p>
+
+        <details class="details">
+          <summary>Keyboard shortcuts</summary>
+          <p class="muted small">
+            <code>j/k</code> or <code>↑/↓</code>: move • <code>d</code>: match • <code>a</code>: no-match •
+            <code>s</code>: clear • <code>Enter</code>: submit • <code>Shift+N</code>: next batch
+          </p>
+        </details>
+
+        <div id="pairList" class="pair-list" aria-live="polite"></div>
+      </section>
+
+      <section class="panel" aria-label="Results">
+        <h2>Results</h2>
+        <div class="actions">
+          <button id="runFull" class="button secondary" type="button" disabled>Run full scoring</button>
+          <a
+            id="downloadPredictions"
+            class="button secondary small"
+            href="#"
+            download
+            style="display: none"
+            >Download predictions</a
+          >
+          <a
+            id="downloadMatches"
+            class="button secondary small"
+            href="#"
+            download
+            style="display: none"
+            >Download matches</a
+          >
+          <a
+            id="downloadClusters"
+            class="button secondary small"
+            href="#"
+            download
+            style="display: none"
+            >Download clusters</a
+          >
+        </div>
+        <p id="runStatus" class="muted small" style="margin-top: 0.75rem"></p>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value" id="labelsUsed">0</div>
+            <div class="metric-label">Labels used</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="precisionRecall">-- / --</div>
+            <div class="metric-label">Estimated precision/recall</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="uncertaintyLeft">--</div>
+            <div class="metric-label">Uncertainty remaining</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="labelSavings">--</div>
+          <div class="metric-label">Labels saved vs random</div>
+          </div>
+        </div>
+        <p class="muted small" style="margin-top: 0.8rem">
+          Metrics update as you label batches. Use “Run full scoring” to generate downloadable outputs.
+        </p>
+        <p class="muted small">
+          Questions or want a hosted version? <a class="text-link" href="mailto:joe@josephsmiller.com">Email me</a>.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const $ = (id) => document.getElementById(id);
+
+        const elements = {
+          apiBase: $("apiBase"),
+          apiStatus: $("apiStatus"),
+          apiBaseApply: $("apiBaseApply"),
+          apiBaseReset: $("apiBaseReset"),
+          leftFile: $("leftFile"),
+          rightFile: $("rightFile"),
+          upload: $("upload"),
+          uploadStatus: $("uploadStatus"),
+          jobId: $("jobId"),
+          batchSize: $("batchSize"),
+          autoThresh: $("autoThresh"),
+          loadBatch: $("loadBatch"),
+          submitLabels: $("submitLabels"),
+          labelStatus: $("labelStatus"),
+          pairList: $("pairList"),
+          runFull: $("runFull"),
+          downloadPredictions: $("downloadPredictions"),
+          downloadMatches: $("downloadMatches"),
+          downloadClusters: $("downloadClusters"),
+          runStatus: $("runStatus"),
+          labelsUsed: $("labelsUsed"),
+          precisionRecall: $("precisionRecall"),
+          uncertaintyLeft: $("uncertaintyLeft"),
+          labelSavings: $("labelSavings"),
+        };
+
+        let API_BASE = "";
+        let batch = [];
+        let cursor = 0;
+
+        function normalizeApiBase(value) {
+          const trimmed = (value || "").trim();
+          return trimmed ? trimmed.replace(/\\/+$/, "") : "";
+        }
+
+        function originApiBase() {
+          try {
+            if (window.location?.origin && window.location.origin !== "null") {
+              return window.location.origin;
+            }
+          } catch {
+            // ignore
+          }
+          return "";
+        }
+
+        function setApiBase(nextBase, { persist = true } = {}) {
+          API_BASE = normalizeApiBase(nextBase) || "http://localhost:8080";
+          elements.apiBase.value = API_BASE;
+          elements.apiStatus.textContent = `Backend: checking… (${API_BASE})`;
+          if (persist && window.localStorage) {
+            localStorage.setItem("fuzzy_api_base", API_BASE);
+          }
+        }
+
+        function api(path) {
+          return `${API_BASE}${path}`;
+        }
+
+        async function probe(url) {
+          try {
+            return await fetch(url, { method: "GET" });
+          } catch {
+            return null;
+          }
+        }
+
+        async function checkBackend() {
+          elements.apiStatus.textContent = `Backend: checking… (${API_BASE})`;
+          elements.upload.disabled = true;
+          const res =
+            (await probe(api("/api/health"))) ||
+            // Fallback probe that exists on older backends and includes CORS on 404.
+            (await probe(api("/api/job/__ping__/next?batch=1")));
+          if (!res) {
+            elements.apiStatus.textContent = `Backend: offline (${API_BASE})`;
+            elements.upload.disabled = true;
+            return false;
+          }
+          elements.apiStatus.textContent = res.ok
+            ? `Backend: connected (${API_BASE})`
+            : `Backend: reachable (${API_BASE})`;
+          elements.upload.disabled = false;
+          return true;
+        }
+
+        function resetDownloads() {
+          for (const el of [
+            elements.downloadPredictions,
+            elements.downloadMatches,
+            elements.downloadClusters,
+          ]) {
+            el.style.display = "none";
+            el.removeAttribute("href");
+            el.removeAttribute("target");
+            el.removeAttribute("rel");
+          }
+        }
+
+        function updateDownloads(artifacts) {
+          resetDownloads();
+          const jobId = elements.jobId.value;
+          const mapping = {
+            predictions: elements.downloadPredictions,
+            matches: elements.downloadMatches,
+            clusters: elements.downloadClusters,
+          };
+
+          for (const name of artifacts || []) {
+            const el = mapping[name];
+            if (!el) continue;
+            el.href = api(
+              `/api/job/${encodeURIComponent(jobId)}/download/${encodeURIComponent(name)}`,
+            );
+            el.style.display = "inline-flex";
+            el.target = "_blank";
+            el.rel = "noopener";
+          }
+        }
+
+        function renderMessage(message) {
+          elements.pairList.innerHTML = "";
+          const el = document.createElement("p");
+          el.className = "muted small";
+          el.textContent = message;
+          elements.pairList.appendChild(el);
+        }
+
+        function scoreDisplay(item) {
+          const score =
+            item.is_probability && Number.isFinite(item.prob) ? item.prob : item.similarity;
+          const value = Number.isFinite(score) ? score : 0;
+          return {
+            value,
+            percent: `${(value * 100).toFixed(1)}%`,
+            kind: item.is_probability ? "prob" : "sim",
+          };
+        }
+
+        function keyFor(item) {
+          return `${item.i}:${item.j}`;
+        }
+
+        function selectCursor(next) {
+          cursor = Math.max(0, Math.min(batch.length - 1, next));
+          const cards = elements.pairList.querySelectorAll(".pair");
+          cards.forEach((card) => card.classList.remove("is-active"));
+          const active = cards[cursor];
+          if (active) {
+            active.classList.add("is-active");
+            active.scrollIntoView({ block: "nearest" });
+          }
+        }
+
+        function refreshChoices() {
+          const wrappers = elements.pairList.querySelectorAll(".choice");
+          wrappers.forEach((wrapper) => {
+            const input = wrapper.querySelector("input");
+            wrapper.classList.toggle("selected", Boolean(input?.checked));
+          });
+          elements.submitLabels.disabled =
+            elements.pairList.querySelectorAll('input[type="radio"]:checked').length === 0;
+        }
+
+        function setChoice(key, value) {
+          const input = elements.pairList.querySelector(
+            `input[name="lbl_${key}"][value="${value}"]`,
+          );
+          if (!input) return;
+          input.checked = true;
+          refreshChoices();
+        }
+
+        function clearChoice(key) {
+          const inputs = elements.pairList.querySelectorAll(`input[name="lbl_${key}"]`);
+          inputs.forEach((input) => {
+            input.checked = false;
+          });
+          refreshChoices();
+        }
+
+        function renderBatch(items) {
+          batch = Array.isArray(items) ? items : [];
+          cursor = 0;
+          elements.pairList.innerHTML = "";
+
+          if (!batch.length) {
+            renderMessage("No more pairs to label.");
+            elements.submitLabels.disabled = true;
+            return;
+          }
+
+          const autoThresh = Number(elements.autoThresh.value || "0.5");
+
+          batch.forEach((item, index) => {
+            const key = keyFor(item);
+            const { value, percent, kind } = scoreDisplay(item);
+
+            const card = document.createElement("div");
+            card.className = "pair";
+            card.dataset.key = key;
+            card.dataset.index = String(index);
+
+            const top = document.createElement("div");
+            top.className = "pair-top";
+
+            const names = document.createElement("div");
+            names.className = "pair-names";
+
+            const left = document.createElement("div");
+            const leftLabel = document.createElement("div");
+            leftLabel.className = "pair-label";
+            leftLabel.textContent = "Left";
+            const leftValue = document.createElement("div");
+            leftValue.className = "pair-value";
+            leftValue.textContent = item.left ?? "";
+            left.append(leftLabel, leftValue);
+
+            const right = document.createElement("div");
+            const rightLabel = document.createElement("div");
+            rightLabel.className = "pair-label";
+            rightLabel.textContent = "Right";
+            const rightValue = document.createElement("div");
+            rightValue.className = "pair-value";
+            rightValue.textContent = item.right ?? "";
+            right.append(rightLabel, rightValue);
+
+            names.append(left, right);
+
+            const score = document.createElement("div");
+            score.className = "pair-score";
+            const pill = document.createElement("span");
+            pill.className = "pill";
+            pill.textContent = kind;
+            const scoreValue = document.createElement("span");
+            scoreValue.className = "score";
+            scoreValue.textContent = percent;
+            score.append(pill, scoreValue);
+
+            top.append(names, score);
+
+            const actions = document.createElement("div");
+            actions.className = "pair-actions";
+
+            const makeChoice = (label, v) => {
+              const wrapper = document.createElement("label");
+              wrapper.className = "choice";
+              const input = document.createElement("input");
+              input.type = "radio";
+              input.name = `lbl_${key}`;
+              input.value = String(v);
+              input.addEventListener("change", refreshChoices);
+              const text = document.createElement("span");
+              text.textContent = label;
+              wrapper.append(input, text);
+              return { wrapper, input };
+            };
+
+            const match = makeChoice("match", 1);
+            const noMatch = makeChoice("no-match", 0);
+            actions.append(match.wrapper, noMatch.wrapper);
+
+            card.append(top, actions);
+            card.addEventListener("click", () => selectCursor(index));
+
+            if (item.is_probability && Number.isFinite(value)) {
+              if (value >= autoThresh) {
+                match.input.checked = true;
+              } else {
+                noMatch.input.checked = true;
+              }
+            }
+
+            elements.pairList.appendChild(card);
+          });
+
+          refreshChoices();
+          selectCursor(0);
+        }
+
+        async function fetchJson(url, options) {
+          let res;
+          try {
+            res = await fetch(url, options);
+          } catch {
+            throw new Error(`Cannot reach backend at ${API_BASE}.`);
+          }
+          const text = await res.text();
+          let data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch {
+            // ignore
+          }
+          if (!res.ok) {
+            const message = data?.error || text || `Request failed (${res.status})`;
+            const err = new Error(message);
+            err.status = res.status;
+            err.body = text;
+            throw err;
+          }
+          return data;
+        }
+
+        async function pollReady(jobId) {
+          elements.uploadStatus.textContent = "Processing…";
+          for (let attempts = 0; attempts < 90; attempts++) {
+            const data = await fetchJson(api(`/api/job/${encodeURIComponent(jobId)}`));
+            if (data?.status === "ready") return;
+            if (data?.status === "error") throw new Error(data.error || "Job failed");
+            await new Promise((r) => setTimeout(r, 1000));
+          }
+          throw new Error("Timed out waiting for the engine to be ready.");
+        }
+
+        async function loadBatch() {
+          const jobId = elements.jobId.value.trim();
+          if (!jobId) throw new Error("Upload files first.");
+
+          const batchSize = Math.max(1, Math.min(100, Number(elements.batchSize.value || "10")));
+          const data = await fetchJson(
+            api(`/api/job/${encodeURIComponent(jobId)}/next?batch=${batchSize}`),
+          );
+          renderBatch(data?.batch || []);
+          if (Number.isFinite(data?.remaining)) {
+            elements.labelStatus.textContent = `Remaining pool: ${data.remaining}`;
+          }
+        }
+
+        async function submitLabels() {
+          const jobId = elements.jobId.value.trim();
+          if (!jobId) throw new Error("Upload files first.");
+
+          const inputs = elements.pairList.querySelectorAll('input[type="radio"]:checked');
+          const labels = [];
+          inputs.forEach((input) => {
+            const name = input.name || "";
+            if (!name.startsWith("lbl_")) return;
+            const key = name.slice(4);
+            const [i, j] = key.split(":").map((n) => Number.parseInt(n, 10));
+            if (!Number.isFinite(i) || !Number.isFinite(j)) return;
+            labels.push({ i, j, label: Number.parseInt(input.value, 10) });
+          });
+          if (!labels.length) throw new Error("No labels selected.");
+
+          const data = await fetchJson(api(`/api/job/${encodeURIComponent(jobId)}/label`), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ labels }),
+          });
+
+          const count = data?.labeled_count ?? "?";
+          const positives = data?.positives ?? "?";
+          const negatives = data?.negatives ?? "?";
+          elements.labelStatus.textContent = `Labeled: ${count} (${positives} match, ${negatives} no-match)`;
+          if (elements.labelsUsed) {
+            elements.labelsUsed.textContent = String(count);
+          }
+          elements.runFull.disabled = false;
+          await loadBatch();
+        }
+
+        async function runFull() {
+          const jobId = elements.jobId.value.trim();
+          if (!jobId) throw new Error("Upload files first.");
+          elements.runFull.disabled = true;
+          resetDownloads();
+          elements.runStatus.textContent = "Running full scoring…";
+          try {
+            const data = await fetchJson(api(`/api/job/${encodeURIComponent(jobId)}/run_full`), {
+              method: "POST",
+            });
+            updateDownloads(data?.artifacts || []);
+            elements.runStatus.textContent = "Done. Downloads ready.";
+          } finally {
+            elements.runFull.disabled = false;
+          }
+        }
+
+        elements.apiBaseApply.addEventListener("click", async () => {
+          setApiBase(elements.apiBase.value);
+          await checkBackend();
+        });
+        elements.apiBaseReset.addEventListener("click", () => {
+          if (window.localStorage) localStorage.removeItem("fuzzy_api_base");
+          initializeApiBase();
+        });
+
+        elements.upload.addEventListener("click", async () => {
+          const left = elements.leftFile.files?.[0];
+          const right = elements.rightFile.files?.[0];
+          if (!left) {
+            alert("Select a left CSV first.");
+            return;
+          }
+
+          elements.upload.disabled = true;
+          elements.loadBatch.disabled = true;
+          elements.submitLabels.disabled = true;
+          elements.runFull.disabled = true;
+          resetDownloads();
+          elements.labelStatus.textContent = "";
+          elements.runStatus.textContent = "";
+          renderMessage("Uploading…");
+
+          try {
+            const fd = new FormData();
+            fd.append("left", left);
+            if (right) fd.append("right", right);
+
+            const data = await fetchJson(api("/api/upload"), { method: "POST", body: fd });
+            const jobId = data?.job_id;
+            if (!jobId) throw new Error("Upload succeeded but job_id was missing.");
+            elements.jobId.value = jobId;
+            elements.uploadStatus.textContent = `Job: ${jobId}`;
+            if (elements.labelsUsed) elements.labelsUsed.textContent = "0";
+            if (elements.precisionRecall) elements.precisionRecall.textContent = "-- / --";
+            if (elements.uncertaintyLeft) elements.uncertaintyLeft.textContent = "--";
+            if (elements.labelSavings) elements.labelSavings.textContent = "--";
+
+            await pollReady(jobId);
+            elements.uploadStatus.textContent = "Ready.";
+            elements.loadBatch.disabled = false;
+            elements.runFull.disabled = false;
+            await loadBatch();
+          } catch (err) {
+            console.error(err);
+            elements.uploadStatus.textContent = `Error: ${err.message}`;
+            renderMessage("Upload failed.");
+          } finally {
+            elements.upload.disabled = false;
+          }
+        });
+
+        elements.loadBatch.addEventListener("click", async () => {
+          elements.loadBatch.disabled = true;
+          try {
+            await loadBatch();
+          } catch (err) {
+            console.error(err);
+            alert(err.message);
+          } finally {
+            elements.loadBatch.disabled = false;
+          }
+        });
+
+        elements.submitLabels.addEventListener("click", async () => {
+          elements.submitLabels.disabled = true;
+          try {
+            await submitLabels();
+          } catch (err) {
+            console.error(err);
+            alert(err.message);
+          } finally {
+            refreshChoices();
+          }
+        });
+
+        elements.runFull.addEventListener("click", async () => {
+          try {
+            await runFull();
+          } catch (err) {
+            console.error(err);
+            alert(err.message);
+            elements.runFull.disabled = false;
+          }
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (!batch.length) return;
+          const target = e.target;
+          if (target instanceof HTMLElement && ["INPUT", "TEXTAREA"].includes(target.tagName)) return;
+
+          const activeKey = batch[cursor] ? keyFor(batch[cursor]) : null;
+
+          if (e.key === "ArrowDown" || e.key.toLowerCase() === "j") {
+            selectCursor(cursor + 1);
+            e.preventDefault();
+          } else if (e.key === "ArrowUp" || e.key.toLowerCase() === "k") {
+            selectCursor(cursor - 1);
+            e.preventDefault();
+          } else if (e.key.toLowerCase() === "d") {
+            if (activeKey) setChoice(activeKey, 1);
+            selectCursor(cursor + 1);
+            e.preventDefault();
+          } else if (e.key.toLowerCase() === "a") {
+            if (activeKey) setChoice(activeKey, 0);
+            selectCursor(cursor + 1);
+            e.preventDefault();
+          } else if (e.key.toLowerCase() === "s") {
+            if (activeKey) clearChoice(activeKey);
+            e.preventDefault();
+          } else if (e.key === "Enter") {
+            if (!elements.submitLabels.disabled) elements.submitLabels.click();
+            e.preventDefault();
+          } else if (e.key.toLowerCase() === "n" && e.shiftKey) {
+            if (!elements.loadBatch.disabled) elements.loadBatch.click();
+            e.preventDefault();
+          }
+        });
+
+        async function initializeApiBase() {
+          const stored = window.localStorage ? localStorage.getItem("fuzzy_api_base") : null;
+          if (stored) {
+            setApiBase(stored, { persist: false });
+            await checkBackend();
+            return;
+          }
+
+          const origin = originApiBase();
+          if (origin) {
+            setApiBase(origin, { persist: false });
+            const ok = await checkBackend();
+            if (ok) return;
+          }
+
+          setApiBase("http://localhost:8080", { persist: false });
+          await checkBackend();
+        }
+
+        renderMessage("Upload CSVs to start.");
+        initializeApiBase();
+      })();
+    </script>
+  </body>
+</html>
