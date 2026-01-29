@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Optimal Experiment Design Demos</title>
+    <meta
+      name="description"
+      content="Adaptive experiment design and active learning demos for faster decisions with fewer samples."
+    />
+    <meta name="theme-color" content="#8b3a3a" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero" id="top">
+        <div class="nav">
+          <div class="nav-brand">Optimal experiment design</div>
+          <nav class="nav-links" aria-label="Primary">
+            <a href="https://josephsmiller.com/">Home</a>
+            <a href="#demos">Demos</a>
+            <a href="#how">How it works</a>
+            <a href="#interactive">Interactive</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+          </nav>
+        </div>
+
+        <div class="hero-content">
+          <div class="eyebrow">Optimal experiment design</div>
+          <h1>Demonstrations of sequential design.</h1>
+          <p class="lede">
+            Adaptive data collection that picks the next most-informative sample, so you can learn with
+            fewer measurements.
+          </p>
+          <p class="muted">
+            Some demos are fully static (precomputed plots). Others are interactive and require a backend
+            service; each demo indicates its status.
+          </p>
+          <div class="actions">
+            <a class="button" href="#demos">View demos</a>
+            <a class="button secondary" href="mailto:joe@josephsmiller.com">Email</a>
+          </div>
+          <p class="muted small" style="margin-top: 0.85rem">
+            Featured demo:
+            <a class="text-link" href="ab-oed.html">Adaptive A/B testing with customer features</a>
+          </p>
+        </div>
+      </header>
+
+      <section class="section" id="what-is">
+        <h2>What this is</h2>
+        <p>
+          Optimal experiment design is a decision system: at each step, pick the next sample that maximally
+          reduces uncertainty about the outcome you care about, subject to budget and constraints.
+        </p>
+        <p class="muted">
+          Example: in deduplication, instead of labeling random record pairs, we label the pairs that most
+          clarify cluster membership.
+        </p>
+        <p class="muted small">
+          One adaptive engine that plugs into surveys, A/B tests, pricing experiments, and ML labeling.
+        </p>
+      </section>
+
+      <section class="section" id="audience">
+        <div class="section-header">
+          <h2>Where it works</h2>
+          <p class="muted small">
+            Practical sequential design that runs fast, even with large candidate spaces.
+          </p>
+        </div>
+        <p class="muted small">
+          Best fit: when each measurement has real cost (time, money, risk) and you can choose what to
+          measure next.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <div class="card-title">Record linkage and deduplication</div>
+            <p class="muted">Label fewer pairs and recover clusters faster.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">A/B tests and bandits</div>
+            <p class="muted">Learn heterogeneous effects across customer features and choose the next best test instead of sampling uniformly.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Pricing and demand estimation</div>
+            <p class="muted">Choose price probes that learn revenue curves quickly.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Surveys and measurement design</div>
+            <p class="muted">Ask fewer questions while preserving inference quality.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Expensive measurements</div>
+            <p class="muted">Pick the next lab run, simulation, or review that moves the posterior most.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="services">
+        <div class="section-header">
+          <h2>Work</h2>
+          <p class="muted small">If you want this on your data, I can help with a prototype or integration.</p>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="card-title">Prototype / pilot</div>
+            <p class="muted">
+              Define the decision, implement an acquisition rule and baseline comparison, and ship a working
+              selection loop you can test on real data.
+            </p>
+            <p class="muted small">
+              Deliverable: selector + baseline comparison + stopping rule.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">Productionization</div>
+            <p class="muted">
+              Turn the prototype into a service with monitoring, stopping rules, and pipeline integrations.
+            </p>
+            <p class="muted small">
+              Deliverable: API endpoints + dashboards + auditability.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">Training + playbook</div>
+            <p class="muted">
+              Leave your team with a reusable template: objectives, priors, constraints, and metrics tailored
+              to your domain.
+            </p>
+            <p class="muted small">Deliverable: internal doc + templates your team can reuse.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how">
+        <h2>How it works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">01</div>
+            <div class="step-title">Define the decision and budget</div>
+            <p class="muted">
+              Clarify the outcome, cost, and what it means to stop, so everyone agrees what "done" means.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">02</div>
+            <div class="step-title">Model uncertainty</div>
+            <p class="muted">
+              Bayesian or approximate Bayesian models, so uncertainty is explicit, not guessed.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">03</div>
+            <div class="step-title">Choose the next data</div>
+            <p class="muted">
+              Maximize expected information or utility under constraints, so each new measurement is worth the cost.
+            </p>
+          </div>
+          <div class="step">
+            <div class="step-number">04</div>
+            <div class="step-title">Stop early with confidence</div>
+            <p class="muted">
+              Act when uncertainty is low enough to make the call, so you stop spending once the decision
+              is clear.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="demos">
+        <div class="section-header">
+          <h2>Demos</h2>
+          <p class="muted small">
+            Demonstrations of the sequential design loop: model uncertainty, select the next measurement, update, and stop.
+          </p>
+        </div>
+        <div class="grid">
+          <a class="card" href="data-linkage.html">
+            <div class="tag tag--local">Local</div>
+            <div class="card-title">Record linkage + deduplication</div>
+            <p class="muted">
+              Upload data, label a small number of pairs, and see the system select the next pair that most
+              reduces clustering uncertainty. Requires running a local backend (instructions on the page).
+            </p>
+          </a>
+          <a class="card" href="ab-oed.html">
+            <div class="tag tag--live">Live</div>
+            <div class="card-title">Adaptive A/B testing with customer features</div>
+            <p class="muted">
+              Browse a 41-step run of expected information gain, decision uncertainty, and decision regions.
+              Shows the recommended next customer (x*) and which ad to show there, plus a non-adaptive baseline.
+            </p>
+          </a>
+          <a class="card" href="pricing.html">
+            <div class="tag tag--upcoming">Upcoming</div>
+            <div class="card-title">Pricing and demand curve probing</div>
+            <p class="muted">
+              Choose the next price test to learn the revenue curve fastest when each change is costly.
+            </p>
+          </a>
+          <a class="card" href="survey.html">
+            <div class="tag tag--upcoming">Upcoming</div>
+            <div class="card-title">Adaptive survey question selection</div>
+            <p class="muted">
+              Ask fewer questions per respondent while preserving inference quality.
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section" id="interactive">
+        <div class="section-header">
+          <h2>Interactive</h2>
+          <p class="muted small">How interactive demos work on a static site.</p>
+        </div>
+        <p class="muted">
+          This site is static. Interactive demos either (1) run entirely in the browser or (2) call a separate API service.
+        </p>
+        <p class="muted small" style="margin-top: 0.75rem">
+          Example: the record linkage demo uses a Julia API (see <code>FuzzyMatchingService/server.jl</code>).
+          Run it locally, or deploy it as a separate service and configure the frontend to point to it.
+        </p>
+        <details class="details">
+          <summary>Run the local backend</summary>
+          <p class="muted small">
+            From <code>FuzzyMatchingService</code>: <code>julia --project=. server.jl</code> then open
+            <code>http://localhost:8080</code>.
+          </p>
+        </details>
+      </section>
+
+      <section class="section" id="about">
+        <div class="section-header">
+          <h2>Why this approach</h2>
+          <p class="muted small">Better experiments when data collection is expensive.</p>
+        </div>
+        <p>
+          Most teams collect data uniformly because it is simple. The problem is that not all data points are
+          equally valuable. Adaptive experiment and labeling systems quantify uncertainty and pick the next
+          most informative measurement so you learn faster and stop earlier.
+        </p>
+        <p class="muted">
+          Fewer labels to reach the same accuracy. Faster decisions under budget. Clear uncertainty about
+          whether more data is worth it.
+        </p>
+        <p class="muted small">
+          Privacy note: when you run the demos locally, your files stay on your machine.
+        </p>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="section-header">
+          <h2>FAQ</h2>
+          <p class="muted small">Quick answers to common pilot questions.</p>
+        </div>
+        <details class="details">
+          <summary>Do we have to be fully Bayesian?</summary>
+          <p class="muted small">No. We can use approximate posteriors or uncertainty proxies when needed.</p>
+        </details>
+        <details class="details">
+          <summary>Does this work with my existing model?</summary>
+          <p class="muted small">
+            Usually yes: we wrap your model with an acquisition rule and stopping criteria.
+          </p>
+        </details>
+        <details class="details">
+          <summary>What data do you need for a pilot?</summary>
+          <p class="muted small">
+            A candidate pool to sample from, a labeling/measurement mechanism, and a decision metric.
+          </p>
+        </details>
+        <details class="details">
+          <summary>Can we run locally and keep data private?</summary>
+          <p class="muted small">Yes. Demos run locally; production deployments can be private.</p>
+        </details>
+      </section>
+
+      <section class="section panel cta-panel" id="contact">
+        <h2>Contact</h2>
+        <p class="lede">Questions, collaborations, or pilots — email me.</p>
+        <div class="actions">
+          <a class="button" href="mailto:joe@josephsmiller.com">Email</a>
+          <a class="button secondary" href="#demos">View demos</a>
+        </div>
+        <p class="muted small">If you prefer a short call, include a few times that work for you.</p>
+      </section>
+
+    </main>
+  </body>
+</html>

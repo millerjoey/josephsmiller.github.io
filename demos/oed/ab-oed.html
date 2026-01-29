@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Adaptive A/B Testing with Customer Features</title>
+    <meta
+      name="description"
+      content="Precomputed decision regions, uncertainty surfaces, and expected information gain surfaces for adaptive A/B testing with customer features."
+    />
+    <meta name="theme-color" content="#8b3a3a" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
+  </head>
+  <body>
+    <main class="shell">
+      <div class="topbar">
+        <a class="text-link" href="index.html">&larr; Demos</a>
+        <div class="topbar-links">
+          <a class="text-link" href="https://josephsmiller.com/">Home</a>
+          <a class="text-link" href="mailto:joe@josephsmiller.com">Contact</a>
+        </div>
+      </div>
+
+      <header class="hero">
+        <div class="eyebrow">Adaptive A/B testing</div>
+        <h1>Adaptive A/B testing with customer features</h1>
+        <p class="lede">
+          Even with a simple logistic model, the best next person to show an ad to is not obvious. This demo
+          pages through precomputed frames to show how the recommendation evolves as you learn.
+        </p>
+      </header>
+
+      <section class="section">
+        <h2>What you are seeing</h2>
+        <ul class="list">
+          <li>We model conversion probability as a function of customer features (x1, x2) and which ad is shown.</li>
+          <li>
+            Three views of the same state: where to test next (expected information gain), where the decision is most
+            fragile (decision uncertainty), and what we would do right now (best choice now).
+          </li>
+          <li>Points show tested customers; the star is the recommended next test.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>Why this matters</h2>
+        <ul class="list">
+          <li>Standard A/B assumes one average effect. Real ads have different effects for different people.</li>
+          <li>Uniform sampling wastes budget on profiles that teach you little.</li>
+          <li>Adaptive design concentrates tests where the model is uncertain and where the decision is sensitive.</li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <details class="details">
+          <summary>Model details (for technical viewers)</summary>
+          <p class="muted small" style="margin-top: 0.75rem">
+            We use a logistic interaction model:
+            \(\eta(x,z) = x^\top\beta + z\,x^\top\gamma\),
+            \(y \sim \mathrm{Bernoulli}(\sigma(\eta(x,z)))\).
+            Here \(x\) denotes the feature vector \(\phi(x_1,x_2)=[1,\,x_1,\,x_2,\,x_1x_2]\).
+            The heterogeneous A/B difference is \(\Delta(x)=\eta(x,1)-\eta(x,0)=x^\top\gamma\).
+          </p>
+          <p class="muted small" style="margin-top: 0.75rem">
+            In this demo, the <strong>expected information gain</strong> view is concerned with learning the interaction
+            weights \(\gamma\) (i.e., the feature-dependent A/B difference), not the baseline \(\beta\). The
+            <strong>decision uncertainty</strong> view focuses on uncertainty in the sign of \(\Delta(x)\)
+            ("is A better than B here?") rather than uncertainty in the absolute conversion rate.
+          </p>
+          <p class="muted small" style="margin-top: 0.75rem">
+            Simulation setup for these precomputed frames: customer features \((x_1, x_2)\in[-3,7]^2\). We start with
+            \(N_0=10\) customers sampled from the same <em>proposal distribution</em> used below. Each step draws a
+            candidate pool of 200 customers from this proposal distribution, where each coordinate is sampled
+            independently as \(\mathcal{N}(\mu=3,\sigma=1)\) with rejection outside \([-3,7]\); after 10,000 rejected draws
+            the implementation falls back to clamping a fresh normal draw into \([-3,7]\).
+            The OED policy chooses \(x^*\) from this candidate pool to maximize expected information gain. Ad assignment at
+            \(x^*\) is randomized with \(P(z=1)=0.5\); outcomes are simulated from fixed “true” parameters.
+          </p>
+        </details>
+      </section>
+
+      <section class="section panel" id="browse">
+        <h2>Browse the sequence</h2>
+        <p class="muted small">
+          Heatmaps are precomputed. Use the slider to move through the 41-frame run, and toggle between views.
+        </p>
+
+        <div class="row" style="margin-top: 1rem">
+          <button id="prev" class="button secondary" type="button">Previous</button>
+          <button id="next" class="button" type="button">Next</button>
+          <label class="field" style="min-width: 260px">
+            <span>Step</span>
+            <input id="step" type="range" min="0" max="0" step="1" value="0" />
+          </label>
+          <div class="muted small" id="stepLabel" style="min-width: 140px">Step 0 of 0</div>
+        </div>
+
+        <p class="muted small" style="margin-top: 0.6rem">
+          Shortcuts: &larr;/&rarr; step, 1/2/3 switch view.
+        </p>
+
+        <p class="muted small" style="margin-top: 0.85rem">
+          Three views of the same state: where to test next, where the decision is fragile, and what we'd do now.
+        </p>
+        <div class="segmented" role="group" aria-label="View toggle" style="margin-top: 0.75rem">
+          <button
+            id="viewInfoGain"
+            type="button"
+            class="view-toggle"
+            data-view="info_gain"
+            aria-pressed="true"
+            title="Where to test next: expected information gain across the feature space."
+          >
+            Where to test next
+          </button>
+          <button
+            id="viewUncertainty"
+            type="button"
+            class="view-toggle"
+            data-view="uncertainty"
+            aria-pressed="false"
+            title="Decision uncertainty: where the A vs B choice is most fragile."
+          >
+            Decision uncertainty
+          </button>
+          <button
+            id="viewDecision"
+            type="button"
+            class="view-toggle"
+            data-view="decision"
+            aria-pressed="false"
+            title="Best choice now: predicted winner (A vs B) across the feature space."
+          >
+            Best choice now
+          </button>
+        </div>
+        <p class="muted small" id="viewBlurb" style="margin-top: 0.75rem">
+          Where to test next: expected information gain &middot; Decision uncertainty: where A vs B is fragile &middot; Best
+          choice now: the predicted winner
+        </p>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value" id="labelsUsed">--</div>
+            <div class="metric-label">Labels used (cumulative)</div>
+            <p class="muted small" id="seedNote">Frames show labels used = 10..50 (41 frames).</p>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="nextCustomer">--</div>
+            <div class="metric-label">Next customer (x*)</div>
+            <p class="muted small" id="nextCustomerNote">From the precomputed OED policy.</p>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="nextAd">--</div>
+            <div class="metric-label">Ad to show at x*</div>
+            <p class="muted small" id="nextAdNote">From the precomputed OED policy.</p>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" style="margin-top: 1.25rem">
+          <img id="frame" alt="Heatmap frame" decoding="async" fetchpriority="high" loading="eager" width="1600" height="1145" />
+          <div class="legend" id="legend" aria-label="Plot legend"></div>
+        </div>
+
+        <p class="muted small" id="caption" style="margin-top: 0.9rem"></p>
+      </section>
+
+      <section class="section panel" id="learning">
+        <h2>Random sampling (no OED)</h2>
+        <p class="muted small">
+          If you collect customers from the same fixed proposal distribution but without adaptive design (no OED), you
+          still end up with clear decision regions, but it usually takes more samples to sharpen.
+        </p>
+
+        <div class="row" style="margin-top: 1rem">
+          <label class="field compact">
+            <span>Show snapshot (N samples)</span>
+            <input id="uniformN" type="range" min="50" max="100" step="10" value="50" />
+          </label>
+          <div class="muted small" id="uniformLabel" style="min-width: 160px">N = 50</div>
+        </div>
+
+        <p class="muted small" style="margin-top: 0.6rem">
+          Snapshots are precomputed at N &isin; {50, 60, 70, 80, 90, 100}.
+        </p>
+
+        <div class="canvas-wrap" style="margin-top: 1.15rem">
+          <img id="uniformFrame" alt="Decision regions under random sampling" decoding="async" loading="lazy" width="1600" height="1200" />
+          <div class="legend" id="uniformLegend" aria-label="Random sampling legend"></div>
+        </div>
+        <p class="muted small" id="uniformHeadline" style="margin-top: 0.9rem"></p>
+        <p class="muted small" id="learningFootnote" style="margin-top: 0.4rem">
+          *Measured against uniform/random sampling under the same budget, using agreed stopping criteria.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Key takeaway</h2>
+        <p>
+          Even in a simplified model, the optimal next test moves around. You cannot reliably pick it by intuition.
+        </p>
+      </section>
+
+      <section class="section panel cta-panel">
+        <h2>Contact</h2>
+        <p class="lede">
+          If you'd like to apply sequential design to your experiments, pricing tests, surveys, or labeling pipelines,
+          email me.
+        </p>
+        <div class="actions">
+          <a class="button" href="mailto:joe@josephsmiller.com">Email</a>
+          <a class="button secondary" href="index.html#demos">Back to demos</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+    <script>
+      (() => {
+        const els = {
+          prev: document.getElementById("prev"),
+          next: document.getElementById("next"),
+          step: document.getElementById("step"),
+          stepLabel: document.getElementById("stepLabel"),
+          viewButtons: Array.from(document.querySelectorAll(".view-toggle")),
+          viewBlurb: document.getElementById("viewBlurb"),
+          frame: document.getElementById("frame"),
+          caption: document.getElementById("caption"),
+          labelsUsed: document.getElementById("labelsUsed"),
+          nextCustomer: document.getElementById("nextCustomer"),
+          nextCustomerNote: document.getElementById("nextCustomerNote"),
+          nextAd: document.getElementById("nextAd"),
+          nextAdNote: document.getElementById("nextAdNote"),
+          uniformN: document.getElementById("uniformN"),
+          uniformLabel: document.getElementById("uniformLabel"),
+          uniformFrame: document.getElementById("uniformFrame"),
+          uniformHeadline: document.getElementById("uniformHeadline"),
+          legend: document.getElementById("legend"),
+          uniformLegend: document.getElementById("uniformLegend"),
+        };
+
+        const VIEW_ORDER = ["info_gain", "uncertainty", "decision"];
+
+        const VIEW_META = {
+          info_gain: {
+            label: "Where to test next",
+            alt: "Where to test next: expected information gain",
+            blurb:
+              "Expected information gain for learning the interaction weights \\(\\gamma\\) (feature-dependent A/B differences).",
+            img: { width: 1600, height: 1145 },
+          },
+          uncertainty: {
+            label: "Decision uncertainty",
+            alt: "Decision uncertainty: where the A vs B choice is fragile",
+            blurb: "Uncertainty in the sign of \\(\\Delta(x)=x^\\top\\gamma\\) (which ad is better here).",
+            img: { width: 1600, height: 1248 },
+          },
+          decision: {
+            label: "Best choice now",
+            alt: "Best choice now: predicted winner (A vs B)",
+            blurb: "Predicted winner (A vs B) across the feature space, given what we've learned so far.",
+            img: { width: 1600, height: 1200 },
+          },
+        };
+
+        const OED_START = 10;
+        const OED_END = 50; // inclusive; 41 frames
+        const UNIFORM_SNAPSHOTS = [50, 60, 70, 80, 90, 100];
+
+        function pad3(n) {
+          return String(n).padStart(3, "0");
+        }
+
+        function oedImage(viewKey, labelCount) {
+          const suffix = pad3(labelCount);
+          if (viewKey === "decision") return `plots/decision_map/decision_map_step_${suffix}.png`;
+          if (viewKey === "uncertainty") return `plots/uncertainty_map/uncertainty_map_step_${suffix}.png`;
+          if (viewKey === "info_gain") return `plots/expected_info_gain/expected_info_gain_step_${suffix}.png`;
+          return "";
+        }
+
+        function uniformDecisionImage(n) {
+          return `plots/decision_map/decision_map_uniform_step_${pad3(n)}.png`;
+        }
+
+        function buildFrames() {
+          return Array.from({ length: OED_END - OED_START + 1 }, (_, i) => {
+            const labels_used = OED_START + i;
+            return {
+              step: i,
+              labels_used,
+              views: {
+                decision: {
+                  image: oedImage("decision", labels_used),
+                  caption: `Decision regions (OED) after ${labels_used} labels.`,
+                },
+                uncertainty: {
+                  image: oedImage("uncertainty", labels_used),
+                  caption: `Decision uncertainty surface (OED) after ${labels_used} labels.`,
+                },
+                info_gain: {
+                  image: oedImage("info_gain", labels_used),
+                  caption: `Expected information gain surface (OED) after ${labels_used} labels.`,
+                },
+              },
+            };
+          });
+        }
+
+        let frames = buildFrames();
+        let idx = 0;
+        let view = "info_gain";
+
+        let metaByLabel = {};
+        let nextAdByLabel = {};
+
+        async function loadMetaMap() {
+          try {
+            const res = await fetch("plots/ab_oed_meta.json", { cache: "force-cache" });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && typeof data === "object") {
+              metaByLabel = data;
+              // Refresh metric after load.
+              render();
+            }
+          } catch {
+            // Optional.
+          }
+        }
+
+        async function loadNextAdMapLegacy() {
+          // Back-compat if someone only has the older file.
+          try {
+            const res = await fetch("plots/ab_oed_next_ad.json", { cache: "force-cache" });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && typeof data === "object") {
+              nextAdByLabel = data;
+              render();
+            }
+          } catch {
+            // Optional.
+          }
+        }
+
+        const imageCache = new Map();
+        let lastMainSrc = "";
+
+        function setImageWithFallback(imgEl, src) {
+          if (!imgEl) return;
+          if (!src) {
+            imgEl.removeAttribute("src");
+            return;
+          }
+
+          // If the PNG doesn't exist (or fails to decode), fall back to the SVG with the same basename.
+          if (src.endsWith(".png")) {
+            imgEl.dataset.fallbackSrc = src.replace(/\.png$/, ".svg");
+          } else {
+            delete imgEl.dataset.fallbackSrc;
+          }
+
+          imgEl.src = src;
+        }
+
+        function ensureFallbackHandler(imgEl) {
+          if (!imgEl || imgEl.dataset.fallbackHandler === "1") return;
+          imgEl.dataset.fallbackHandler = "1";
+          imgEl.addEventListener("error", () => {
+            const fb = imgEl.dataset.fallbackSrc;
+            if (fb && imgEl.src && imgEl.src.endsWith(".png") && fb !== imgEl.src) {
+              delete imgEl.dataset.fallbackSrc;
+              imgEl.src = fb;
+            }
+          });
+        }
+
+        function renderMath(root) {
+          try {
+            if (root && typeof window.renderMathInElement === "function") {
+              window.renderMathInElement(root, {
+                delimiters: [
+                  { left: "$$", right: "$$", display: true },
+                  { left: "\\(", right: "\\)", display: false },
+                  { left: "\\[", right: "\\]", display: true },
+                ],
+                throwOnError: false,
+              });
+            }
+          } catch {
+            // Optional.
+          }
+        }
+
+        function preload(src) {
+          if (!src || typeof src !== "string") return;
+          if (imageCache.has(src)) return;
+          const img = new Image();
+          img.decoding = "async";
+          img.addEventListener(
+            "load",
+            () => {
+              if (typeof img.decode === "function") {
+                img.decode().catch(() => {});
+              }
+            },
+            { once: true }
+          );
+          img.src = src;
+          imageCache.set(src, img);
+        }
+
+        function preloadAround(index) {
+          if (!Array.isArray(frames) || !frames.length) return;
+          const i = Math.max(0, Math.min(frames.length - 1, index));
+          for (const viewKey of VIEW_ORDER) {
+            const here = getViewObj(frames[i], viewKey);
+            preload(here.image);
+          }
+        }
+
+        function warmCacheAll() {
+          if (!Array.isArray(frames) || !frames.length) return;
+
+          // Build a deduped list of all OED plot images.
+          const all = [];
+          for (let i = 0; i < frames.length; i++) {
+            for (const viewKey of VIEW_ORDER) {
+              const viewObj = getViewObj(frames[i], viewKey);
+              if (viewObj && viewObj.image) all.push(viewObj.image);
+            }
+          }
+
+          // Also warm the uniform/random decision snapshots.
+          for (const n of UNIFORM_SNAPSHOTS) {
+            all.push(uniformDecisionImage(n));
+          }
+
+          const uniq = Array.from(new Set(all));
+          let cursor = 0;
+
+          function pump(deadline) {
+            const start = performance.now();
+            while (cursor < uniq.length) {
+              // Keep the UI responsive.
+              if (deadline && typeof deadline.timeRemaining === "function") {
+                if (deadline.timeRemaining() < 10) break;
+              } else if (performance.now() - start > 12) {
+                break;
+              }
+
+              preload(uniq[cursor]);
+              cursor++;
+            }
+
+            if (cursor < uniq.length) {
+              if (typeof window.requestIdleCallback === "function") {
+                window.requestIdleCallback(pump);
+              } else {
+                window.setTimeout(pump, 0);
+              }
+            }
+          }
+
+          if (typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(pump);
+          } else {
+            window.setTimeout(pump, 0);
+          }
+        }
+
+        function getViewObj(frame, key) {
+          if (!frame || typeof frame !== "object") return {};
+          const views = frame.views && typeof frame.views === "object" ? frame.views : null;
+          if (!views) return {};
+
+          const aliases =
+            key === "info_gain" ? ["info_gain", "infoGain", "infogain", "information_gain"] : [key];
+          for (const k of aliases) {
+            if (views[k]) return views[k];
+          }
+          return {};
+        }
+
+        function setView(nextView) {
+          if (!VIEW_META[nextView]) return;
+          view = nextView;
+          for (const btn of els.viewButtons) {
+            btn.setAttribute("aria-pressed", btn.dataset.view === view ? "true" : "false");
+          }
+          if (els.viewBlurb && VIEW_META[view] && VIEW_META[view].blurb) {
+            els.viewBlurb.textContent = VIEW_META[view].blurb;
+            renderMath(els.viewBlurb);
+          }
+          render();
+        }
+
+        function setIndex(next) {
+          idx = Math.max(0, Math.min(frames.length - 1, next));
+          const total = Math.max(frames.length, 1);
+          const f = frames[idx] || {};
+
+          els.step.value = String(idx);
+          if (typeof f.labels_used === "number") {
+            els.stepLabel.textContent = `Frame ${idx + 1} of ${total} (labels: ${f.labels_used})`;
+          } else {
+            els.stepLabel.textContent = `Frame ${idx + 1} of ${total}`;
+          }
+          els.prev.disabled = idx === 0;
+          els.next.disabled = idx === total - 1;
+
+          if (typeof f.labels_used === "number") {
+            els.labelsUsed.textContent = String(f.labels_used);
+          }
+          render();
+        }
+
+        function render() {
+          const f = frames[idx] || {};
+          const viewObj = getViewObj(f, view);
+
+          ensureFallbackHandler(els.frame);
+          const nextSrc = viewObj.image || "";
+          if (nextSrc && nextSrc !== lastMainSrc) {
+            setImageWithFallback(els.frame, nextSrc);
+            lastMainSrc = nextSrc;
+          }
+          els.frame.alt = (VIEW_META[view] && VIEW_META[view].alt) || "Heatmap frame";
+          els.caption.textContent = viewObj.caption || "";
+
+          // Keep width/height aligned with the active view to reduce layout shift.
+          const dims = VIEW_META[view] && VIEW_META[view].img;
+          if (dims && els.frame) {
+            els.frame.setAttribute("width", String(dims.width));
+            els.frame.setAttribute("height", String(dims.height));
+          }
+
+          // External legend (we stripped the in-plot legend from the assets).
+          renderLegend(view, els.legend);
+
+          // Next customer x* and ad at x* (pulled from precomputed plot metadata).
+          const key = typeof f.labels_used === "number" ? String(f.labels_used) : "";
+          const meta = key && metaByLabel && typeof metaByLabel === "object" ? metaByLabel[key] : undefined;
+
+          if (els.nextCustomer) {
+            const x = meta && meta.x_star ? meta.x_star : undefined;
+            if (x && typeof x.x1 === "number" && typeof x.x2 === "number") {
+              els.nextCustomer.textContent = `(${x.x1.toFixed(2)}, ${x.x2.toFixed(2)})`;
+              if (els.nextCustomerNote) els.nextCustomerNote.textContent = "From the precomputed OED policy.";
+            } else {
+              els.nextCustomer.textContent = "--";
+              if (els.nextCustomerNote) els.nextCustomerNote.textContent = "(x* metadata not loaded.)";
+            }
+          }
+
+          if (els.nextAd) {
+            const next = meta && meta.next_ad ? meta.next_ad : (key && nextAdByLabel ? nextAdByLabel[key] : undefined);
+            if (next === "A" || next === "B") {
+              els.nextAd.textContent = `Ad ${next}`;
+              if (els.nextAdNote) els.nextAdNote.textContent = "From the precomputed OED policy.";
+            } else {
+              els.nextAd.textContent = "--";
+              if (els.nextAdNote) els.nextAdNote.textContent = "(Next-ad metadata not loaded.)";
+            }
+          }
+
+          // Preload adjacent frames for ALL views so toggling is instant.
+          preloadAround(idx);
+          preloadAround(idx + 1);
+          preloadAround(idx - 1);
+        }
+
+        function renderUniform(n) {
+          if (!els.uniformFrame) return;
+          ensureFallbackHandler(els.uniformFrame);
+          setImageWithFallback(els.uniformFrame, uniformDecisionImage(n));
+          if (els.uniformLabel) els.uniformLabel.textContent = `N = ${n}`;
+          if (els.uniformHeadline) {
+            els.uniformHeadline.textContent = `Decision regions learned from ${n} random (non-adaptive) samples (no OED).`;
+          }
+
+          renderLegend("decision", els.uniformLegend);
+
+          // Preload neighboring snapshots.
+          const pos = UNIFORM_SNAPSHOTS.indexOf(n);
+          const nextN = UNIFORM_SNAPSHOTS[Math.min(UNIFORM_SNAPSHOTS.length - 1, pos + 1)];
+          const prevN = UNIFORM_SNAPSHOTS[Math.max(0, pos - 1)];
+          if (typeof nextN === "number") {
+            const img = new Image();
+            img.src = uniformDecisionImage(nextN);
+          }
+          if (typeof prevN === "number") {
+            const img = new Image();
+            img.src = uniformDecisionImage(prevN);
+          }
+        }
+
+        function renderLegend(which, container) {
+          if (!container) return;
+
+          // Avoid repeated DOM churn & KaTeX work when the view hasn't changed.
+          if (container.dataset.legendKey === which) return;
+          container.dataset.legendKey = which;
+
+          if (which === "decision") {
+            container.innerHTML = `
+              <div class="legend-title">Legend</div>
+              <div class="legend-items">
+                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
+                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
+                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
+                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
+                <div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>
+                <div class="legend-item muted">Decision regions show the predicted winner; boundaries show where A vs B flips.</div>
+              </div>
+            `;
+            renderMath(container);
+            return;
+          }
+
+          if (which === "uncertainty") {
+            container.innerHTML = `
+              <div class="legend-title">Legend</div>
+              <div class="legend-items">
+                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
+                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
+                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
+                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
+                <div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>
+                <div class="legend-item muted">Uncertainty highlights where the sign of \(\Delta(x)=x^\top\gamma\) is unclear.</div>
+              </div>
+            `;
+            renderMath(container);
+            return;
+          }
+
+          // info_gain
+          container.innerHTML = `
+            <div class="legend-title">Legend</div>
+            <div class="legend-items">
+              <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
+              <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
+              <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
+              <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
+              <div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>
+              <div class="legend-item muted">Info gain targets learning \(\gamma\) (the feature-dependent A/B difference), not \(\beta\).</div>
+            </div>
+          `;
+          renderMath(container);
+        }
+
+        // Legend placement is handled purely by layout (legend sits below the image).
+
+        for (const btn of els.viewButtons) {
+          btn.addEventListener("click", () => setView(btn.dataset.view));
+        }
+
+        els.prev.addEventListener("click", () => setIndex(idx - 1));
+        els.next.addEventListener("click", () => setIndex(idx + 1));
+        els.step.addEventListener("input", () => setIndex(Number(els.step.value || "0")));
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft") setIndex(idx - 1);
+          if (e.key === "ArrowRight") setIndex(idx + 1);
+          if (e.key === "1") setView("info_gain");
+          if (e.key === "2") setView("uncertainty");
+          if (e.key === "3") setView("decision");
+        });
+
+        if (els.uniformN) {
+          els.uniformN.addEventListener("input", () => renderUniform(Number(els.uniformN.value || "50")));
+        }
+
+        // Init.
+        els.step.min = "0";
+        els.step.max = String(Math.max(frames.length - 1, 0));
+        if (els.viewBlurb && VIEW_META[view] && VIEW_META[view].blurb) {
+          els.viewBlurb.textContent = VIEW_META[view].blurb;
+          renderMath(els.viewBlurb);
+        }
+        setIndex(0);
+        renderUniform(Number((els.uniformN && els.uniformN.value) || "50"));
+
+        loadMetaMap();
+        loadNextAdMapLegacy();
+
+        // Warm all images in the background so later toggles are instant.
+        warmCacheAll();
+
+        // Render LaTeX if KaTeX is available (CDN).
+        window.addEventListener("load", () => {
+          renderMath(document.body);
+        });
+      })();
+    </script>
+  </body>
+</html>
