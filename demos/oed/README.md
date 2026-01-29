@@ -26,7 +26,6 @@ Then open `http://localhost:8080`.
 
 `server.jl` serves static files from the first directory it finds (in order):
 
-- `../FuzzyMatchingWeb`
 - `../josephsmiller.github.io/demos/oed`
 - `./public` (inside `FuzzyMatchingService`)
 
