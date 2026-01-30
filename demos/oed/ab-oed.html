@@ -24,7 +24,7 @@
 
       <header class="hero">
         <div class="eyebrow">Adaptive A/B testing</div>
-        <h1>Adaptive A/B testing with customer features</h1>
+        <h1>Adaptive A/B Testing with Customer Features</h1>
         <p class="lede">
           Even with a simple logistic model, the best next person to show an ad to is not obvious. This demo
           pages through precomputed frames to show how the recommendation evolves as you learn.
@@ -584,7 +584,8 @@
             els.uniformHeadline.textContent = `Decision regions learned from ${n} random (non-adaptive) samples (no OED).`;
           }
 
-          renderLegend("decision", els.uniformLegend);
+          // Random sampling snapshots do not include the recommended "next test" marker.
+          renderLegend("decision", els.uniformLegend, { includeStar: false });
 
           // Preload neighboring snapshots.
           const pos = UNIFORM_SNAPSHOTS.indexOf(n);
@@ -600,59 +601,60 @@
           }
         }
 
-        function renderLegend(which, container) {
+        function renderLegend(which, container, { includeStar = true } = {}) {
           if (!container) return;
 
           // Avoid repeated DOM churn & KaTeX work when the view hasn't changed.
-          if (container.dataset.legendKey === which) return;
-          container.dataset.legendKey = which;
+          const key = `${which}:${includeStar ? 1 : 0}`;
+          if (container.dataset.legendKey === key) return;
+          container.dataset.legendKey = key;
 
-          if (which === "decision") {
-            container.innerHTML = `
-              <div class="legend-title">Legend</div>
-              <div class="legend-items">
-                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
-                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
-                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
-                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
-                <div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>
-                <div class="legend-item muted">Decision regions show the predicted winner; boundaries show where A vs B flips.</div>
-              </div>
-            `;
-            renderMath(container);
-            return;
-          }
+	          if (which === "decision") {
+	            container.innerHTML = `
+	              <div class="legend-title">Legend</div>
+	              <div class="legend-items">
+	                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
+	                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
+	                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
+	                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
+	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
+	                <div class="legend-item muted">Decision regions show the predicted winner; boundaries show where A vs B flips.</div>
+	              </div>
+	            `;
+	            renderMath(container);
+	            return;
+	          }
 
-          if (which === "uncertainty") {
-            container.innerHTML = `
-              <div class="legend-title">Legend</div>
-              <div class="legend-items">
-                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
-                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
-                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
-                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
-                <div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>
-                <div class="legend-item muted">Uncertainty highlights where the sign of \(\Delta(x)=x^\top\gamma\) is unclear.</div>
-              </div>
-            `;
-            renderMath(container);
-            return;
-          }
+	          if (which === "uncertainty") {
+	            container.innerHTML = `
+	              <div class="legend-title">Legend</div>
+	              <div class="legend-items">
+	                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
+	                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
+	                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
+	                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
+	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
+	                <div class="legend-item muted">Uncertainty highlights where the sign of \(\Delta(x)=x^\top\gamma\) is unclear.</div>
+	              </div>
+	            `;
+	            renderMath(container);
+	            return;
+	          }
 
           // info_gain
-          container.innerHTML = `
-            <div class="legend-title">Legend</div>
-            <div class="legend-items">
-              <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
-              <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
-              <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
-              <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
-              <div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>
-              <div class="legend-item muted">Info gain targets learning \(\gamma\) (the feature-dependent A/B difference), not \(\beta\).</div>
-            </div>
-          `;
-          renderMath(container);
-        }
+	          container.innerHTML = `
+	            <div class="legend-title">Legend</div>
+	            <div class="legend-items">
+	              <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
+	              <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
+	              <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
+	              <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
+	              ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
+	              <div class="legend-item muted">Info gain targets learning \(\gamma\) (the feature-dependent A/B difference), not \(\beta\).</div>
+	            </div>
+	          `;
+	          renderMath(container);
+	        }
 
         // Legend placement is handled purely by layout (legend sits below the image).
 
