@@ -114,19 +114,20 @@
           <p class="muted small">A high-level view of sequential design.</p>
         </div>
         <p class="muted">
-          Sequential design treats data collection as a control problem: choose the next measurement to
-          maximize expected utility (or information) with respect to a target quantity of interest, while accounting
-          for uncertainty and constraints.
+          Sequential design makes data collection active: choose the next measurement to
+          maximize expected information about a target quantity of interest, accounting
+          for sampling uncertainty and uncertainty in the model.
         </p>
         <p class="muted" style="margin-top: 0.75rem">
-          In practice, this is implemented by maintaining a posterior (or approximation), evaluating candidate measurements
-          via an acquisition objective (e.g., expected information gain about a decision boundary or treatment choice),
+          In practice, this is implemented by an approximation to Bayesian optimal experiment design, evaluating candidate measurements
+          via a data acquisition objective (e.g., expected information gain about a decision boundary or treatment choice),
           and iterating until the remaining decision uncertainty is below a chosen tolerance.
         </p>
         <p class="muted" style="margin-top: 0.75rem">
-          Unlike standard A/B testing, bandits, or generic active learning, the objective here is explicitly tied to the
-          decision-relevant quantity—not short-term reward or uncertainty reduction in parts of the model that do not
-          change the recommended action.
+          Unlike standard A/B testing, bandits, or generic active learning, the objective here can be explicitly tied to the
+          decision-relevant quantity of interest, and is approximately Bayesian. We don't reward uncertainty reduction in parts of the model that do not
+          change the recommended action. We can also fit more complex models--likely ones you already use. We evaluate the
+          acquisition function in about the time it takes to fit the model itself.
         </p>
         <details class="details">
           <summary>Hosted vs local demos</summary>
