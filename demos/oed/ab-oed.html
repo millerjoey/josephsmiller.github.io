@@ -26,9 +26,9 @@
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
         <p class="lede">
-          With customer features, you don’t just need a recommendation — you need the next best experiment. This demo shows
-          how sequential design chooses the next customer \(x^*\) (and ad assignment) to learn the A vs B decision boundary
-          with fewer samples.
+          When experimenting to estimate a treatment effect, particularly if it depends on customer features,
+          the precise experiment you run can make a big difference. This demo shows how sequential design 
+          chooses the next customer \(x^*\) (and ad assignment) to learn the A vs B decision boundary with fewer samples.
         </p>
       </header>
 
@@ -86,7 +86,7 @@
       <section class="section panel" id="browse">
         <h2>Browse the sequence</h2>
         <p class="muted small">
-          Heatmaps are precomputed for a sequential design run (recommended next experiment at each step). Use the slider to
+          Plots are precomputed for a sequential design run (recommended next experiment at each step). Use the slider to
           move through the 41-frame run, and toggle between views.
         </p>
 
@@ -163,7 +163,7 @@
         </div>
 
         <div class="canvas-wrap" style="margin-top: 1.25rem">
-          <img id="frame" alt="Heatmap frame" decoding="async" fetchpriority="high" loading="eager" width="1600" height="1145" />
+          <img id="frame" alt="Plot frame" decoding="async" fetchpriority="high" loading="eager" width="1600" height="1145" />
           <div class="legend" id="legend" aria-label="Plot legend"></div>
         </div>
 
@@ -534,7 +534,7 @@
             setImageWithFallback(els.frame, nextSrc);
             lastMainSrc = nextSrc;
           }
-          els.frame.alt = (VIEW_META[view] && VIEW_META[view].alt) || "Heatmap frame";
+          els.frame.alt = (VIEW_META[view] && VIEW_META[view].alt) || "Plot frame";
           els.caption.textContent = viewObj.caption || "";
 
           // Keep width/height aligned with the active view to reduce layout shift.
@@ -617,12 +617,14 @@
 	            container.innerHTML = `
 	              <div class="legend-title">Legend</div>
 	              <div class="legend-items">
+	                <div class="legend-item"><span class="legend-swatch square" style="background:#fddbc7;border:1.5px solid #b2182b"></span> recommend ad A</div>
+	                <div class="legend-item"><span class="legend-swatch square" style="background:#d1e5f0;border:1.5px solid #2166ac"></span> recommend ad B</div>
 	                <div class="legend-item"><span class="legend-swatch circle filled"></span> sale (y=1)</div>
 	                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
 	                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
 	                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
 	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
-	                <div class="legend-item muted">Decision regions show the predicted winner; boundaries show where A vs B flips.</div>
+	                <div class="legend-item muted">Shaded regions show the predicted winner; boundaries show where A vs B flips.</div>
 	              </div>
 	            `;
 	            renderMath(container);
