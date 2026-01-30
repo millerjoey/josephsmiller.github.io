@@ -6,7 +6,7 @@
     <title>Adaptive A/B Testing with Customer Features</title>
     <meta
       name="description"
-      content="Precomputed decision regions, uncertainty surfaces, and expected information gain surfaces for adaptive A/B testing with customer features."
+      content="Adaptive A/B testing with covariates: precomputed decision regions, decision uncertainty, and expected information gain over time."
     />
     <meta name="theme-color" content="#8b3a3a" />
     <link rel="stylesheet" href="style.css" />
@@ -26,7 +26,7 @@
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
         <p class="lede">
-          Even with a simple logistic model, the most informative next customer to show an ad to is not obvious. This demo
+          With customer features, the most informative next customer to show an ad to is not obvious. This demo
           pages through precomputed frames to show how the recommendation evolves as you learn.
         </p>
       </header>
@@ -142,15 +142,15 @@
           choice now: the predicted winner
         </p>
 
-        <div class="metrics">
-          <div class="metric">
-            <div class="metric-value" id="labelsUsed">--</div>
-            <div class="metric-label">Labels used (cumulative)</div>
-            <p class="muted small" id="seedNote">Frames show labels used = 10..50 (41 frames).</p>
-          </div>
-          <div class="metric">
-            <div class="metric-value" id="nextCustomer">--</div>
-            <div class="metric-label">Next customer (x*)</div>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-value" id="labelsUsed">--</div>
+          <div class="metric-label">Outcomes observed (cumulative)</div>
+          <p class="muted small" id="seedNote">Frames show observed outcomes = 10..50 (41 frames).</p>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="nextCustomer">--</div>
+          <div class="metric-label">Next customer (x*)</div>
             <p class="muted small" id="nextCustomerNote">From the precomputed OED policy.</p>
           </div>
           <div class="metric">
@@ -172,8 +172,8 @@
         <h2>Random sampling (no OED)</h2>
         <p class="muted small">
           If you sample customers from the same fixed proposal distribution but without adaptive design (no OED), the
-          resulting A/B recommendation can remain wrong for much longer. Even at larger sample sizes, random sampling can miss
-          highly informative data and produce a worse recommendation.
+          resulting A/B recommendation can remain wrong for much longer. Random sampling often misses the few profiles that
+          would resolve the decision quickly.
         </p>
 
         <div class="row" style="margin-top: 1rem">
@@ -194,7 +194,7 @@
         </div>
         <p class="muted small" id="uniformHeadline" style="margin-top: 0.9rem"></p>
         <p class="muted small" id="learningFootnote" style="margin-top: 0.4rem">
-          *Measured against uniform/random sampling under the same budget, using agreed stopping criteria.
+          *Compared against random sampling under the same budget and the same evaluation criteria.
         </p>
       </section>
 
@@ -669,6 +669,15 @@
         els.step.addEventListener("input", () => setIndex(Number(els.step.value || "0")));
 
         document.addEventListener("keydown", (e) => {
+          const t = e.target;
+          const tag = t && t.tagName ? t.tagName.toLowerCase() : "";
+          const isFormField =
+            tag === "input" ||
+            tag === "textarea" ||
+            tag === "select" ||
+            (t && t.isContentEditable);
+          if (isFormField) return;
+
           if (e.key === "ArrowLeft") setIndex(idx - 1);
           if (e.key === "ArrowRight") setIndex(idx + 1);
           if (e.key === "1") setView("info_gain");
