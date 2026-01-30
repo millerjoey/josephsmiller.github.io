@@ -26,7 +26,7 @@
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
         <p class="lede">
-          Even with a simple logistic model, the best next person to show an ad to is not obvious. This demo
+          Even with a simple logistic model, the most informative next customer to show an ad to is not obvious. This demo
           pages through precomputed frames to show how the recommendation evolves as you learn.
         </p>
       </header>
@@ -34,11 +34,11 @@
       <section class="section">
         <h2>What you are seeing</h2>
         <ul class="list">
-          <li>We model conversion probability as a function of customer features (x1, x2) and which ad is shown.</li>
           <li>
             Three views of the same state: where to test next (expected information gain), where the decision is most
             fragile (decision uncertainty), and what we would do right now (best choice now).
           </li>
+          <li>We model conversion probability as a function of customer features (x1, x2) and which ad is shown.</li>
           <li>Points show tested customers; the star is the recommended next test.</li>
         </ul>
       </section>
@@ -48,7 +48,7 @@
         <ul class="list">
           <li>Standard A/B assumes one average effect. Real ads have different effects for different people.</li>
           <li>Uniform sampling wastes budget on profiles that teach you little.</li>
-          <li>Adaptive design concentrates tests where the model is uncertain and where the decision is sensitive.</li>
+          <li>Adaptive design concentrates tests where the model is uncertain and where the A/B decision is sensitive.</li>
         </ul>
       </section>
 
@@ -65,8 +65,8 @@
           <p class="muted small" style="margin-top: 0.75rem">
             In this demo, the <strong>expected information gain</strong> view is concerned with learning the interaction
             weights \(\gamma\) (i.e., the feature-dependent A/B difference), not the baseline \(\beta\). Any other random
-            quantity computable from the model can be targeted depending on our goals, each leading to different computed
-            optimal designs. The
+            quantity computable from the model can be targeted depending on our goals (e.g., a policy boundary, a threshold,
+            or a ranking), each leading to different computed optimal designs. The
             <strong>decision uncertainty</strong> view focuses on uncertainty in the sign of \(\Delta(x)\)
             ("is A better than B here?") rather than uncertainty in the absolute conversion rate.
           </p>
@@ -172,8 +172,8 @@
         <h2>Random sampling (no OED)</h2>
         <p class="muted small">
           If you sample customers from the same fixed proposal distribution but without adaptive design (no OED), the
-          resulting A/B recommendation can remain wrong for much longer. Even at twice the sample sizes, we are missing
-          highly informative data and our model is far from optimal.
+          resulting A/B recommendation can remain wrong for much longer. Even at larger sample sizes, random sampling can miss
+          highly informative data and produce a worse recommendation.
         </p>
 
         <div class="row" style="margin-top: 1rem">
@@ -201,7 +201,7 @@
       <section class="section">
         <h2>Key takeaway</h2>
         <p>
-          Even in a simplified model, the optimal next test moves around. You cannot reliably pick it by intuition.
+          Even in a simplified model, the optimal next test moves around. Intuition is not a reliable sampling strategy.
         </p>
       </section>
 
