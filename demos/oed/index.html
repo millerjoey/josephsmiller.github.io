@@ -29,8 +29,8 @@
           <div class="eyebrow">Optimal experiment design</div>
           <h1>Demonstrations of sequential design.</h1>
           <p class="lede">
-            Adaptive data collection that picks the next most-informative sample, so you can learn with
-            fewer measurements.
+            Adaptive data collection that picks the next most-informative sample, so product, ML, and research
+            teams can learn with fewer measurements.
           </p>
           <p class="muted">
             Some demos are fully static (precomputed plots). Others are interactive and require a backend
@@ -50,15 +50,20 @@
       <section class="section" id="what-is">
         <h2>What this is</h2>
         <p>
-          Optimal experiment design is a decision system: at each step, pick the next sample that maximally
-          reduces uncertainty about the outcome you care about, subject to budget and constraints.
+          Optimal experiment design provides a way to fit a statistical model with less data: start with some initial data,
+          then iteratively choose the next measurement to reduce uncertainty about the quantity that matters for a decision.
+        </p>
+        <p class="muted">
+          The emphasis is not exploration for its own sake, but learning the specific quantity that drives a decision as
+          quickly as possible.
         </p>
         <p class="muted">
           Example: in deduplication, instead of labeling random record pairs, we label the pairs that most
           clarify cluster membership.
         </p>
         <p class="muted small">
-          One adaptive engine that plugs into surveys, A/B tests, pricing experiments, and ML labeling.
+          Typical applications include A/B testing with covariates, record linkage, pricing experiments, adaptive surveys,
+          and ML data labeling.
         </p>
       </section>
 
@@ -66,38 +71,38 @@
         <div class="section-header">
           <h2>Demos</h2>
           <p class="muted small">
-            Precomputed visualizations and local interactive tools.
+            Precomputed plots and interactive demos.
           </p>
         </div>
         <div class="grid">
           <a class="card" href="data-linkage.html">
-            <div class="tag tag--local">Local</div>
+            <div class="tag tag--local" title="Runs on your machine (backend required).">Self-hosted</div>
             <div class="card-title">Record linkage + deduplication</div>
             <p class="muted">
-              Upload data, label a small number of pairs, and see the system select the next pair that most
-              reduces clustering uncertainty. Currently requires a local backend; a hosted version is in progress.
+              Learn accurate clusters with far fewer labeled pairs by targeting the comparisons that matter most.
+              Currently requires a local backend; a hosted version is in progress.
             </p>
           </a>
           <a class="card" href="ab-oed.html">
-            <div class="tag tag--live">Live</div>
+            <div class="tag tag--live" title="Fully hosted (static, precomputed plots).">Live</div>
             <div class="card-title">Adaptive A/B testing with customer features</div>
             <p class="muted">
-              Browse a 41-step run of expected information gain, decision uncertainty, and decision regions.
-              Shows the recommended next customer (x*) and which ad to show there, plus a non-adaptive baseline.
+              Focus experimentation where the A vs B decision is uncertain, not where data are easiest to collect.
+              Browse a 41-step run of decision regions, decision uncertainty, and expected information gain.
             </p>
           </a>
           <a class="card" href="pricing.html">
             <div class="tag tag--upcoming">Upcoming</div>
             <div class="card-title">Pricing and demand curve probing</div>
             <p class="muted">
-              Choose the next price test to learn the revenue curve fastest when each change is costly.
+              Estimate a demand curve with fewer price experiments by choosing probes that target revenue uncertainty.
             </p>
           </a>
           <a class="card" href="survey.html">
             <div class="tag tag--upcoming">Upcoming</div>
             <div class="card-title">Adaptive survey question selection</div>
             <p class="muted">
-              Ask fewer questions per respondent while preserving inference quality.
+              Reduce survey length by selecting questions that maximize information about the target construct.
             </p>
           </a>
         </div>
@@ -114,9 +119,14 @@
           for uncertainty and constraints.
         </p>
         <p class="muted" style="margin-top: 0.75rem">
-          In practice, this is implemented by maintaining an uncertainty-aware model, evaluating candidate measurements
-          via an acquisition objective (e.g., expected information gain about a decision boundary), and iterating until
-          the remaining uncertainty is below a chosen tolerance.
+          In practice, this is implemented by maintaining a posterior (or approximation), evaluating candidate measurements
+          via an acquisition objective (e.g., expected information gain about a decision boundary or treatment choice),
+          and iterating until the remaining decision uncertainty is below a chosen tolerance.
+        </p>
+        <p class="muted" style="margin-top: 0.75rem">
+          Unlike standard A/B testing, bandits, or generic active learning, the objective here is explicitly tied to the
+          decision-relevant quantity—not short-term reward or uncertainty reduction in parts of the model that do not
+          change the recommended action.
         </p>
         <details class="details">
           <summary>Hosted vs local demos</summary>
