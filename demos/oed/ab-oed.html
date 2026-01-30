@@ -169,8 +169,9 @@
       <section class="section panel" id="learning">
         <h2>Random sampling (no OED)</h2>
         <p class="muted small">
-          If you collect customers from the same fixed proposal distribution but without adaptive design (no OED), you
-          still end up with clear decision regions, but it usually takes more samples to sharpen.
+          If you sample customers from the same fixed proposal distribution but without adaptive design (no OED), the
+          resulting A/B recommendation can remain wrong for much longer. Even at twice the sample sizes, we are missing
+          highly informative data and our model is far from optimal.
         </p>
 
         <div class="row" style="margin-top: 1rem">
