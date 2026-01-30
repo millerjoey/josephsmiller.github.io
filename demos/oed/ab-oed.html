@@ -26,8 +26,9 @@
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
         <p class="lede">
-          With customer features, the most informative next customer to show an ad to is not obvious. This demo
-          pages through precomputed frames to show how the recommendation evolves as you learn.
+          With customer features, you don’t just need a recommendation — you need the next best experiment. This demo shows
+          how sequential design chooses the next customer \(x^*\) (and ad assignment) to learn the A vs B decision boundary
+          with fewer samples.
         </p>
       </header>
 
@@ -39,7 +40,7 @@
             fragile (decision uncertainty), and what we would do right now (best choice now).
           </li>
           <li>We model conversion probability as a function of customer features (x1, x2) and which ad is shown.</li>
-          <li>Points show tested customers; the star is the recommended next test.</li>
+          <li>Points show past experiments; the star is the recommended next experiment \(x^*\).</li>
         </ul>
       </section>
 
@@ -85,7 +86,8 @@
       <section class="section panel" id="browse">
         <h2>Browse the sequence</h2>
         <p class="muted small">
-          Heatmaps are precomputed. Use the slider to move through the 41-frame run, and toggle between views.
+          Heatmaps are precomputed for a sequential design run (recommended next experiment at each step). Use the slider to
+          move through the 41-frame run, and toggle between views.
         </p>
 
         <div class="row" style="margin-top: 1rem">
