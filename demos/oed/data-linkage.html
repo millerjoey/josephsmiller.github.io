@@ -29,14 +29,13 @@
         </p>
       </header>
 
-      <section class="panel" aria-label="Local backend note">
-        <div class="tag tag--local">Local demo</div>
+      <section class="panel" aria-label="Backend note">
+        <div class="tag">Hosted demo</div>
         <p class="muted">
-          This page calls a backend API. A hosted version is in progress so visitors can upload data directly.
+          This page calls a hosted backend API. Uploaded data is processed temporarily and is not stored long-term.
         </p>
         <p class="muted small" style="margin-top: 0.6rem">
-          For now, start the backend service and set the API endpoint below. If you need the system to run locally for
-          privacy or infrastructure reasons, email
+          If you need a private deployment or a higher-throughput trial environment, email
           <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
         </p>
       </section>
@@ -45,8 +44,13 @@
         <h2>Connect + upload</h2>
         <div class="row">
           <label class="field">
-            <span>API endpoint</span>
-            <input id="apiBase" type="url" inputmode="url" placeholder="http://localhost:8080" />
+            <span>Backend endpoint (advanced)</span>
+            <input
+              id="apiBase"
+              type="url"
+              inputmode="url"
+              placeholder="https://fuzzymatchingservice-production.up.railway.app"
+            />
           </label>
           <button id="apiBaseApply" class="button secondary small" type="button">Use endpoint</button>
           <button id="apiBaseReset" class="button secondary small" type="button">Reset</button>
@@ -199,6 +203,7 @@
         let API_TOKEN = "";
         let batch = [];
         let cursor = 0;
+        const DEFAULT_API_BASE = "https://fuzzymatchingservice-production.up.railway.app";
 
         function normalizeApiBase(value) {
           const trimmed = (value || "").trim();
@@ -220,19 +225,8 @@
           return headers;
         }
 
-        function originApiBase() {
-          try {
-            if (window.location?.origin && window.location.origin !== "null") {
-              return window.location.origin;
-            }
-          } catch {
-            // ignore
-          }
-          return "";
-        }
-
         function setApiBase(nextBase, { persist = true } = {}) {
-          API_BASE = normalizeApiBase(nextBase) || "http://localhost:8080";
+          API_BASE = normalizeApiBase(nextBase) || DEFAULT_API_BASE;
           elements.apiBase.value = API_BASE;
           elements.apiStatus.textContent = `Backend: checking… (${API_BASE})`;
           if (persist && window.localStorage) {
@@ -570,7 +564,8 @@
         });
         elements.apiBaseReset.addEventListener("click", () => {
           if (window.localStorage) localStorage.removeItem("fuzzy_api_base");
-          initializeApiBase();
+          setApiBase(DEFAULT_API_BASE, { persist: false });
+          checkBackend();
         });
         elements.apiTokenApply.addEventListener("click", async () => {
           setApiToken(elements.apiToken.value);
@@ -712,15 +707,7 @@
             await checkBackend();
             return;
           }
-
-          const origin = originApiBase();
-          if (origin) {
-            setApiBase(origin, { persist: false });
-            const ok = await checkBackend();
-            if (ok) return;
-          }
-
-          setApiBase("http://localhost:8080", { persist: false });
+          setApiBase(DEFAULT_API_BASE, { persist: false });
           await checkBackend();
         }
 
