@@ -25,11 +25,13 @@
       <header class="hero">
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
-        <p class="lede">
-          When treatment effects depend on customer features, the choice of who to test can strongly affect how quickly you learn.
-          Sequential design treats each assignment as a decision: pick the next customer \(x^*\) (and ad assignment) to reduce
-          uncertainty about the A vs B decision boundary as fast as possible—so you reach a reliable targeting policy with fewer samples.
-        </p>
+	        <p class="lede">
+	          When treatment effects depend on customer features, the choice of who to test can strongly affect how quickly you learn.
+	          Sequential design treats each assignment as a decision: pick the next customer \(x^*\) (and ad assignment) to reduce
+	          uncertainty about the A vs B decision boundary as fast as possible—so you reach a reliable targeting policy with fewer samples.
+	          In many settings this reduces the classic explore/exploit tension: customers who are confidently A (or B) are low-value
+	          information-wise, so the design naturally concentrates experiments near the boundary where the opportunity cost of exploration is small.
+	        </p>
       </header>
 
       <section class="section">
