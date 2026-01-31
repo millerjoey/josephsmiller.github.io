@@ -25,7 +25,7 @@
         <div class="eyebrow">Record linkage demo</div>
         <h1>Record linkage with active learning</h1>
         <p class="lede">
-          Upload CSVs, label informative pairs, and see how many labels you did not need.
+          Upload CSVs, label informative pairs, and save time labeling.
         </p>
       </header>
 
@@ -50,6 +50,14 @@
           </label>
           <button id="apiBaseApply" class="button secondary small" type="button">Use endpoint</button>
           <button id="apiBaseReset" class="button secondary small" type="button">Reset</button>
+        </div>
+        <div class="row" style="margin-top: 0.9rem">
+          <label class="field">
+            <span>API token (optional)</span>
+            <input id="apiToken" type="password" placeholder="(optional)" autocomplete="off" />
+          </label>
+          <button id="apiTokenApply" class="button secondary small" type="button">Use token</button>
+          <button id="apiTokenReset" class="button secondary small" type="button">Clear</button>
         </div>
 
         <div class="row" style="margin-top: 1rem">
@@ -92,7 +100,7 @@
         <details class="details">
           <summary>Keyboard shortcuts</summary>
           <p class="muted small">
-            <code>j/k</code> or <code>↑/↓</code>: move • <code>d</code>: match • <code>a</code>: no-match •
+            <code>j/k</code> or <code>↑/↓</code>: move • <code>a</code>: match • <code>d</code>: no-match •
             <code>s</code>: clear • <code>Enter</code>: submit • <code>Shift+N</code>: next batch
           </p>
         </details>
@@ -132,20 +140,12 @@
         <p id="runStatus" class="muted small" style="margin-top: 0.75rem"></p>
         <div class="metrics">
           <div class="metric">
-            <div class="metric-value" id="labelsUsed">0</div>
-            <div class="metric-label">Labels used</div>
+            <div class="metric-value" id="positivesCount">0</div>
+            <div class="metric-label">Match labels</div>
           </div>
           <div class="metric">
-            <div class="metric-value" id="precisionRecall">-- / --</div>
-            <div class="metric-label">Estimated precision/recall</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value" id="uncertaintyLeft">--</div>
-            <div class="metric-label">Uncertainty remaining</div>
-          </div>
-          <div class="metric">
-            <div class="metric-value" id="labelSavings">--</div>
-          <div class="metric-label">Labels saved vs random</div>
+            <div class="metric-value" id="negativesCount">0</div>
+            <div class="metric-label">No-match labels</div>
           </div>
         </div>
         <p class="muted small" style="margin-top: 0.8rem">
@@ -168,6 +168,9 @@
           apiStatus: $("apiStatus"),
           apiBaseApply: $("apiBaseApply"),
           apiBaseReset: $("apiBaseReset"),
+          apiToken: $("apiToken"),
+          apiTokenApply: $("apiTokenApply"),
+          apiTokenReset: $("apiTokenReset"),
           leftFile: $("leftFile"),
           rightFile: $("rightFile"),
           upload: $("upload"),
@@ -184,19 +187,33 @@
           downloadMatches: $("downloadMatches"),
           downloadClusters: $("downloadClusters"),
           runStatus: $("runStatus"),
-          labelsUsed: $("labelsUsed"),
-          precisionRecall: $("precisionRecall"),
-          uncertaintyLeft: $("uncertaintyLeft"),
-          labelSavings: $("labelSavings"),
+          positivesCount: $("positivesCount"),
+          negativesCount: $("negativesCount"),
         };
 
         let API_BASE = "";
+        let API_TOKEN = "";
         let batch = [];
         let cursor = 0;
 
         function normalizeApiBase(value) {
           const trimmed = (value || "").trim();
-          return trimmed ? trimmed.replace(/\\/+$/, "") : "";
+          return trimmed ? trimmed.replace(/\/+$/, "") : "";
+        }
+
+        function setApiToken(nextToken, { persist = true } = {}) {
+          API_TOKEN = (nextToken || "").trim();
+          if (elements.apiToken) elements.apiToken.value = API_TOKEN;
+          if (persist && window.localStorage) {
+            if (API_TOKEN) localStorage.setItem("fuzzy_api_token", API_TOKEN);
+            else localStorage.removeItem("fuzzy_api_token");
+          }
+        }
+
+        function authHeaders(base = {}) {
+          const headers = { ...(base || {}) };
+          if (API_TOKEN) headers["X-API-Token"] = API_TOKEN;
+          return headers;
         }
 
         function originApiBase() {
@@ -225,7 +242,7 @@
 
         async function probe(url) {
           try {
-            return await fetch(url, { method: "GET" });
+            return await fetch(url, { method: "GET", headers: authHeaders() });
           } catch {
             return null;
           }
@@ -275,9 +292,7 @@
           for (const name of artifacts || []) {
             const el = mapping[name];
             if (!el) continue;
-            el.href = api(
-              `/api/job/${encodeURIComponent(jobId)}/download/${encodeURIComponent(name)}`,
-            );
+            el.href = api(`/api/job/${encodeURIComponent(jobId)}/download/${encodeURIComponent(name)}`);
             el.style.display = "inline-flex";
             el.target = "_blank";
             el.rel = "noopener";
@@ -447,7 +462,10 @@
         async function fetchJson(url, options) {
           let res;
           try {
-            res = await fetch(url, options);
+            const opts = { ...(options || {}) };
+            const baseHeaders = opts.headers && typeof opts.headers === "object" ? opts.headers : {};
+            opts.headers = authHeaders(baseHeaders);
+            res = await fetch(url, opts);
           } catch {
             throw new Error(`Cannot reach backend at ${API_BASE}.`);
           }
@@ -519,9 +537,8 @@
           const positives = data?.positives ?? "?";
           const negatives = data?.negatives ?? "?";
           elements.labelStatus.textContent = `Labeled: ${count} (${positives} match, ${negatives} no-match)`;
-          if (elements.labelsUsed) {
-            elements.labelsUsed.textContent = String(count);
-          }
+          if (elements.positivesCount) elements.positivesCount.textContent = String(positives);
+          if (elements.negativesCount) elements.negativesCount.textContent = String(negatives);
           elements.runFull.disabled = false;
           await loadBatch();
         }
@@ -551,6 +568,14 @@
           if (window.localStorage) localStorage.removeItem("fuzzy_api_base");
           initializeApiBase();
         });
+        elements.apiTokenApply.addEventListener("click", async () => {
+          setApiToken(elements.apiToken.value);
+          await checkBackend();
+        });
+        elements.apiTokenReset.addEventListener("click", async () => {
+          setApiToken("");
+          await checkBackend();
+        });
 
         elements.upload.addEventListener("click", async () => {
           const left = elements.leftFile.files?.[0];
@@ -579,10 +604,8 @@
             if (!jobId) throw new Error("Upload succeeded but job_id was missing.");
             elements.jobId.value = jobId;
             elements.uploadStatus.textContent = `Job: ${jobId}`;
-            if (elements.labelsUsed) elements.labelsUsed.textContent = "0";
-            if (elements.precisionRecall) elements.precisionRecall.textContent = "-- / --";
-            if (elements.uncertaintyLeft) elements.uncertaintyLeft.textContent = "--";
-            if (elements.labelSavings) elements.labelSavings.textContent = "--";
+            if (elements.positivesCount) elements.positivesCount.textContent = "0";
+            if (elements.negativesCount) elements.negativesCount.textContent = "0";
 
             await pollReady(jobId);
             elements.uploadStatus.textContent = "Ready.";
@@ -646,11 +669,11 @@
             selectCursor(cursor - 1);
             e.preventDefault();
           } else if (e.key.toLowerCase() === "d") {
-            if (activeKey) setChoice(activeKey, 1);
+            if (activeKey) setChoice(activeKey, 0);
             selectCursor(cursor + 1);
             e.preventDefault();
           } else if (e.key.toLowerCase() === "a") {
-            if (activeKey) setChoice(activeKey, 0);
+            if (activeKey) setChoice(activeKey, 1);
             selectCursor(cursor + 1);
             e.preventDefault();
           } else if (e.key.toLowerCase() === "s") {
@@ -666,6 +689,19 @@
         });
 
         async function initializeApiBase() {
+          const storedToken = window.localStorage ? localStorage.getItem("fuzzy_api_token") : null;
+          if (storedToken) {
+            setApiToken(storedToken, { persist: false });
+          }
+
+          const qs = new URLSearchParams(window.location.search || "");
+          const apiParam = qs.get("api");
+          if (apiParam) {
+            setApiBase(apiParam, { persist: false });
+            await checkBackend();
+            return;
+          }
+
           const stored = window.localStorage ? localStorage.getItem("fuzzy_api_base") : null;
           if (stored) {
             setApiBase(stored, { persist: false });
