@@ -41,20 +41,7 @@
       </section>
 
       <section class="panel" aria-label="Connect and upload">
-        <h2>Connect + upload</h2>
-        <div class="row">
-          <label class="field">
-            <span>Backend endpoint (advanced)</span>
-            <input
-              id="apiBase"
-              type="url"
-              inputmode="url"
-              placeholder="https://fuzzymatchingservice-production.up.railway.app"
-            />
-          </label>
-          <button id="apiBaseApply" class="button secondary small" type="button">Use endpoint</button>
-          <button id="apiBaseReset" class="button secondary small" type="button">Reset</button>
-        </div>
+        <h2>Upload</h2>
         <div class="row" style="margin-top: 0.9rem">
           <label class="field">
             <span>API token (optional)</span>
@@ -172,10 +159,7 @@
         const $ = (id) => document.getElementById(id);
 
         const elements = {
-          apiBase: $("apiBase"),
           apiStatus: $("apiStatus"),
-          apiBaseApply: $("apiBaseApply"),
-          apiBaseReset: $("apiBaseReset"),
           apiToken: $("apiToken"),
           apiTokenApply: $("apiTokenApply"),
           apiTokenReset: $("apiTokenReset"),
@@ -199,16 +183,11 @@
           negativesCount: $("negativesCount"),
         };
 
-        let API_BASE = "";
+        // Hosted backend endpoint. Edit this constant if you move hosting.
+        const API_BASE = "https://fuzzymatchingservice-production.up.railway.app";
         let API_TOKEN = "";
         let batch = [];
         let cursor = 0;
-        const DEFAULT_API_BASE = "https://fuzzymatchingservice-production.up.railway.app";
-
-        function normalizeApiBase(value) {
-          const trimmed = (value || "").trim();
-          return trimmed ? trimmed.replace(/\/+$/, "") : "";
-        }
 
         function setApiToken(nextToken, { persist = true } = {}) {
           API_TOKEN = (nextToken || "").trim();
@@ -223,15 +202,6 @@
           const headers = { ...(base || {}) };
           if (API_TOKEN) headers["X-API-Token"] = API_TOKEN;
           return headers;
-        }
-
-        function setApiBase(nextBase, { persist = true } = {}) {
-          API_BASE = normalizeApiBase(nextBase) || DEFAULT_API_BASE;
-          elements.apiBase.value = API_BASE;
-          elements.apiStatus.textContent = `Backend: checking… (${API_BASE})`;
-          if (persist && window.localStorage) {
-            localStorage.setItem("fuzzy_api_base", API_BASE);
-          }
         }
 
         function api(path) {
@@ -558,15 +528,6 @@
           }
         }
 
-        elements.apiBaseApply.addEventListener("click", async () => {
-          setApiBase(elements.apiBase.value);
-          await checkBackend();
-        });
-        elements.apiBaseReset.addEventListener("click", () => {
-          if (window.localStorage) localStorage.removeItem("fuzzy_api_base");
-          setApiBase(DEFAULT_API_BASE, { persist: false });
-          checkBackend();
-        });
         elements.apiTokenApply.addEventListener("click", async () => {
           setApiToken(elements.apiToken.value);
           await checkBackend();
@@ -687,32 +648,16 @@
           }
         });
 
-        async function initializeApiBase() {
+        async function initialize() {
           const storedToken = window.localStorage ? localStorage.getItem("fuzzy_api_token") : null;
           if (storedToken) {
             setApiToken(storedToken, { persist: false });
           }
-
-          const qs = new URLSearchParams(window.location.search || "");
-          const apiParam = qs.get("api");
-          if (apiParam) {
-            setApiBase(apiParam, { persist: false });
-            await checkBackend();
-            return;
-          }
-
-          const stored = window.localStorage ? localStorage.getItem("fuzzy_api_base") : null;
-          if (stored) {
-            setApiBase(stored, { persist: false });
-            await checkBackend();
-            return;
-          }
-          setApiBase(DEFAULT_API_BASE, { persist: false });
           await checkBackend();
         }
 
         renderMessage("Upload CSVs to start.");
-        initializeApiBase();
+        initialize();
       })();
     </script>
   </body>
