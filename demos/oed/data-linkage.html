@@ -152,7 +152,8 @@
           <button id="submitLabels" class="button" type="button" disabled>Submit labels</button>
         </div>
         <p class="muted small" style="margin-top: 0.55rem">
-          Suggestions only apply to high-confidence probabilities; correct them if they're wrong. Uncertain pairs are left blank.
+          Suggestions only apply to high-confidence probabilities. Suggested labels are highlighted until you review the pair; uncertain pairs are left
+          blank.
         </p>
 
         <div class="metrics" style="margin-top: 0.75rem">
@@ -183,8 +184,8 @@
         <details class="details">
           <summary>Keyboard shortcuts</summary>
           <p class="muted small">
-            <code>j/k</code> or <code>↑/↓</code>: move • <code>a</code>: match • <code>d</code>: no-match •
-            <code>x</code>: skip • <code>s</code>: clear • <code>Enter</code>: submit • <code>Shift+N</code>: next batch
+            <code>j/k</code> or <code>↑/↓</code>: move • <code>a</code>: match • <code>s</code>: skip • <code>d</code>: no-match •
+            <code>x</code>: clear • <code>Enter</code>: submit • <code>Shift+N</code>: next batch
           </p>
         </details>
 
@@ -657,15 +658,35 @@ Prestige Worldwide, LLC
           const active = cards[cursor];
           if (active) {
             active.classList.add("is-active");
+            active.dataset.reviewed = "1";
             active.scrollIntoView({ block: "nearest" });
           }
+          refreshChoices();
         }
 
         function refreshChoices() {
           const wrappers = elements.pairList.querySelectorAll(".choice");
           wrappers.forEach((wrapper) => {
             const input = wrapper.querySelector("input");
-            wrapper.classList.toggle("selected", Boolean(input?.checked));
+            const checked = Boolean(input?.checked);
+            const isAuto = input?.dataset.auto === "1";
+            const reviewed = wrapper.closest(".pair")?.dataset.reviewed === "1";
+            const finalSelected = checked && (!isAuto || reviewed);
+            wrapper.classList.toggle("selected", finalSelected);
+
+            if (checked && isAuto && !reviewed) {
+              wrapper.style.background = "rgba(139, 58, 58, 0.12)";
+              wrapper.style.borderColor = "rgba(139, 58, 58, 0.35)";
+              wrapper.style.color = "var(--accent-strong)";
+              wrapper.title = "Suggested. Review this pair to confirm (turns solid once viewed).";
+            } else {
+              wrapper.style.removeProperty("background");
+              wrapper.style.removeProperty("border-color");
+              wrapper.style.removeProperty("color");
+              if (wrapper.title === "Suggested. Review this pair to confirm (turns solid once viewed).") {
+                wrapper.removeAttribute("title");
+              }
+            }
           });
           elements.submitLabels.disabled =
             elements.pairList.querySelectorAll('input[type="radio"]:checked:not([value="skip"])').length === 0;
@@ -715,11 +736,6 @@ Prestige Worldwide, LLC
             card.className = "pair";
             card.dataset.key = key;
             card.dataset.index = String(index);
-
-            const meta = document.createElement("div");
-            meta.className = "muted small";
-            meta.style.marginBottom = "0.55rem";
-            meta.textContent = `pair: i=${item.i}, j=${item.j}`;
 
             const top = document.createElement("div");
             top.className = "pair-top";
@@ -780,19 +796,23 @@ Prestige Worldwide, LLC
               input.name = `lbl_${key}`;
               input.value = String(v);
               input.addEventListener("click", (e) => e.stopPropagation());
-              input.addEventListener("change", refreshChoices);
+              input.addEventListener("change", () => {
+                input.removeAttribute("data-auto");
+                card.dataset.reviewed = "1";
+                refreshChoices();
+              });
               const text = document.createElement("span");
               text.textContent = label;
               wrapper.append(input, text);
               return { wrapper, input };
             };
 
-            const match = makeChoice("match", 1);
-            const noMatch = makeChoice("no-match", 0);
-            const skip = makeChoice("skip", "skip");
-            actions.append(match.wrapper, noMatch.wrapper, skip.wrapper);
+            const match = makeChoice("match (a)", 1);
+            const skip = makeChoice("skip (s)", "skip");
+            const noMatch = makeChoice("no-match (d)", 0);
+            actions.append(match.wrapper, skip.wrapper, noMatch.wrapper);
 
-            card.append(meta, top, actions);
+            card.append(top, actions);
             card.addEventListener("click", () => selectCursor(index));
 
             const suggested = suggestLabel(item, autoThresh);
@@ -913,11 +933,19 @@ Prestige Worldwide, LLC
           });
           if (!labels.length) throw new Error("No labels selected.");
 
+          const prevButtonText = elements.submitLabels.textContent;
+          elements.labelStatus.textContent = `Submitting ${labels.length} label${labels.length === 1 ? "" : "s"}…`;
+          elements.submitLabels.textContent = "Submitting…";
+
           if (autoSuggested >= 3 && autoSuggested >= Math.ceil(labels.length * 0.5)) {
             const ok = window.confirm(
               `You are submitting ${labels.length} labels (${autoSuggested} auto-suggested). Continue?`,
             );
-            if (!ok) return;
+            if (!ok) {
+              elements.submitLabels.textContent = prevButtonText;
+              updateLabelStatus();
+              return;
+            }
           }
 
           const data = await fetchJson(api(`/api/job/${encodeURIComponent(jobId)}/label`), {
@@ -925,6 +953,7 @@ Prestige Worldwide, LLC
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ labels }),
           });
+          elements.submitLabels.textContent = prevButtonText;
 
           const count = data?.labeled_count ?? "?";
           const positives = data?.positives ?? "?";
@@ -1033,6 +1062,7 @@ Prestige Worldwide, LLC
             console.error(err);
             alert(err.message);
           } finally {
+            elements.submitLabels.textContent = "Submit labels";
             refreshChoices();
           }
         });
@@ -1076,11 +1106,11 @@ Prestige Worldwide, LLC
             if (activeKey) setChoice(activeKey, 1);
             selectCursor(cursor + 1);
             e.preventDefault();
-          } else if (e.key.toLowerCase() === "x") {
+          } else if (e.key.toLowerCase() === "s") {
             if (activeKey) setChoice(activeKey, "skip");
             selectCursor(cursor + 1);
             e.preventDefault();
-          } else if (e.key.toLowerCase() === "s") {
+          } else if (e.key.toLowerCase() === "x") {
             if (activeKey) clearChoice(activeKey);
             e.preventDefault();
           } else if (e.key === "Enter") {
