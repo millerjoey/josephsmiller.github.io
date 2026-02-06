@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <svg xmlns='http://www.w3.org/2000/svg' width='720' height='620' viewBox='0 0 720 620'>
 <rect width='100%' height='100%' fill='white'/>
-<text x='360.0' y='28' text-anchor='middle' font-size='16' fill='#111'>Expected Information Gain about the next experiment - Step 42</text>
+<text x='360.0' y='28' text-anchor='middle' font-size='16' fill='#111'>Where to Test Next (Expected Information Gain) - Step 42</text>
 <text x='360.0' y='48' text-anchor='middle' font-size='12' fill='#444'>Information gain about ad lift (performance gain of A vs B)</text>
 <rect x='70.0' y='452.2' width='10.7' height='8.3' fill='#f1ab55' stroke='none'/>
 <rect x='80.2' y='452.2' width='10.7' height='8.3' fill='#f3b157' stroke='none'/>
