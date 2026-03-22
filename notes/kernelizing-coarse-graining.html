@@ -340,13 +340,13 @@
       <div class="eyebrow">Technical note</div>
       <h1>Kernalized coarse graining</h1>
       <p class="lede">
-        A small algebraic restatement motivates similarity-sensitive entropy: keep a latent uniform seed
-        $U \sim \mathrm{Unif}[0,1]$, and represent what you can (and can’t) distinguish using a kernel rather than only a
+        We can motivate similarity-sensitive entropy with the following idea: keep a latent uniform seed
+        $U \sim \mathrm{Unif}[0,1]$, and represent what you can/can’t distinguish using a kernel rather than only a
         pushed-forward variable.
       </p>
       <ul class="bullets muted">
-        <li><strong>Uniform noise + structure:</strong> represent a law as $X=\psi(U)$ with $U\sim\mathrm{Unif}[0,1]$.</li>
-        <li><strong>Coarse observation → partition kernel:</strong> a many-to-one map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
+        <li>Represent a law as $X=\psi(U)$ with $U\sim\mathrm{Unif}[0,1]$.</li>
+        <li>A many-to-one map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
         <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,d\lambda(u')$.</li>
       </ul>
       <div class="actions">
@@ -401,8 +401,7 @@
           $\psi$ as a measurable map that pushes the Lebesgue measure forward to whatever law you want.
         </p>
         <p>
-          Any law can be read as
-          <em>uniform randomness plus a reorganizing structure (the map $\psi$).</em>
+          Any law can be read as uniform randomness plus a relabeling (the map $\psi$).
         </p>
 
         <h3>Coarse observation are a partition map</h3>
@@ -412,12 +411,12 @@
           $Y := f(U)$. The fibers $A_j := f^{-1}(j)$ form a partition of $[0,1]$.
         </p>
         <div class="math-block">
-          $$\mathbb P(Y=j)=\lambda(A_j)=:p_j,\qquad H(Y) = -\sum_{j=1}^m p_j \log p_j.$$
+          $$\mathbb P(Y=j)=\lambda(A_j)=p_j,\qquad H(Y) = -\sum_{j=1}^m p_j \log p_j.$$
         </div>
         <details open>
           <summary>Fiber-size form of Shannon entropy</summary>
           <p>
-            Because $U$ is uniform, the probability of “being indistinguishable from $u$ under $f$” is literally the
+            Because $U$ is uniform, the probability of “being indistinguishable from $u$ under $f$” is just the
             Lebesgue measure of the fiber that contains $u$:
           </p>
           <div class="math-block">
@@ -445,7 +444,7 @@
           Interpretation: $K_f(u,u')=1$ exactly when the observation $f$ cannot tell $u$ and $u'$ apart.
         </p>
         <p>
-          From a kernel, a natural notion of “typicality” is just the kernel mass around a point:
+          “Typicality” is just the kernel mass around a point:
         </p>
         <div class="math-block">
           $$\tau_f(u) := \int_0^1 K_f(u,u')\,du'.$$
@@ -473,10 +472,10 @@
         <p>
           In words, SS-entropy is expected surprisal of being typical under the similarity notion $K$. Partition kernels
           recover ordinary Shannon entropy for the corresponding coarse variable, while intermediate kernels interpolate
-          between “everything is distinct” and “many things count as similar.”
+          between “everything is distinct” and “many things are similar.”
         </p>
         <p class="muted">
-          A benefit of this formulation is that you can define similarity where the semantics live, then transport it
+          A benefit of this formulation is that you can define similarity where the semantics are natural to specify, then transport it
           through a change of variables by pulling the kernel back.
         </p>
 
@@ -486,7 +485,7 @@
           Here $\psi$ is a quantile map: if $F$ is the CDF of $X$, then one choice is $\psi=F^{-1}$ (and $U=F(X)$).
         </p>
         <p>
-          Now “set the distinguishability scale” in $x$-space by binning. Fix a bin width $\Delta=0.4\sigma$ and let
+          Now set the kernel in $x$-space by binning. Fix a bin width $\Delta=0.4\sigma$ and let
           $g_\Delta:\mathbb R\to\mathbb Z$ record which interval of length $\Delta$ contains $x$ (anchored at the mean).
           Define the coarse variable
           $$Y:=g_\Delta(X)=g_\Delta(\psi(U)).$$
