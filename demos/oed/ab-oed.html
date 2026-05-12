@@ -6,7 +6,7 @@
     <title>Adaptive A/B Testing with Customer Features</title>
     <meta
       name="description"
-      content="Adaptive A/B testing with covariates: precomputed decision regions, decision uncertainty, and expected information gain over time."
+      content="A small adaptive A/B testing demo with covariates, precomputed decision regions, uncertainty, and expected information gain."
     />
     <meta name="theme-color" content="#8b3a3a" />
     <link rel="stylesheet" href="style.css" />
@@ -26,11 +26,10 @@
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
 	        <p class="lede">
-	          When treatment effects depend on customer features, the choice of who to test can strongly affect how quickly you learn.
-	          Sequential design treats each assignment as a decision: pick the next customer \(x^*\) (and ad assignment) to reduce
-	          uncertainty about the A vs B decision boundary as fast as possible—so you reach a reliable targeting policy with fewer samples.
-	          In many settings this reduces the classic explore/exploit tension: customers who are confidently A (or B) are low-value
-	          information-wise, so the design naturally concentrates experiments near the boundary where the opportunity cost of exploration is small.
+	          When treatment effects depend on customer features, who you test matters. This demo walks through a simple
+	          sequential design run: at each step, choose the next customer \(x^*\) and ad assignment to learn about the A/B
+	          decision boundary. Customers who are clearly better for A or B usually do not teach much, so the design tends
+	          to spend tests near the boundary.
 	        </p>
       </header>
 
@@ -38,20 +37,20 @@
         <h2>What you are seeing</h2>
         <ul class="list">
           <li>
-            Three views of the same state: where to test next (expected information gain), where the decision is most
-            fragile (decision uncertainty), and what we would do right now (best choice now).
+            Three views of the same state: where the next test would be useful (expected information gain), where the
+            A/B choice is least settled (decision uncertainty), and what the model would choose right now.
           </li>
           <li>We model conversion probability as a function of customer features (x1, x2) and which ad is shown.</li>
-          <li>Points show past experiments; the star is the recommended next experiment \(x^*\).</li>
+          <li>Points show past experiments; the star is the next experiment \(x^*\) chosen by the design rule.</li>
         </ul>
       </section>
 
       <section class="section">
         <h2>Why this matters</h2>
         <ul class="list">
-          <li>Standard A/B assumes one average effect. Real ads have different effects for different people.</li>
-          <li>Uniform sampling wastes budget on profiles that teach you little.</li>
-          <li>Adaptive design concentrates tests where the model is uncertain and where the A/B decision is sensitive.</li>
+          <li>A single average treatment effect can hide the cases where A works better for one group and B works better for another.</li>
+          <li>Random sampling may spend many tests on customer profiles where the decision is already obvious.</li>
+          <li>Adaptive design puts more tests where the model is uncertain and the A/B decision is sensitive.</li>
         </ul>
       </section>
 
@@ -66,9 +65,9 @@
             The heterogeneous A/B difference is \(\Delta(x)=\eta(x,1)-\eta(x,0)=x^\top\gamma\).
           </p>
           <p class="muted small" style="margin-top: 0.75rem">
-            In this demo, the <strong>expected information gain</strong> view is concerned with learning the interaction
+            In this demo, the <strong>expected information gain</strong> view focuses on learning the interaction
             weights \(\gamma\) (i.e., the feature-dependent A/B difference), not the baseline \(\beta\). Any other random
-            quantity computable from the model can be targeted depending on our goals (e.g., a policy boundary, a threshold,
+            quantity computable from the model could be targeted depending on the goal (e.g., a policy boundary, a threshold,
             or a ranking), each leading to different computed optimal designs. The
             <strong>decision uncertainty</strong> view focuses on uncertainty in the sign of \(\Delta(x)\)
             ("is A better than B here?") rather than uncertainty in the absolute conversion rate.
@@ -88,8 +87,8 @@
       <section class="section panel" id="browse">
         <h2>Browse the sequence</h2>
         <p class="muted small">
-          Plots are precomputed for a sequential design run (recommended next experiment at each step). Use the slider to
-          move through the 41-frame run, and toggle between views.
+          The plots are precomputed from one sequential design run. Use the slider to move through the 41 frames, and
+          switch views to understand why points were chosen.
         </p>
 
         <div class="row" style="margin-top: 1rem">
@@ -107,7 +106,8 @@
         </p>
 
         <p class="muted small" style="margin-top: 0.85rem">
-          Three views of the same state: where to test next, where the decision is fragile, and what we'd do now.
+          Three views of the same state: where to test next, where the A/B choice is unsettled, and what the model would
+          choose now.
         </p>
         <div class="segmented" role="group" aria-label="View toggle" style="margin-top: 0.75rem">
           <button
@@ -126,7 +126,7 @@
             class="view-toggle"
             data-view="uncertainty"
             aria-pressed="false"
-            title="Decision uncertainty: where the A vs B choice is most fragile."
+            title="Decision uncertainty: where the A vs B choice is least settled."
           >
             Decision uncertainty
           </button>
@@ -142,8 +142,8 @@
           </button>
         </div>
         <p class="muted small" id="viewBlurb" style="margin-top: 0.75rem">
-          Where to test next: expected information gain &middot; Decision uncertainty: where A vs B is fragile &middot; Best
-          choice now: the predicted winner
+          Where to test next: expected information gain &middot; Decision uncertainty: where A vs B is least settled &middot;
+          Best choice now: the predicted winner
         </p>
 
       <div class="metrics">
@@ -176,8 +176,8 @@
         <h2>Random sampling (no OED)</h2>
         <p class="muted small">
           If you sample customers from the same fixed proposal distribution but without adaptive design (no OED), the
-          resulting A/B recommendation can remain wrong for much longer. Random sampling often misses the few profiles that
-          would resolve the decision quickly.
+          resulting A/B recommendation can stay wrong for longer. In this run, random sampling often misses the profiles
+          that would clarify the boundary.
         </p>
 
         <div class="row" style="margin-top: 1rem">
@@ -205,15 +205,15 @@
       <section class="section">
         <h2>Key takeaway</h2>
         <p>
-          Even in a simplified model, the optimal next test moves around. Intuition is not a reliable sampling strategy.
+          Even in this simplified model, the useful next test moves around. I would not want to pick these samples by
+          intuition alone.
         </p>
       </section>
 
       <section class="section panel cta-panel">
         <h2>Contact</h2>
         <p class="lede">
-          If you'd like to apply sequential design to your experiments, pricing tests, surveys, or labeling pipelines,
-          email me.
+          If you're thinking about sequential design for experiments, pricing tests, surveys, or labeling pipelines, email me.
         </p>
         <div class="actions">
           <a class="button" href="mailto:joe@josephsmiller.com">Email</a>
@@ -261,7 +261,7 @@
           },
           uncertainty: {
             label: "Decision uncertainty",
-            alt: "Decision uncertainty: where the A vs B choice is fragile",
+            alt: "Decision uncertainty: where the A vs B choice is least settled",
             blurb: "Uncertainty in the sign of \\(\\Delta(x)=x^\\top\\gamma\\) (which ad is better here).",
             img: { width: 1600, height: 1248 },
           },
@@ -590,7 +590,7 @@
             els.uniformHeadline.textContent = `Decision regions learned from ${n} random (non-adaptive) samples (no OED).`;
           }
 
-          // Random sampling snapshots do not include the recommended "next test" marker.
+          // Random sampling snapshots do not include the next-test marker.
           renderLegend("decision", els.uniformLegend, { includeStar: false });
 
           // Preload neighboring snapshots.
@@ -625,7 +625,7 @@
 	                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
 	                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
 	                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
-	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
+	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test</div>' : ""}
 	                <div class="legend-item muted">Shaded regions show the predicted winner; boundaries show where A vs B flips.</div>
 	              </div>
 	            `;
@@ -641,7 +641,7 @@
 	                <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
 	                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
 	                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
-	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
+	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test</div>' : ""}
 	                <div class="legend-item muted">Uncertainty highlights where the sign of \(\Delta(x)=x^\top\gamma\) is unclear.</div>
 	              </div>
 	            `;
@@ -657,7 +657,7 @@
 	              <div class="legend-item"><span class="legend-swatch circle hollow"></span> no sale (y=0)</div>
 	              <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
 	              <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
-	              ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test (recommended customer)</div>' : ""}
+	              ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test</div>' : ""}
 	              <div class="legend-item muted">Info gain targets learning \(\gamma\) (the feature-dependent A/B difference), not \(\beta\).</div>
 	            </div>
 	          `;
