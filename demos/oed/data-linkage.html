@@ -64,7 +64,7 @@
           The backend is efficient and designed to run in a tiny compute footprint (CPU-only).
         </p>
         <p class="muted small" style="margin-top: 0.6rem">
-          If you need a private deployment or a higher-throughput trial environment, email
+          If you need a private deployment or a higher-throughput environment, email
           <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
         </p>
       </section>
@@ -80,12 +80,12 @@
           <button id="apiTokenReset" class="button secondary small" type="button">Clear</button>
         </div>
         <p id="tokenHint" class="muted small" style="margin-top: 0.6rem; display: none">
-          This server requires a token. Request a demo token:
-          <a class="text-link" href="mailto:joe@josephsmiller.com?subject=Record%20linkage%20demo%20token">email me</a>.
+          If the public demo is slow or rate-limited, email me for private access:
+          <a class="text-link" href="mailto:joe@josephsmiller.com?subject=Record%20linkage%20private%20access">email me</a>.
         </p>
         <p class="muted small" style="margin-top: 0.6rem">
-          For a hosted trial, request a demo token:
-          <a class="text-link" href="mailto:joe@josephsmiller.com?subject=Record%20linkage%20demo%20token">email me</a>.
+          The public demo may be rate-limited. If it is slow, email me and I can give you private access:
+          <a class="text-link" href="mailto:joe@josephsmiller.com?subject=Record%20linkage%20private%20access">email me</a>.
         </p>
 
         <div class="row" style="margin-top: 1rem">
@@ -119,6 +119,11 @@
           CSV format (hosted demo): the backend uses a <code>text</code> column if present, else <code>name</code>, else the first
           column, and ignores other columns. Tip: concatenate multiple fields into a single <code>text</code> column (e.g., name +
           address) for better matching.
+        </p>
+        <p class="muted small" style="margin-top: 0.4rem">
+          Keep each record's text free of commas. This demo uses commas as column separators, so commas inside a record will
+          be treated as extra columns. If you are unsure about the format, download one of the sample CSVs first and match
+          that structure.
         </p>
         <p class="muted small" style="margin-top: 0.4rem">
           Sample datasets are optional — you can upload your own CSVs instead (subject to demo limits enforced by the
@@ -246,7 +251,7 @@
           Metrics update as you label batches. Use “Run full scoring” to generate downloadable outputs.
         </p>
         <p class="muted small">
-          Questions or want a private deployment / higher-throughput environment?
+          Questions, or want a private deployment / higher-throughput environment?
           <a class="text-link" href="mailto:joe@josephsmiller.com">Email me</a>.
         </p>
       </section>
