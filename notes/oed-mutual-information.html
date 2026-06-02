@@ -379,14 +379,12 @@
       <div class="eyebrow">Technical note</div>
       <h1>Constant-time mutual information for Bayesian experimental design</h1>
       <p class="lede">
-        Best-first adaptive partitioning performs Bayesian updating and mutual-information
-        estimation together, giving a budgeted constant-time-in-$k$ MI estimate for differentiable models without requiring
-        separate posterior sampling or an MCMC pipeline.
+        Classic asymptotically unbiased Mutual Information estimation techniques require two rounds of independent sampling, one from a posterior and one from the likelihood, and have high variance and terrible scaling properties to large  experiment batches. For large experiment batches, you'd instead rely on optimization and techniques that scale better but are biased in ways that make them difficult to audit, or variants of an importance-sampling approach but risk extremely high variance as weights shrink. The algorithm that I highlight below performs Bayesian updating and mutual-information approximation with nearly no variance and, being recursive, has very consistent bias for large ranges of batch sizes. It is extremely efficient for low-parameter (dozens of parameters) differentiable models and can handle moderate batch sizes, decaying gracefully as batch size increases and budget remains limited.
       </p>
       <ul class="bullets muted">
-        <li><strong>Predictable compute:</strong> with a fixed computation budget, per-query runtime stays approximately flat as batch size $k$ grows.</li>
-        <li><strong>Anytime estimates:</strong> early scores can be refined by spending more budget.</li>
+        <li><strong>Predictable compute:</strong> with a fixed computation budget, per-query runtime stays approximately flat for a range of batch sizes.</li>
         <li><strong>Simpler integration:</strong> no posterior samples or separate inference/scoring service required.</li>
+        <li><strong>Low variance:</strong> deterministic given a fixed budget, with no sampling noise.</li>
       </ul>
       <div class="actions">
         <a class="button" href="mailto:joe@josephsmiller.com?subject=Optimal%20experiment%20design%20MI">Email me</a>
@@ -406,7 +404,7 @@
         </p>
         <p class="muted">
           OED is useful when the pool of possible observations is much larger than what will ever be used
-          for training (clinical trials, A/B testing, ad experiments, surveys). In those settings, spending some compute to choose data can be a good trade when collecting uninformative data is expensive.
+          for training (clinical trials, A/B testing, ad experiments, surveys). In those settings, spending some compute to choose data can be a good trade since collecting uninformative data is expensive.
         </p>
         <p>
           In typical variants of optimal experiment design, this idea is formalized by scoring candidate designs by <em>expected
@@ -435,8 +433,7 @@
         <p class="muted">
           Modifications to the above are useful when the relevant notion of “uncertainty” isn’t purely Shannon entropy—for
           example, using similarity-sensitive entropy to encode which distinctions matter for your downstream goal. See
-          <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
-          Induced Kernels and Data-Processing Inequalities (arXiv:2601.03064)</a> for a framework that helps clarify what to do when the uncertainty you care about is parameter uncertainty, predictive uncertainty, or uncertainty in some other derived random variable.
+          <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy under Representation Change and Inference (arXiv:2601.03064)</a> for a framework that helps clarify what to do when the uncertainty you care about is parameter uncertainty, predictive uncertainty, or uncertainty in some other derived random variable.
         </p>
         <p class="muted">
           Below, $k$ is the batch size. The design $\mathcal{D}_{1:k}$ represents a set of $k$ candidate experiments (design
@@ -445,14 +442,14 @@
         </p>
         <p>
           When you can run multiple experiments, selecting the single best experiment (repeatedly choosing $k{=}1$) can be
-          suboptimal: you want a batch that is informative <em>together</em>, avoiding redundancy and covering the space of
+          suboptimal: you want a batch that is informative <em>together</em>, avoiding internal redundancy and covering the space of
           uncertainty efficiently.
         </p>
         <p>
           In principle, you can run this continuously: score designs in real time, collect the next batch, update the
           model, then re-score after every update.
         </p>
-        <p class="muted">In practice, computing MI inside a live data pipeline is awkward:</p>
+        <p class="muted">In practice, computing MI inside a live system is awkward:</p>
         <ul class="bullets">
           <li>
             <strong>Batch combinatorics:</strong> if you have $n$ candidate experiments and you choose batches of size $k$,
@@ -460,17 +457,7 @@
             estimator many times.
           </li>
           <li>
-            <strong>$k$-dimensional averaging:</strong> the expectation over $y_{1:k}$ is a $k$-dimensional sum/integral.
-            Naive enumeration can scale as $2^k$ for binary outcomes, and is even worse for continuous outcomes. Sampling-based estimators can help but often have high variance too.
-          </li>
-          <li>
-            <strong>Posterior refresh + state handoff:</strong> many estimators assume posterior samples exist (HMC/MCMC).
-            As new data arrives, you pay an inference cost to refresh the model state, ship samples/state to the MI
-            evaluator, score candidate batches, then repeat.
-          </li>
-          <li>
-            <strong>Engineering friction:</strong> implementing, tuning, and serving MI under latency constraints can become
-            its own project.
+            <strong>Posterior refresh + data movement:</strong> many estimators assume posterior samples exist (HMC/MCMC). As new data arrives, you also have to pay an inference cost to refresh the model state, ship samples/state to the MI evaluator, score candidate batches, then observe the data and repeat. Realistically, most use a stale model state for scoring, defeating the purpose of automated experiment design.
           </li>
         </ul>      </section>
 
@@ -479,17 +466,13 @@
         <p>
           Best-first adaptive partitioning is an adaptive quadrature over a discrete (or discretized) outcome space.
           It performs Bayesian updating inside the MI computation, so candidate batches can be scored without maintaining
-          posterior samples or a separate inference service. The main knob is a global refinement budget: fix that budget,
-          and per-query compute stays approximately flat as batch size $k$ grows.
-        </p>        <p class="muted">
-          “Constant-time in $k$” here means: with a fixed global refinement budget, runtime per MI query is approximately
-          independent of $k$. Increasing the budget trades runtime for fidelity.
-        </p>
+          posterior samples or a separate inference service. The main parameter is a global refinement budget: fix that budget,
+          and per-query compute stays approximately flat for many practical batch sizes.
+
         <p class="muted">
           In integration terms, you can treat it as a single scoring function: given your regression model specification,
           observed data, and a candidate batch $\mathcal{D}_{1:k}$, it returns an information-gain score for that batch.
-          “Model specification” can be as simple as a likelihood (and, when available, gradients/Hessians for efficient
-          local updates).
+          “Model specification” can be as simple as a likelihood (from which the service computes gradients/Hessians).
         </p>
         <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
         <p class="muted">
@@ -519,13 +502,13 @@ score = mi_estimate(posterior_samples, candidate_batch)        # repeated many t
           <div>
             <div class="code-title">After · Single Scoring Call</div>
             <pre><code>observed_data += new_observations
-score = information_gain(model_spec, observed_data, candidate_batch)</code></pre>
+score = information_gain(model_spec, observed_data, candidate_batch) # repeated many times during batch search</code></pre>
           </div>
         </div>
         <p class="muted">
           Observed data and a candidate batch go in, an
           information-gain score comes out. Dependencies can be minimal: standard numerical linear algebra plus your
-          likelihood/model code.
+          model likelihood.
         </p>
       </section>
 
@@ -536,15 +519,10 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
           across two representative model families (a linear-Gaussian baseline and a nonconjugate ridge-logistic model).
         </p>
         <p class="muted">
-          For context: on these small benchmarks, refreshing the sampling-based baselines via HMC/MCMC takes about 0.1s
-          (~100ms) per inference run.
-        </p>
-        <p class="muted">
           Terminology: “Oracle” refers to the high-quality reference used to score fidelity (correlation). In addition,
           the figures include a couple of problem-specific ceiling baselines (“MC analytic” in the linear-Gaussian case
           and “Exhaustive importance” in the ridge-logistic case). These are not general-purpose estimators—many models
-          don’t admit shortcuts like these—and they are included to show what’s achievable when you’re willing to write
-          custom, model-tailored machinery for these convenient model classes.
+          don’t admit shortcuts like these—and they are included to show what’s achievable in the absolute best case.
         </p>
         <p class="muted">
           One naming note: the plots label this method as “martingale.” On this page, that is the best-first adaptive
@@ -710,8 +688,7 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
         <details>
           <summary>Importance sampling (y-sampled)</summary>
           <p>
-            Avoids exhaustive outcome enumeration by sampling outcomes with a proposal distribution; can be brittle when
-            outcomes are imbalanced or proposals mismatch the predictive distribution.
+            Reweights prior samples by likelihoods at sampled outcomes. Highly efficient for the logistic regression benchmark, but can have high variance if the likelihoods are small or if the outcome space is large.
           </p>
         </details>
         <details>
@@ -732,8 +709,7 @@ score = information_gain(model_spec, observed_data, candidate_batch)</code></pre
         <h2>Interested?</h2>
         <p>
           If you’re selecting experiments with MI, or trying to score designs without maintaining an MCMC pipeline, I’m
-          happy to compare notes. The useful starting point is usually the regression model, the outcome space, and the
-          latency budget.
+          happy to discuss.
         </p>
         <div class="actions">
           <a class="button" href="mailto:joe@josephsmiller.com?subject=Mutual%20information%20design%20inquiry">Email me</a>
