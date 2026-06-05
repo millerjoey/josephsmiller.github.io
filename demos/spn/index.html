@@ -21,20 +21,8 @@
           <p class="eyebrow">Sum-Product Network Demo</p>
           <h1>Uncertain Data Explorer</h1>
           <p class="intro-copy">
-            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely in the browser.
+            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely computed in the browser.
           </p>
-          <p id="modelSubtitle"></p>
-        </div>
-        <div class="model-pickers">
-          <label class="model-picker">
-            <span>Model</span>
-            <select id="modelSelect" aria-label="Choose model"></select>
-          </label>
-          <label id="variantPicker" class="model-picker variant-picker" hidden>
-            <span>Trained model</span>
-            <select id="variantSelect" aria-label="Choose training data size"></select>
-            <small>Each option loads a separate exported SPN.</small>
-          </label>
         </div>
       </header>
 
@@ -42,12 +30,10 @@
         <div>
           <h2>What This Is</h2>
           <p>
-            Most dashboards filter observed rows. That works when the slice is large and clean, but breaks down when the question gets specific: small subgroups, missing fields, censored values, interval observations, or several partial conditions at once.
+            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. Instead of building a new model or custom analysis each time you have a follow-up question, the data is first turned into a learned probabilistic model. You can then ask many different “what if?” questions interactively: condition on partial evidence, leave some values unknown, use ranges or censored observations, and see the implied distributions, relationships, and realistic example records update immediately.
           </p>
-        </div>
-        <div>
           <p>
-            This demo is a dashboard over a learned joint distribution. A Sum-Product Network is trained once offline, optionally refined with autodiff, then exported as a static browser model. Because SPNs are tractable, the page can answer many conditional probability and sampling questions quickly without a backend.
+            The result sits somewhere between a very fast database and a handcrafted statistical model. It is designed for situations where you have hypotheses, incomplete observations, and follow-up questions that evolve as you look at the results. The model is trained once offline, then exported to the browser, so many conditional probability and sampling queries can be answered locally and almost instantly, without a backend or network round trip. A normal database can retrieve the records that match your query; this can also estimate what is likely in slices of the data that are small, incomplete, or only partially specified.
           </p>
         </div>
       </section>
@@ -68,6 +54,21 @@
       </aside>
 
       <section class="results">
+        <section class="panel model-panel">
+          <div class="model-pickers">
+            <label class="model-picker">
+              <span>Model</span>
+              <select id="modelSelect" aria-label="Choose model"></select>
+            </label>
+            <label id="variantPicker" class="model-picker variant-picker" hidden>
+              <span>Trained model</span>
+              <select id="variantSelect" aria-label="Choose training data size"></select>
+              <small>Each option loads a separate exported SPN.</small>
+            </label>
+          </div>
+          <p id="modelSubtitle"></p>
+        </section>
+
         <section class="panel about-panel">
           <div class="panel-head">
             <h2>Dataset</h2>
