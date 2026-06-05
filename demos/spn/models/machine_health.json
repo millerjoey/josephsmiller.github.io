@@ -2,7 +2,7 @@
   "id": "machine_health",
   "title": "Machine Health (synthetic data)",
   "subtitle": "Synthetic equipment data with one-sided sensor limits and set-valued alarm states.",
-  "about": "Synthetic, hand-authored demonstration model. It is not trained on a real equipment dataset yet; the parameters are chosen to mimic operating regimes with sensor limits, alarm states, count data, and zero-inflated downtime.",
+  "about": "Synthetic equipment-style demonstration model for operating regimes with sensor limits, alarm states, count data, and zero-inflated downtime.",
   "features": [
     {
       "name": "mode",
