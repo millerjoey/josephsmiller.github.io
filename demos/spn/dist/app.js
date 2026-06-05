@@ -10,7 +10,7 @@ import {
   sampleRows
 } from "./spn.js";
 
-const SAMPLE_COUNT = 10;
+const DEFAULT_SAMPLE_COUNT = 10;
 const RELATIONSHIP_SAMPLE_COUNT = 420;
 
 const state = {
@@ -19,6 +19,7 @@ const state = {
   activeVariant: null,
   model: null,
   evidence: {},
+  sampleCount: DEFAULT_SAMPLE_COUNT,
   sampleNonce: 0,
   relationship: {
     x: null,
@@ -41,6 +42,7 @@ const els = {
   relationshipPlot: document.querySelector("#relationshipPlot"),
   samples: document.querySelector("#samples"),
   redrawSamples: document.querySelector("#redrawSamples"),
+  sampleCountSelect: document.querySelector("#sampleCountSelect"),
   resetButton: document.querySelector("#resetEvidence")
 };
 
@@ -71,8 +73,12 @@ async function init() {
   els.redrawSamples.addEventListener("click", () => {
     state.sampleNonce += 1;
     const lp = logProb(state.model, state.evidence);
-    renderRelationship(lp);
     renderSamples(lp);
+  });
+  els.sampleCountSelect.addEventListener("change", () => {
+    state.sampleCount = Number(els.sampleCountSelect.value) || DEFAULT_SAMPLE_COUNT;
+    state.sampleNonce += 1;
+    renderSamples(logProb(state.model, state.evidence));
   });
   await selectCatalogItem(state.catalog[0]);
 }
@@ -106,6 +112,7 @@ async function loadModel(path) {
   const raw = await fetchJson(path);
   state.model = prepareModel(raw);
   state.evidence = {};
+  state.sampleCount = Number(els.sampleCountSelect.value) || DEFAULT_SAMPLE_COUNT;
   state.sampleNonce += 1;
   state.relationship = { x: null, y: null };
   els.subtitle.textContent = raw.subtitle ?? "";
@@ -539,8 +546,8 @@ function renderSamples(lp) {
     els.samples.innerHTML = `<div class="empty-panel">No conditional samples.</div>`;
     return;
   }
-  const rng = mulberry32(hashString(`${state.model.id}:${state.sampleNonce}:samples:${JSON.stringify(state.evidence)}`));
-  const rows = sampleRows(state.model, state.evidence, SAMPLE_COUNT, rng);
+  const rng = mulberry32(hashString(`${state.model.id}:${state.sampleNonce}:samples:${state.sampleCount}:${JSON.stringify(state.evidence)}`));
+  const rows = sampleRows(state.model, state.evidence, state.sampleCount, rng);
   const headers = state.model.features.map((feature) => `<th>${escapeHtml(feature.label)}</th>`).join("");
   const body = rows.map((row) => `
     <tr>

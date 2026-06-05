@@ -85,8 +85,12 @@ button:hover {
 select,
 input[type="number"] {
   min-height: 38px;
-  padding: 0 11px;
+  padding: 0 2.1rem 0 0.85rem;
   width: 100%;
+}
+
+input[type="number"] {
+  padding-right: 0.85rem;
 }
 
 button:focus-visible,
@@ -278,7 +282,10 @@ input:focus-visible {
 
 .evidence-row {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(86px, 0.8fr) minmax(0, 1.4fr);
+  grid-template-areas:
+    "label mode"
+    "editor editor";
+  grid-template-columns: minmax(0, 1fr) minmax(140px, auto);
   gap: 8px;
   align-items: start;
   padding: 10px;
@@ -288,7 +295,15 @@ input:focus-visible {
 }
 
 .field-label {
+  grid-area: label;
   min-width: 0;
+}
+
+.mode-select {
+  grid-area: mode;
+  justify-self: end;
+  width: min(170px, 100%);
+  min-width: 140px;
 }
 
 .field-label span {
@@ -306,15 +321,17 @@ input:focus-visible {
 }
 
 .field-editor {
+  grid-area: editor;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
   min-width: 0;
 }
 
 .field-editor input[type="number"] {
-  flex: 1 1 80px;
+  flex: 1 1 120px;
   min-width: 0;
 }
 
@@ -535,6 +552,29 @@ input:focus-visible {
   font-weight: 500;
 }
 
+.sample-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.sample-size-control {
+  display: inline-grid;
+  grid-template-columns: auto minmax(86px, 1fr);
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sample-size-control select {
+  min-width: 86px;
+}
+
 .relationship-plot {
   min-height: 250px;
   max-width: 100%;
@@ -676,7 +716,16 @@ td {
   }
 
   .evidence-row {
+    grid-template-areas:
+      "label"
+      "mode"
+      "editor";
     grid-template-columns: 1fr;
+  }
+
+  .mode-select {
+    justify-self: stretch;
+    width: 100%;
   }
 
   .field-editor {

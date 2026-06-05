@@ -17,7 +17,6 @@
         <div class="header-copy">
           <nav class="demo-nav" aria-label="Demo navigation">
             <a href="https://josephsmiller.com/">Home</a>
-            <a href="../oed/">Demos</a>
           </nav>
           <p class="eyebrow">Sum-Product Network Demo</p>
           <h1>Uncertain Data Explorer</h1>
@@ -88,7 +87,19 @@
         <section class="panel">
           <div class="panel-head">
             <h2>Conditional Samples</h2>
-            <button id="redrawSamples" type="button">Redraw samples</button>
+            <div class="sample-controls">
+              <button id="redrawSamples" type="button">Resample</button>
+              <label class="sample-size-control">
+                <span>Rows</span>
+                <select id="sampleCountSelect" aria-label="Conditional sample size">
+                  <option value="5">5</option>
+                  <option value="10" selected>10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </label>
+            </div>
           </div>
           <div id="samples"></div>
         </section>
