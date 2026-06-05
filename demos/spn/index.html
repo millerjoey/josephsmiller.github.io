@@ -23,9 +23,6 @@
           <p class="intro-copy">
             Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely in the browser.
           </p>
-          <p class="intro-copy">
-            Most dashboards filter observed rows. This demo queries a Sum-Product Network trained offline on finite mixed data. The same training path supports missing and censored observations, so uncertainty can enter the model before you ever start filtering or sampling.
-          </p>
           <p id="modelSubtitle"></p>
         </div>
         <div class="model-pickers">
@@ -34,11 +31,26 @@
             <select id="modelSelect" aria-label="Choose model"></select>
           </label>
           <label id="variantPicker" class="model-picker variant-picker" hidden>
-            <span>Training data</span>
+            <span>Trained model</span>
             <select id="variantSelect" aria-label="Choose training data size"></select>
+            <small>Each option loads a separate exported SPN.</small>
           </label>
         </div>
       </header>
+
+      <section class="what-panel">
+        <div>
+          <h2>What This Is</h2>
+          <p>
+            Most dashboards filter observed rows. That works when the slice is large and clean, but breaks down when the question gets specific: small subgroups, missing fields, censored values, interval observations, or several partial conditions at once.
+          </p>
+        </div>
+        <div>
+          <p>
+            This demo is a dashboard over a learned joint distribution. A Sum-Product Network is trained once offline, optionally refined with autodiff, then exported as a static browser model. Because SPNs are tractable, the page can answer many conditional probability and sampling questions quickly without a backend.
+          </p>
+        </div>
+      </section>
 
       <div class="workspace">
       <aside class="sidebar">

@@ -110,6 +110,11 @@ input:focus-visible {
   border-bottom: 1px solid rgba(31, 42, 55, 0.08);
 }
 
+.header-copy {
+  flex: 1 1 900px;
+  min-width: 0;
+}
+
 .app-header h1,
 .app-header p {
   margin: 0;
@@ -117,6 +122,7 @@ input:focus-visible {
 
 .app-header h1 {
   font-family: var(--font-serif);
+  margin: 0.45rem 0 0.8rem;
   font-size: clamp(2.1rem, 4vw, 3rem);
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -124,15 +130,19 @@ input:focus-visible {
 
 .intro-copy,
 .app-header #modelSubtitle {
-  max-width: 760px;
-  margin-top: 0.8rem;
+  max-width: 920px;
+  margin: 0;
   color: var(--muted);
   line-height: 1.65;
   font-size: 1.02rem;
 }
 
+.intro-copy + .intro-copy {
+  margin-top: 0.8rem;
+}
+
 .app-header #modelSubtitle {
-  margin-top: 0.55rem;
+  margin-top: 1rem;
   font-size: 0.95rem;
 }
 
@@ -184,6 +194,37 @@ input:focus-visible {
 
 .variant-picker {
   min-width: 150px;
+}
+
+.model-picker small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.what-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.3fr);
+  gap: 1.4rem;
+  padding: 1.5rem 2.75rem;
+  border-bottom: 1px solid rgba(31, 42, 55, 0.08);
+  background: linear-gradient(120deg, rgba(139, 58, 58, 0.08), rgba(255, 255, 255, 0.92));
+}
+
+.what-panel h2 {
+  font-family: var(--font-serif);
+  margin: 0 0 0.75rem;
+  color: var(--accent-strong);
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.what-panel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
 }
 
 .workspace {
@@ -588,6 +629,13 @@ input:focus-visible {
   font-weight: 700;
 }
 
+.plot-note {
+  margin: -4px 0 12px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
 .scatter-plot {
   display: block;
   width: 100%;
@@ -602,8 +650,52 @@ input:focus-visible {
   stroke-width: 1.4;
 }
 
+.box-plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 560px;
+}
+
+.box-plot .axis {
+  stroke: #9ba8a9;
+  stroke-width: 1.4;
+}
+
+.box-label,
+.box-value {
+  fill: var(--muted);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.box-value {
+  fill: var(--ink);
+  text-anchor: end;
+}
+
+.box-whisker,
+.box-cap {
+  stroke: rgba(139, 58, 58, 0.7);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.box-iqr {
+  fill: rgba(139, 58, 58, 0.18);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.box-median {
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
 .scatter-plot .axis-label,
-.scatter-plot .tick-label {
+.scatter-plot .tick-label,
+.box-plot .tick-label {
   fill: var(--muted);
   font-size: 13px;
 }
@@ -677,6 +769,10 @@ td {
     flex-direction: column;
   }
 
+  .header-copy {
+    flex-basis: auto;
+  }
+
   .model-pickers,
   .model-picker {
     min-width: 0;
@@ -684,6 +780,11 @@ td {
 
   .model-pickers {
     justify-content: stretch;
+  }
+
+  .what-panel {
+    grid-template-columns: 1fr;
+    padding: 1.25rem 1.35rem;
   }
 
   .workspace {

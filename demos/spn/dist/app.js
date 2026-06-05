@@ -473,33 +473,81 @@ function renderScatter(rows, xFeature, yFeature) {
 function renderCategoricalNumeric(rows, firstFeature, secondFeature) {
   const catFeature = isNumericFeature(firstFeature) ? secondFeature : firstFeature;
   const numFeature = isNumericFeature(firstFeature) ? firstFeature : secondFeature;
-  const groups = new Map(categoryValues(catFeature).map((value) => [value, { sum: 0, count: 0 }]));
+  const groups = new Map(categoryValues(catFeature).map((value) => [value, []]));
   for (const row of rows) {
     const key = row[catFeature.name];
     const value = Number(row[numFeature.name]);
     if (!groups.has(key) || !Number.isFinite(value)) continue;
-    const group = groups.get(key);
-    group.sum += value;
-    group.count += 1;
+    groups.get(key).push(value);
   }
-  const values = Array.from(groups.entries()).map(([category, group]) => ({
-    category,
-    mean: group.count > 0 ? group.sum / group.count : 0,
-    count: group.count
-  }));
-  const maxMean = Math.max(...values.map((item) => item.mean), 1e-12);
+  const summaries = Array.from(groups.entries())
+    .map(([category, values]) => summarizeGroup(category, values))
+    .filter((item) => item.count > 0);
+  if (summaries.length === 0) {
+    els.relationshipPlot.innerHTML = `<div class="empty-panel">No finite conditional samples for these variables.</div>`;
+    return;
+  }
+
+  const width = 760;
+  const rowHeight = 54;
+  const margin = { left: 130, right: 108, top: 28, bottom: 48 };
+  const height = margin.top + margin.bottom + rowHeight * summaries.length;
+  const extent = paddedExtent(summaries.flatMap((item) => [item.p05, item.p95]), numFeature.domain);
+  const xScale = (value) => margin.left + ((value - extent[0]) / (extent[1] - extent[0])) * (width - margin.left - margin.right);
+  const rowsSvg = summaries.map((item, index) => {
+    const y = margin.top + index * rowHeight + rowHeight / 2;
+    const q1 = xScale(item.q1);
+    const q3 = xScale(item.q3);
+    const median = xScale(item.median);
+    const p05 = xScale(item.p05);
+    const p95 = xScale(item.p95);
+    const boxWidth = Math.max(2, q3 - q1);
+    return `
+      <g class="box-row">
+        <text class="box-label" x="0" y="${y + 5}">${escapeHtml(displayCategory(item.category))}</text>
+        <line class="box-whisker" x1="${p05.toFixed(2)}" y1="${y}" x2="${p95.toFixed(2)}" y2="${y}"></line>
+        <line class="box-cap" x1="${p05.toFixed(2)}" y1="${y - 10}" x2="${p05.toFixed(2)}" y2="${y + 10}"></line>
+        <line class="box-cap" x1="${p95.toFixed(2)}" y1="${y - 10}" x2="${p95.toFixed(2)}" y2="${y + 10}"></line>
+        <rect class="box-iqr" x="${Math.min(q1, q3).toFixed(2)}" y="${y - 14}" width="${boxWidth.toFixed(2)}" height="28" rx="5"></rect>
+        <line class="box-median" x1="${median.toFixed(2)}" y1="${y - 15}" x2="${median.toFixed(2)}" y2="${y + 15}"></line>
+        <text class="box-value" x="${width}" y="${y + 5}">${escapeHtml(formatValue(numFeature, item.median))} / n=${item.count}</text>
+      </g>
+    `;
+  }).join("");
+
   els.relationshipPlot.innerHTML = `
     <div class="plot-title">${escapeHtml(numFeature.label)} by ${escapeHtml(catFeature.label)} from ${rows.length} conditional samples</div>
-    <div class="bar-list relationship-bars">
-      ${values.map((item) => `
-        <div class="bar-row">
-          <span class="bar-label">${escapeHtml(displayCategory(item.category))}</span>
-          <div class="bar-track"><i style="width:${toWidth(item.mean / maxMean)}%"></i></div>
-          <b>${escapeHtml(formatValue(numFeature, item.mean))} / n=${item.count}</b>
-        </div>
-      `).join("")}
-    </div>
+    <div class="plot-note">Box shows Q1-Q3; center line is median; whiskers show 5th-95th percentiles.</div>
+    <svg class="box-plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="Conditional box plot">
+      <line class="axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
+      <text class="tick-label" x="${margin.left}" y="${height - margin.bottom + 22}">${escapeHtml(formatValue(numFeature, extent[0]))}</text>
+      <text class="tick-label end" x="${width - margin.right}" y="${height - margin.bottom + 22}">${escapeHtml(formatValue(numFeature, extent[1]))}</text>
+      ${rowsSvg}
+    </svg>
   `;
+}
+
+function summarizeGroup(category, values) {
+  const sorted = values.slice().sort((a, b) => a - b);
+  return {
+    category,
+    count: sorted.length,
+    p05: quantileSorted(sorted, 0.05),
+    q1: quantileSorted(sorted, 0.25),
+    median: quantileSorted(sorted, 0.5),
+    q3: quantileSorted(sorted, 0.75),
+    p95: quantileSorted(sorted, 0.95)
+  };
+}
+
+function quantileSorted(sorted, p) {
+  if (sorted.length === 0) return NaN;
+  if (sorted.length === 1) return sorted[0];
+  const position = p * (sorted.length - 1);
+  const lo = Math.floor(position);
+  const hi = Math.ceil(position);
+  const weight = position - lo;
+  return sorted[lo] * (1 - weight) + sorted[hi] * weight;
 }
 
 function renderContingency(rows, xFeature, yFeature) {
