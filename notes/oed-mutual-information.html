@@ -516,34 +516,32 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
         <h2>Results</h2>
         <p class="muted">
           These figures compare multiple estimators of mutual information (MI) used for Bayesian experimental design,
-          across two representative model families (a linear-Gaussian baseline and a nonconjugate ridge-logistic model).
+          across two representative model families (linear regression with unknown observation variance and a
+          nonconjugate ridge-logistic model).
         </p>
         <p class="muted">
           Terminology: “Oracle” refers to the high-quality reference used to score fidelity (correlation). In addition,
-          the figures include a couple of problem-specific ceiling baselines (“MC analytic” in the linear-Gaussian case
-          and “Exhaustive importance” in the ridge-logistic case). These are not general-purpose estimators—many models
-          don’t admit shortcuts like these—and they are included to show what’s achievable in the absolute best case.
-        </p>
-        <p class="muted">
-          One naming note: the plots label this method as “martingale.” On this page, that is the best-first adaptive
-          partitioning implementation described above.
+          the figures include a couple of problem-specific ceiling baselines (“HMC oracle (analytic)” in the linear
+          model and “Exhaustive importance” in the ridge-logistic case). These are not general-purpose estimators—many
+          models don’t admit shortcuts like these—and they are included to show what’s achievable in the absolute best
+          case.
         </p>
 
         <div class="stack-tight">
           <figure>
             <img
               src="assets/mi_all_summary_linear.png"
-              alt="Linear-Gaussian results: correlation and runtime versus batch size k for posterior MI and predictive MI."
+              alt="Linear regression with unknown variance results: correlation and runtime versus batch size k for posterior MI and predictive MI."
               width="2600"
               height="1400"
               loading="lazy"
               decoding="async"
             >
             <figcaption>
-              <strong>Linear-Gaussian model.</strong> Top row: correlation with the Oracle reference vs batch size $k$ for
-              posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs $k$. With a fixed
-              refinement budget, best-first adaptive partitioning keeps runtime roughly flat as $k$ grows while maintaining
-              useful correlation with the reference ranking.
+              <strong>Linear regression with unknown variance.</strong> Top row: correlation with the Oracle reference vs
+              batch size $k$ for posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs
+              $k$. With a fixed refinement budget, best-first adaptive partitioning keeps runtime roughly flat as $k$
+              grows while maintaining useful correlation with the reference ranking.
             </figcaption>
           </figure>
 
@@ -692,7 +690,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
           </p>
         </details>
         <details>
-          <summary>Problem-specific ceiling baselines (MC analytic / exhaustive importance)</summary>
+          <summary>Problem-specific ceiling baselines (HMC oracle / exhaustive importance)</summary>
           <p>
             These are not drop-in estimators you’d deploy in a generic design loop. They are custom, model-specific
             reference computations that either exploit analytic structure or use very expensive, problem-tailored
