@@ -6,7 +6,7 @@
     <title>SPN Uncertain Data Explorer</title>
     <meta
       name="description"
-      content="Interactive Sum-Product Network demo for querying mixed data with missing, interval/censored, and set-valued evidence."
+      content="Interactive Sum-Product Network demo for training and querying mixed data with missing, interval/censored, and set-valued evidence."
     >
     <meta name="theme-color" content="#8b3a3a">
     <link rel="stylesheet" href="styles.css">
@@ -22,6 +22,9 @@
           <h1>Uncertain Data Explorer</h1>
           <p class="intro-copy">
             Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely in the browser.
+          </p>
+          <p class="intro-copy">
+            Most dashboards filter observed rows. This demo queries a Sum-Product Network trained offline on finite mixed data. The same training path supports missing and censored observations, so uncertainty can enter the model before you ever start filtering or sampling.
           </p>
           <p id="modelSubtitle"></p>
         </div>
