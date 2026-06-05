@@ -2,7 +2,7 @@
   "id": "messy_claims",
   "title": "Messy Claims (synthetic data)",
   "subtitle": "Synthetic mixed data with censored claim amounts and partial demographic evidence.",
-  "about": "Synthetic, hand-authored demonstration model. It is not trained on a real claims dataset yet; the parameters are chosen to mimic mixed records with demographic fields, counts, categorical risk, zero claim amounts, and right-censored claim observations.",
+  "about": "Synthetic claims-style demonstration model for mixed records with demographic fields, counts, categorical risk, zero claim amounts, and right-censored claim observations.",
   "features": [
     {
       "name": "segment",
