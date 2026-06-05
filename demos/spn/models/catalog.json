@@ -1,0 +1,35 @@
+{
+  "models": [
+    {
+      "id": "messy_claims",
+      "title": "Messy Claims (synthetic data)",
+      "path": "models/messy_claims.json"
+    },
+    {
+      "id": "machine_health",
+      "title": "Machine Health (synthetic data)",
+      "path": "models/machine_health.json"
+    },
+    {
+      "id": "adult_census",
+      "title": "Adult Census",
+      "variants": [
+        {
+          "id": "adult_census_500",
+          "label": "500 rows",
+          "path": "models/adult_census_500.json"
+        },
+        {
+          "id": "adult_census_2000",
+          "label": "2,000 rows",
+          "path": "models/adult_census_2000.json"
+        },
+        {
+          "id": "adult_census_5000",
+          "label": "5,000 rows",
+          "path": "models/adult_census_5000.json"
+        }
+      ]
+    }
+  ]
+}

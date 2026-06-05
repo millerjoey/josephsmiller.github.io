@@ -1,0 +1,143 @@
+{
+  "id": "messy_claims",
+  "title": "Messy Claims (synthetic data)",
+  "subtitle": "Synthetic mixed data with censored claim amounts and partial demographic evidence.",
+  "about": "Synthetic, hand-authored demonstration model. It is not trained on a real claims dataset yet; the parameters are chosen to mimic mixed records with demographic fields, counts, categorical risk, zero claim amounts, and right-censored claim observations.",
+  "features": [
+    {
+      "name": "segment",
+      "label": "Segment",
+      "kind": "categorical",
+      "values": ["student", "professional", "family", "retired"]
+    },
+    {
+      "name": "age",
+      "label": "Age",
+      "kind": "continuous",
+      "domain": [18, 88],
+      "unit": "years",
+      "bins": 10
+    },
+    {
+      "name": "income_k",
+      "label": "Income",
+      "kind": "continuous",
+      "domain": [0, 220],
+      "unit": "$k",
+      "bins": 11
+    },
+    {
+      "name": "education",
+      "label": "Education",
+      "kind": "categorical",
+      "values": ["high_school", "some_college", "college", "graduate"]
+    },
+    {
+      "name": "visits",
+      "label": "Visits",
+      "kind": "count",
+      "domain": [0, 14],
+      "unit": "visits",
+      "bins": 8
+    },
+    {
+      "name": "claim_k",
+      "label": "Claim",
+      "kind": "continuous",
+      "domain": [0, 35],
+      "unit": "$k",
+      "bins": 10
+    },
+    {
+      "name": "risk",
+      "label": "Risk",
+      "kind": "categorical",
+      "values": ["low", "medium", "high"]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Censored Claim",
+      "evidence": {
+        "age": { "kind": "interval", "lower": 35, "upper": 60 },
+        "claim_k": { "kind": "interval", "upper": 2.5 },
+        "education": { "kind": "set", "values": ["college", "graduate"] }
+      }
+    },
+    {
+      "name": "Sparse High Earner",
+      "evidence": {
+        "income_k": { "kind": "interval", "lower": 85 },
+        "visits": { "kind": "interval", "upper": 2 },
+        "risk": { "kind": "set", "values": ["low", "medium"] }
+      }
+    },
+    {
+      "name": "Older Partial Row",
+      "evidence": {
+        "age": { "kind": "interval", "lower": 67 },
+        "claim_k": { "kind": "interval", "upper": 5 },
+        "risk": { "kind": "set", "values": ["medium", "high"] }
+      }
+    }
+  ],
+  "root": {
+    "type": "sum",
+    "name": "population",
+    "weights": [0.14, 0.38, 0.3, 0.18],
+    "children": [
+      {
+        "type": "product",
+        "name": "student-like",
+        "children": [
+          { "type": "leaf", "feature": "segment", "dist": { "kind": "categorical", "probs": { "student": 0.96, "professional": 0.02, "family": 0.01, "retired": 0.01 } } },
+          { "type": "leaf", "feature": "age", "dist": { "kind": "normal", "mean": 23, "sd": 4.2 } },
+          { "type": "leaf", "feature": "income_k", "dist": { "kind": "lognormal", "mu": 3.22, "sigma": 0.52 } },
+          { "type": "leaf", "feature": "education", "dist": { "kind": "categorical", "probs": { "high_school": 0.13, "some_college": 0.46, "college": 0.33, "graduate": 0.08 } } },
+          { "type": "leaf", "feature": "visits", "dist": { "kind": "poisson", "lambda": 1.4 } },
+          { "type": "leaf", "feature": "claim_k", "dist": { "kind": "zeroInflatedLognormal", "zeroProb": 0.72, "mu": 0.41, "sigma": 0.82 } },
+          { "type": "leaf", "feature": "risk", "dist": { "kind": "categorical", "probs": { "low": 0.72, "medium": 0.22, "high": 0.06 } } }
+        ]
+      },
+      {
+        "type": "product",
+        "name": "professional-like",
+        "children": [
+          { "type": "leaf", "feature": "segment", "dist": { "kind": "categorical", "probs": { "student": 0.02, "professional": 0.91, "family": 0.05, "retired": 0.02 } } },
+          { "type": "leaf", "feature": "age", "dist": { "kind": "normal", "mean": 41, "sd": 9 } },
+          { "type": "leaf", "feature": "income_k", "dist": { "kind": "lognormal", "mu": 4.25, "sigma": 0.45 } },
+          { "type": "leaf", "feature": "education", "dist": { "kind": "categorical", "probs": { "high_school": 0.12, "some_college": 0.21, "college": 0.45, "graduate": 0.22 } } },
+          { "type": "leaf", "feature": "visits", "dist": { "kind": "poisson", "lambda": 2.3 } },
+          { "type": "leaf", "feature": "claim_k", "dist": { "kind": "zeroInflatedLognormal", "zeroProb": 0.58, "mu": 1.2, "sigma": 0.72 } },
+          { "type": "leaf", "feature": "risk", "dist": { "kind": "categorical", "probs": { "low": 0.58, "medium": 0.32, "high": 0.1 } } }
+        ]
+      },
+      {
+        "type": "product",
+        "name": "family-like",
+        "children": [
+          { "type": "leaf", "feature": "segment", "dist": { "kind": "categorical", "probs": { "student": 0.01, "professional": 0.18, "family": 0.78, "retired": 0.03 } } },
+          { "type": "leaf", "feature": "age", "dist": { "kind": "normal", "mean": 50, "sd": 10 } },
+          { "type": "leaf", "feature": "income_k", "dist": { "kind": "lognormal", "mu": 4.05, "sigma": 0.56 } },
+          { "type": "leaf", "feature": "education", "dist": { "kind": "categorical", "probs": { "high_school": 0.24, "some_college": 0.31, "college": 0.33, "graduate": 0.12 } } },
+          { "type": "leaf", "feature": "visits", "dist": { "kind": "poisson", "lambda": 3.9 } },
+          { "type": "leaf", "feature": "claim_k", "dist": { "kind": "zeroInflatedLognormal", "zeroProb": 0.42, "mu": 1.9, "sigma": 0.78 } },
+          { "type": "leaf", "feature": "risk", "dist": { "kind": "categorical", "probs": { "low": 0.34, "medium": 0.46, "high": 0.2 } } }
+        ]
+      },
+      {
+        "type": "product",
+        "name": "retired-like",
+        "children": [
+          { "type": "leaf", "feature": "segment", "dist": { "kind": "categorical", "probs": { "student": 0.01, "professional": 0.03, "family": 0.08, "retired": 0.88 } } },
+          { "type": "leaf", "feature": "age", "dist": { "kind": "normal", "mean": 71, "sd": 7 } },
+          { "type": "leaf", "feature": "income_k", "dist": { "kind": "lognormal", "mu": 3.55, "sigma": 0.43 } },
+          { "type": "leaf", "feature": "education", "dist": { "kind": "categorical", "probs": { "high_school": 0.45, "some_college": 0.29, "college": 0.19, "graduate": 0.07 } } },
+          { "type": "leaf", "feature": "visits", "dist": { "kind": "poisson", "lambda": 6.0 } },
+          { "type": "leaf", "feature": "claim_k", "dist": { "kind": "zeroInflatedLognormal", "zeroProb": 0.34, "mu": 2.1, "sigma": 0.82 } },
+          { "type": "leaf", "feature": "risk", "dist": { "kind": "categorical", "probs": { "low": 0.22, "medium": 0.48, "high": 0.3 } } }
+        ]
+      }
+    ]
+  }
+}
