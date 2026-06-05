@@ -379,7 +379,12 @@
       <div class="eyebrow">Technical note</div>
       <h1>Constant-time mutual information for Bayesian experimental design</h1>
       <p class="lede">
-        Classic asymptotically unbiased Mutual Information estimation techniques require two rounds of independent sampling, one from a posterior and one from the likelihood, and have high variance and terrible scaling properties to large  experiment batches. For large experiment batches, you'd instead rely on optimization and techniques that scale better but are biased in ways that make them difficult to audit, or variants of an importance-sampling approach but risk extremely high variance as weights shrink. The algorithm that I highlight below performs Bayesian updating and mutual-information approximation with nearly no variance and, being recursive, has very consistent bias for large ranges of batch sizes. It is extremely efficient for low-parameter (dozens of parameters) differentiable models and can handle moderate batch sizes, decaying gracefully as batch size increases and budget remains limited.
+        Classic asymptotically unbiased mutual-information estimators usually need nested sampling: one set of samples
+        from the posterior and another from the likelihood. That can be noisy and expensive when a batch contains many
+        experiments. You can use optimization-heavy approximations or importance sampling instead, but the bias and
+        variance can be hard to audit. The algorithm highlighted below performs Bayesian updating and
+        mutual-information approximation together. With a fixed refinement budget it gives stable, low-variance scores
+        for low-parameter differentiable models and degrades gradually as batch size grows.
       </p>
       <ul class="bullets muted">
         <li><strong>Predictable compute:</strong> with a fixed computation budget, per-query runtime stays approximately flat for a range of batch sizes.</li>
@@ -468,11 +473,11 @@
           It performs Bayesian updating inside the MI computation, so candidate batches can be scored without maintaining
           posterior samples or a separate inference service. The main parameter is a global refinement budget: fix that budget,
           and per-query compute stays approximately flat for many practical batch sizes.
-
+        </p>
         <p class="muted">
           In integration terms, you can treat it as a single scoring function: given your regression model specification,
           observed data, and a candidate batch $\mathcal{D}_{1:k}$, it returns an information-gain score for that batch.
-          “Model specification” can be as simple as a likelihood (from which the service computes gradients/Hessians).
+          “Model specification” can be as simple as a likelihood plus the derivatives needed for local updates.
         </p>
         <pre><code>information_gain(model_spec, observed_data, candidate_batch) -&gt; score</code></pre>
         <p class="muted">
@@ -482,7 +487,7 @@
         </p>
         <p class="muted">
           <strong>Where I would not start with it:</strong> settings where you already have high-quality posterior draws on hand,
-          have highly complex models without analytic likelihoods (though I'm working on it, email me), or are not bottlenecked by latency.
+          have highly complex models without tractable likelihood evaluations, or are not bottlenecked by latency.
         </p>
         <p class="muted"><strong>Integration view:</strong> before (two-service pipeline) vs after (single scoring call).</p>
         <div class="code-grid">
@@ -520,11 +525,8 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
           nonconjugate ridge-logistic model).
         </p>
         <p class="muted">
-          Terminology: “Oracle” refers to the high-quality reference used to score fidelity (correlation). In addition,
-          the figures include a couple of problem-specific ceiling baselines (“HMC oracle (analytic)” in the linear
-          model and “Exhaustive importance” in the ridge-logistic case). These are not general-purpose estimators—many
-          models don’t admit shortcuts like these—and they are included to show what’s achievable in the absolute best
-          case.
+          Fidelity is measured by correlation with a high-quality reference MI value for each candidate batch. The
+          reference is kept off the plots, so the figures compare the practical estimators directly.
         </p>
 
         <div class="stack-tight">
@@ -538,7 +540,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
               decoding="async"
             >
             <figcaption>
-              <strong>Linear regression with unknown variance.</strong> Top row: correlation with the Oracle reference vs
+              <strong>Linear regression with unknown variance.</strong> Top row: correlation with the reference vs
               batch size $k$ for posterior MI (left) and predictive MI (right). Bottom row: average time per MI query vs
               $k$. With a fixed refinement budget, best-first adaptive partitioning keeps runtime roughly flat as $k$
               grows while maintaining useful correlation with the reference ranking.
@@ -604,7 +606,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
             </li>
             <li>
               <strong>Fidelity (correlation):</strong> Pearson correlation across 20 candidate batches between a method’s MI
-              estimates and the Oracle MI values (higher means better MI-based ranking).
+              estimates and the reference MI values (higher means better MI-based ranking).
             </li>
             <li>
               Two objectives: posterior MI (learning parameters) and predictive MI (learning predictions at target
@@ -623,12 +625,13 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
               partitioning avoids that dependency by updating posterior state as part of MI estimation.
             </li>
             <li>
-              On these benchmarks the HMC/MCMC inference step is about 0.1s (~100ms), even though the models are small.
-              Best-first adaptive partitioning takes about 1ms for inference <strong>and</strong> MI estimation.
+              On these small benchmarks the HMC/MCMC refresh is still a fixed cost outside the plotted MI-query timings.
+              Best-first adaptive partitioning folds the update into the scoring call, so the plotted cost is the full
+              per-query estimator cost.
             </li>
             <li>
               To avoid subtle “training on the test set” effects, each sampling-based method uses its own independent
-              posterior draw stream (not shared across methods or with the Oracle reference).
+              posterior draw stream (not shared across methods or with the reference computation).
             </li>
           </ul>
         </section>
@@ -687,18 +690,6 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
           <summary>Importance sampling (y-sampled)</summary>
           <p>
             Reweights prior samples by likelihoods at sampled outcomes. Highly efficient for the logistic regression benchmark, but can have high variance if the likelihoods are small or if the outcome space is large.
-          </p>
-        </details>
-        <details>
-          <summary>Problem-specific ceiling baselines (HMC oracle / exhaustive importance)</summary>
-          <p>
-            These are not drop-in estimators you’d deploy in a generic design loop. They are custom, model-specific
-            reference computations that either exploit analytic structure or use very expensive, problem-tailored
-            importance schemes (often alongside HMC) to approximate MI as accurately as practical for these benchmarks.
-          </p>
-          <p>
-            They’re included to ground the comparisons: rather than arguing against weak baselines, the figures show how
-            close each scalable method gets to a credible ceiling when custom, model-tailored tools are available.
           </p>
         </details>
       </section>
