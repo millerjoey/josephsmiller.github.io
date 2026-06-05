@@ -16,17 +16,17 @@
       "variants": [
         {
           "id": "adult_census_500",
-          "label": "500 rows",
+          "label": "504-row model",
           "path": "models/adult_census_500.json"
         },
         {
           "id": "adult_census_2000",
-          "label": "2,000 rows",
+          "label": "2,001-row model",
           "path": "models/adult_census_2000.json"
         },
         {
           "id": "adult_census_5000",
-          "label": "5,000 rows",
+          "label": "5,000-row model",
           "path": "models/adult_census_5000.json"
         }
       ]
