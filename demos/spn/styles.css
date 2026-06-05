@@ -683,16 +683,10 @@ input:focus-visible {
   stroke-width: 1.4;
 }
 
-.box-label,
-.box-value {
+.box-label {
   fill: var(--muted);
   font-size: 14px;
   font-weight: 650;
-}
-
-.box-value {
-  fill: var(--ink);
-  text-anchor: end;
 }
 
 .box-whisker,
