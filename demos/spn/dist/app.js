@@ -16,7 +16,6 @@ const RELATIONSHIP_SAMPLE_COUNT = 420;
 const state = {
   catalog: [],
   activeItem: null,
-  activeVariant: null,
   model: null,
   evidence: {},
   sampleCount: DEFAULT_SAMPLE_COUNT,
@@ -29,8 +28,6 @@ const state = {
 
 const els = {
   modelSelect: document.querySelector("#modelSelect"),
-  variantPicker: document.querySelector("#variantPicker"),
-  variantSelect: document.querySelector("#variantSelect"),
   subtitle: document.querySelector("#modelSubtitle"),
   modelAbout: document.querySelector("#modelAbout"),
   presetButtons: document.querySelector("#presetButtons"),
@@ -58,12 +55,6 @@ async function init() {
     const item = state.catalog.find((model) => model.id === els.modelSelect.value) ?? state.catalog[0];
     selectCatalogItem(item);
   });
-  els.variantSelect.addEventListener("change", () => {
-    const variants = state.activeItem?.variants ?? [];
-    const variant = variants.find((item) => item.id === els.variantSelect.value) ?? variants[0];
-    state.activeVariant = variant;
-    loadModel(variant.path);
-  });
   els.resetButton.addEventListener("click", () => {
     state.evidence = {};
     state.sampleNonce += 1;
@@ -83,29 +74,9 @@ async function init() {
   await selectCatalogItem(state.catalog[0]);
 }
 
-async function selectCatalogItem(item, preferredVariantId = null) {
+async function selectCatalogItem(item) {
   state.activeItem = item;
-  renderVariantSelect(item, preferredVariantId);
-  const path = state.activeVariant?.path ?? item.path;
-  await loadModel(path);
-}
-
-function renderVariantSelect(item, preferredVariantId = null) {
-  const variants = item.variants ?? [];
-  if (variants.length === 0) {
-    state.activeVariant = null;
-    els.variantPicker.hidden = true;
-    els.variantSelect.innerHTML = "";
-    return;
-  }
-
-  const selected = variants.find((variant) => variant.id === preferredVariantId) ?? variants[0];
-  state.activeVariant = selected;
-  els.variantPicker.hidden = false;
-  els.variantSelect.innerHTML = variants.map((variant) => (
-    `<option value="${escapeHtml(variant.id)}">${escapeHtml(variant.label)}</option>`
-  )).join("");
-  els.variantSelect.value = selected.id;
+  await loadModel(item.path);
 }
 
 async function loadModel(path) {
@@ -118,7 +89,6 @@ async function loadModel(path) {
   els.subtitle.textContent = raw.subtitle ?? "";
   els.modelAbout.textContent = raw.about ?? "Static SPN model loaded from JSON. Training is expected to happen offline before deployment.";
   els.modelSelect.value = state.activeItem?.id ?? raw.id;
-  if (state.activeVariant) els.variantSelect.value = state.activeVariant.id;
   renderPresets();
   renderControls();
   renderOutputs();
@@ -490,7 +460,7 @@ function renderCategoricalNumeric(rows, firstFeature, secondFeature) {
 
   const width = 760;
   const rowHeight = 54;
-  const margin = { left: 130, right: 44, top: 28, bottom: 48 };
+  const margin = { left: 130, right: 108, top: 28, bottom: 48 };
   const height = margin.top + margin.bottom + rowHeight * summaries.length;
   const extent = paddedExtent(summaries.flatMap((item) => [item.p05, item.p95]), numFeature.domain);
   const xScale = (value) => margin.left + ((value - extent[0]) / (extent[1] - extent[0])) * (width - margin.left - margin.right);
@@ -510,6 +480,7 @@ function renderCategoricalNumeric(rows, firstFeature, secondFeature) {
         <line class="box-cap" x1="${p95.toFixed(2)}" y1="${y - 10}" x2="${p95.toFixed(2)}" y2="${y + 10}"></line>
         <rect class="box-iqr" x="${Math.min(q1, q3).toFixed(2)}" y="${y - 14}" width="${boxWidth.toFixed(2)}" height="28" rx="5"></rect>
         <line class="box-median" x1="${median.toFixed(2)}" y1="${y - 15}" x2="${median.toFixed(2)}" y2="${y + 15}"></line>
+        <text class="box-value" x="${width}" y="${y + 5}">${escapeHtml(formatValue(numFeature, item.median))} / n=${item.count}</text>
       </g>
     `;
   }).join("");

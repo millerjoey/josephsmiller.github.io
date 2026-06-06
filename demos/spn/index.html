@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SPN Probabilistic Data Explorer</title>
+    <title>SPN Uncertain Data Explorer</title>
     <meta
       name="description"
       content="Interactive Sum-Product Network demo for training and querying mixed data with missing, interval/censored, and set-valued evidence."
@@ -19,10 +19,20 @@
             <a href="https://josephsmiller.com/">Home</a>
           </nav>
           <p class="eyebrow">Sum-Product Network Demo</p>
-          <h1>Probabilistic Data Explorer</h1>
+          <h1>Uncertain Data Explorer</h1>
           <p class="intro-copy">
-            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely computed in the browser.
+            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely in the browser.
           </p>
+          <p class="intro-copy">
+            Most dashboards filter observed rows. This demo queries a Sum-Product Network trained offline on finite mixed data. The same training path supports missing and censored observations, so uncertainty can enter the model before you ever start filtering or sampling.
+          </p>
+          <p id="modelSubtitle"></p>
+        </div>
+        <div class="model-pickers">
+          <label class="model-picker">
+            <span>Model</span>
+            <select id="modelSelect" aria-label="Choose model"></select>
+          </label>
         </div>
       </header>
 
@@ -30,10 +40,12 @@
         <div>
           <h2>What This Is</h2>
           <p>
-            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. Instead of building a new model or custom analysis each time you have a follow-up question, the data is first turned into a learned probabilistic model. You can then ask many different questions about the relationships in the data interactively: condition on partial evidence, leave some values unknown, use ranges or censored observations, and see the implied distributions, trends, and realistic example records update immediately.
+            Most dashboards filter observed rows. That works when the slice is large and clean, but breaks down when the question gets specific: small subgroups, missing fields, censored values, interval observations, or several partial conditions at once.
           </p>
+        </div>
+        <div>
           <p>
-            The result sits somewhere between a very fast big database and a handcrafted statistical model. It is designed for situations where you have hypotheses, incomplete observations, and follow-up questions that evolve as you look at the results. In this example, each model is trained once offline, then exported and computed in the browser, so many conditional probability and sampling queries can be answered locally and almost instantly, without a backend or network trip. A normal database can retrieve the records that match your query; this can also estimate what is likely in slices of the data that are small, incomplete, or only partially specified.
+            This demo is a dashboard over a learned joint distribution. A Sum-Product Network is trained once offline, optionally refined with autodiff, then exported as a static browser model. Because SPNs are tractable, the page can answer many conditional probability and sampling questions quickly without a backend. The same representation can also be used during training, so incomplete records, missing fields, ranges, and censored values do not have to be discarded or forced into single imputed values.
           </p>
         </div>
       </section>
@@ -54,21 +66,6 @@
       </aside>
 
       <section class="results">
-        <section class="panel model-panel">
-          <div class="model-pickers">
-            <label class="model-picker">
-              <span>Model</span>
-              <select id="modelSelect" aria-label="Choose model"></select>
-            </label>
-            <label id="variantPicker" class="model-picker variant-picker" hidden>
-              <span>Trained model</span>
-              <select id="variantSelect" aria-label="Choose training data size"></select>
-              <small>Each option loads a separate exported SPN.</small>
-            </label>
-          </div>
-          <p id="modelSubtitle"></p>
-        </section>
-
         <section class="panel about-panel">
           <div class="panel-head">
             <h2>Dataset</h2>
