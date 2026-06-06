@@ -192,7 +192,7 @@ input:focus-visible {
 
 .model-panel {
   display: grid;
-  grid-template-columns: minmax(260px, 380px) minmax(280px, 1fr);
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
   align-items: end;
   gap: 1rem 1.35rem;
   padding: 1.15rem 1.35rem;
@@ -201,6 +201,7 @@ input:focus-visible {
 .model-panel .model-pickers {
   align-items: start;
   justify-content: flex-start;
+  min-width: 0;
 }
 
 .model-panel .model-picker {
@@ -216,11 +217,13 @@ input:focus-visible {
 }
 
 .model-panel #modelSubtitle {
+  min-width: 0;
   max-width: 620px;
   margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .what-panel {
