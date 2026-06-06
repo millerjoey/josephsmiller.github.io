@@ -480,7 +480,6 @@ function renderCategoricalNumeric(rows, firstFeature, secondFeature) {
         <line class="box-cap" x1="${p95.toFixed(2)}" y1="${y - 10}" x2="${p95.toFixed(2)}" y2="${y + 10}"></line>
         <rect class="box-iqr" x="${Math.min(q1, q3).toFixed(2)}" y="${y - 14}" width="${boxWidth.toFixed(2)}" height="28" rx="5"></rect>
         <line class="box-median" x1="${median.toFixed(2)}" y1="${y - 15}" x2="${median.toFixed(2)}" y2="${y + 15}"></line>
-        <text class="box-value" x="${width}" y="${y + 5}">${escapeHtml(formatValue(numFeature, item.median))} / n=${item.count}</text>
       </g>
     `;
   }).join("");
