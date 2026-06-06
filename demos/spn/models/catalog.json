@@ -13,18 +13,7 @@
     {
       "id": "adult_census",
       "title": "Adult Census",
-      "variants": [
-        {
-          "id": "adult_census_500",
-          "label": "504-row optimized model",
-          "path": "models/adult_census_500.json"
-        },
-        {
-          "id": "adult_census_2000",
-          "label": "2,001-row optimized model",
-          "path": "models/adult_census_2000.json"
-        }
-      ]
+      "path": "models/adult_census_5000.json"
     }
   ]
 }
