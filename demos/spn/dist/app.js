@@ -173,7 +173,7 @@ function createFeatureControl(feature) {
 function buildEditor(feature, mode, current, editor) {
   editor.innerHTML = "";
   if (mode === "missing") {
-    editor.appendChild(readonlyPill("marginalized"));
+    editor.appendChild(readonlyPill("left unknown"));
     return;
   }
 
@@ -289,8 +289,16 @@ function renderActiveEvidence() {
 function renderMetrics(lp) {
   const mass = Number.isFinite(lp) ? Math.exp(lp) : 0;
   els.metrics.innerHTML = [
-    metric("log p(e)", Number.isFinite(lp) ? lp.toFixed(3) : "-inf"),
-    metric("p(e) / density", formatScientific(mass)),
+    metric(
+      "Query fit",
+      Number.isFinite(lp) ? lp.toFixed(3) : "-inf",
+      "Technical term: log p(e), the log probability of the selected evidence."
+    ),
+    metric(
+      "Query weight",
+      formatScientific(mass),
+      "Technical term: p(e) / density, the probability mass or density for the selected evidence."
+    ),
     metric("active fields", String(Object.keys(state.evidence).length))
   ].join("");
 }
@@ -375,13 +383,13 @@ function renderRelationshipControls() {
 
 function renderRelationship(lp) {
   if (!Number.isFinite(lp)) {
-    els.relationshipPlot.innerHTML = `<div class="empty-panel">No conditional relationship to draw.</div>`;
+    els.relationshipPlot.innerHTML = `<div class="empty-panel">No relationship to draw for this query.</div>`;
     return;
   }
 
   const available = availableRelationshipFeatures();
   if (available.length < 2) {
-    els.relationshipPlot.innerHTML = `<div class="empty-panel">Fix fewer variables exactly to inspect a conditional relationship.</div>`;
+    els.relationshipPlot.innerHTML = `<div class="empty-panel">Fix fewer variables exactly to inspect a relationship.</div>`;
     return;
   }
 
@@ -425,8 +433,8 @@ function renderScatter(rows, xFeature, yFeature) {
   )).join("");
 
   els.relationshipPlot.innerHTML = `
-    <div class="plot-title">Conditional scatter from ${points.length} samples</div>
-    <svg class="scatter-plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="Conditional scatter plot">
+    <div class="plot-title">Scatter from ${points.length} matching sample rows</div>
+    <svg class="scatter-plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="Scatter plot for matching sample rows">
       <line class="axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
       <line class="axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}"></line>
       <text class="axis-label" x="${width / 2}" y="${height - 12}">${escapeHtml(xFeature.label)}</text>
@@ -454,7 +462,7 @@ function renderCategoricalNumeric(rows, firstFeature, secondFeature) {
     .map(([category, values]) => summarizeGroup(category, values))
     .filter((item) => item.count > 0);
   if (summaries.length === 0) {
-    els.relationshipPlot.innerHTML = `<div class="empty-panel">No finite conditional samples for these variables.</div>`;
+    els.relationshipPlot.innerHTML = `<div class="empty-panel">No finite sample rows for these variables.</div>`;
     return;
   }
 
@@ -485,9 +493,9 @@ function renderCategoricalNumeric(rows, firstFeature, secondFeature) {
   }).join("");
 
   els.relationshipPlot.innerHTML = `
-    <div class="plot-title">${escapeHtml(numFeature.label)} by ${escapeHtml(catFeature.label)} from ${rows.length} conditional samples</div>
+    <div class="plot-title">${escapeHtml(numFeature.label)} by ${escapeHtml(catFeature.label)} from ${rows.length} matching sample rows</div>
     <div class="plot-note">Box shows Q1-Q3; center line is median; whiskers show 5th-95th percentiles.</div>
-    <svg class="box-plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="Conditional box plot">
+    <svg class="box-plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="Box plot for matching sample rows">
       <line class="axis" x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}"></line>
       <text class="tick-label" x="${margin.left}" y="${height - margin.bottom + 22}">${escapeHtml(formatValue(numFeature, extent[0]))}</text>
       <text class="tick-label end" x="${width - margin.right}" y="${height - margin.bottom + 22}">${escapeHtml(formatValue(numFeature, extent[1]))}</text>
@@ -543,7 +551,7 @@ function renderContingency(rows, xFeature, yFeature) {
   `).join("");
 
   els.relationshipPlot.innerHTML = `
-    <div class="plot-title">Conditional contingency from ${rows.length} samples</div>
+    <div class="plot-title">Category pairing from ${rows.length} matching sample rows</div>
     <div class="table-wrap">
       <table class="contingency-table">
         <thead>
@@ -560,7 +568,7 @@ function renderContingency(rows, xFeature, yFeature) {
 
 function renderSamples(lp) {
   if (!Number.isFinite(lp)) {
-    els.samples.innerHTML = `<div class="empty-panel">No conditional samples.</div>`;
+    els.samples.innerHTML = `<div class="empty-panel">No sample rows for this query.</div>`;
     return;
   }
   const rng = mulberry32(hashString(`${state.model.id}:${state.sampleNonce}:samples:${state.sampleCount}:${JSON.stringify(state.evidence)}`));
@@ -626,8 +634,11 @@ function paddedExtent(values, domain) {
   return [lo - pad, hi + pad];
 }
 
-function metric(label, value) {
-  return `<section class="metric"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></section>`;
+function metric(label, value, tooltip = "") {
+  const labelHtml = tooltip
+    ? `<span class="tooltip-label" tabindex="0" aria-label="${escapeHtml(`${label}. ${tooltip}`)}" data-tooltip="${escapeHtml(tooltip)}">${escapeHtml(label)} <i aria-hidden="true">?</i></span>`
+    : `<span>${escapeHtml(label)}</span>`;
+  return `<section class="metric">${labelHtml}<b>${escapeHtml(value)}</b></section>`;
 }
 
 function evidenceLabel(feature, evidence) {
