@@ -14,6 +14,16 @@
       "id": "adult_census",
       "title": "Adult Census",
       "path": "models/adult_census_5000.json"
+    },
+    {
+      "id": "bike_sharing",
+      "title": "Bike Sharing",
+      "path": "models/bike_sharing_1000.json"
+    },
+    {
+      "id": "ames_housing",
+      "title": "Ames Housing",
+      "path": "models/ames_housing_1000.json"
     }
   ]
 }
