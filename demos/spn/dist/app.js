@@ -290,14 +290,9 @@ function renderMetrics(lp) {
   const mass = Number.isFinite(lp) ? Math.exp(lp) : 0;
   els.metrics.innerHTML = [
     metric(
-      "Query fit",
-      Number.isFinite(lp) ? lp.toFixed(3) : "-inf",
-      "Technical term: log p(e), the log probability of the selected evidence."
-    ),
-    metric(
       "Query weight",
       formatScientific(mass),
-      "Technical term: p(e) / density, the probability mass or density for the selected evidence."
+      "p(e) / density, the probability mass or density for the selected evidence."
     ),
     metric("active fields", String(Object.keys(state.evidence).length))
   ].join("");
