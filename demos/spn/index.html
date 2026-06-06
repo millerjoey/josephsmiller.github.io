@@ -6,7 +6,7 @@
     <title>SPN Probabilistic Data Explorer</title>
     <meta
       name="description"
-      content="Interactive Sum-Product Network demo for training and querying mixed data with missing, interval/censored, and set-valued evidence."
+      content="Interactive Sum-Product Network demo for exploring mixed data with missing, interval/censored, and set-valued evidence."
     >
     <meta name="theme-color" content="#8b3a3a">
     <link rel="stylesheet" href="styles.css">
@@ -21,7 +21,7 @@
           <p class="eyebrow">Sum-Product Network Demo</p>
           <h1>Probabilistic Data Explorer</h1>
           <p class="intro-copy">
-            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect conditional marginals, relationships, and plausible samples entirely computed in the browser.
+            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect updated distributions, relationships, and plausible sample rows entirely computed in the browser.
           </p>
         </div>
       </header>
@@ -30,10 +30,10 @@
         <div>
           <h2>What This Is</h2>
           <p>
-            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. Instead of building a new model or custom analysis each time you have a follow-up question, the data is first turned into a learned probabilistic model. You can then ask many different questions about the relationships in the data interactively: condition on partial evidence, leave some values unknown, use ranges or censored observations, and see the implied distributions, trends, and realistic example records update immediately. The same representation can also be used during training, so incomplete records, missing fields, ranges, and censored values do not have to be discarded or forced into single imputed values.
+            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. Instead of building a new model or custom analysis each time you have a follow-up question, the data is first turned into a learned probabilistic model. You can then ask many different questions about the relationships in the data interactively: condition on partial evidence, leave some values unknown, use ranges or censored observations, and see the implied distributions, trends, and realistic example records update immediately.
           </p>
           <p>
-            The result sits somewhere between a very fast database and a handcrafted statistical model. It is designed for situations where you have hypotheses, incomplete observations, and follow-up questions that evolve as you look at the results. In this example, each model is trained once offline, then exported and computed in the browser, so many conditional probability and sampling queries can be answered locally and almost instantly, without a backend or network trip. A normal database can retrieve the records that match your query; this can also estimate what is likely in slices of the data that are small, incomplete, or only partially specified.
+            The result sits somewhere between a very fast database and a handcrafted statistical model. It is designed for situations where you have hypotheses, incomplete observations, and follow-up questions that evolve as you look at the results. In this example, each model is trained once offline, then exported and computed in the browser, so many follow-up probability and sampling queries can be answered locally and almost instantly, without a backend or network trip. A normal database can retrieve the records that match your query; this can also estimate what is likely in slices of the data that are small, incomplete, or only partially specified.
           </p>
         </div>
       </section>
@@ -76,20 +76,36 @@
             <h2>Query</h2>
           </div>
           <div id="activeEvidence" class="chips"></div>
-          <p class="query-note">Everything below is computed conditional on the selected query.</p>
+          <p class="query-note">Everything below updates based on the selected query.</p>
           <div id="metrics" class="metrics-grid"></div>
         </section>
 
         <section>
           <div class="section-head">
-            <h2>Conditional Marginals</h2>
+            <h2>
+              Updated Distributions
+              <span
+                class="term-tooltip"
+                tabindex="0"
+                aria-label="Technical term: conditional marginals."
+                data-tooltip="Technical term: conditional marginals, each variable's distribution after applying the selected evidence."
+              >?</span>
+            </h2>
           </div>
           <div id="charts" class="chart-grid"></div>
         </section>
 
         <section class="panel relationship-panel">
           <div class="panel-head">
-            <h2>Conditional Relationship</h2>
+            <h2>
+              Relationships
+              <span
+                class="term-tooltip"
+                tabindex="0"
+                aria-label="Technical term: conditional relationship."
+                data-tooltip="Technical term: conditional relationship, the relationship implied after applying the selected evidence."
+              >?</span>
+            </h2>
           </div>
           <div id="relationshipControls" class="relationship-controls"></div>
           <div id="relationshipPlot" class="relationship-plot"></div>
@@ -97,12 +113,20 @@
 
         <section class="panel">
           <div class="panel-head">
-            <h2>Conditional Samples</h2>
+            <h2>
+              Sample Rows
+              <span
+                class="term-tooltip"
+                tabindex="0"
+                aria-label="Technical term: conditional samples."
+                data-tooltip="Technical term: conditional samples, plausible rows drawn after applying the selected evidence."
+              >?</span>
+            </h2>
             <div class="sample-controls">
               <button id="redrawSamples" type="button">Resample</button>
               <label class="sample-size-control">
                 <span>Rows</span>
-                <select id="sampleCountSelect" aria-label="Conditional sample size">
+                <select id="sampleCountSelect" aria-label="Sample row count">
                   <option value="5">5</option>
                   <option value="10" selected>10</option>
                   <option value="25">25</option>
