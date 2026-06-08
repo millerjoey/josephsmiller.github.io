@@ -6,9 +6,9 @@
       "path": "models/messy_claims.json"
     },
     {
-      "id": "machine_health",
-      "title": "Machine Health (synthetic data)",
-      "path": "models/machine_health.json"
+      "id": "health_checkin",
+      "title": "Health Check-in (synthetic data)",
+      "path": "models/health_checkin.json"
     },
     {
       "id": "adult_census",
