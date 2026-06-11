@@ -74,10 +74,8 @@
           </p>
           <p class="muted small" style="margin-top: 0.75rem">
             Simulation setup for these precomputed frames: customer features \((x_1, x_2)\in[-3,7]^2\). We start with
-            \(N_0=10\) customers sampled from the same <em>proposal distribution</em> used below. Each step draws a
-            candidate pool of 200 customers from this proposal distribution, where each coordinate is sampled
-            independently as \(\mathcal{N}(\mu=3,\sigma=1)\) with rejection outside \([-3,7]\); after 10,000 rejected draws
-            the implementation falls back to clamping a fresh normal draw into \([-3,7]\).
+            \(N_0=10\) customers, then evaluate a fresh candidate pool of 200 customers drawn from the same distribution
+            at each step.
             The OED policy chooses \(x^*\) from this candidate pool to maximize expected information gain. Ad assignment at
             \(x^*\) is randomized with \(P(z=1)=0.5\); outcomes are simulated from fixed “true” parameters.
           </p>
@@ -175,9 +173,9 @@
       <section class="section panel" id="learning">
         <h2>Random sampling (no OED)</h2>
         <p class="muted small">
-          If you sample customers from the same fixed proposal distribution but without adaptive design (no OED), the
-          resulting A/B recommendation can stay wrong for longer. In this run, random sampling often misses the profiles
-          that would clarify the boundary.
+          If you sample customers from the same distribution without adaptive design (no OED), the resulting A/B
+          recommendation can stay wrong for longer. In this run, random sampling often misses the profiles that would
+          clarify the boundary.
         </p>
 
         <div class="row" style="margin-top: 1rem">
