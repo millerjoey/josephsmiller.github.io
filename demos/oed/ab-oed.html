@@ -28,8 +28,8 @@
 	        <p class="lede">
 	          When treatment effects depend on customer features, who you test matters. This demo walks through a simple
 	          sequential design run: at each step, choose the next customer \(x^*\) and ad assignment to learn about the A/B
-	          decision boundary. Customers who are clearly better for A or B usually do not teach much, so the design tends
-	          to spend tests near the boundary.
+	          decision boundary. Customers who are clearly better for A or B usually do not teach the model much, so the design tends
+	          to spend tests near the boundary. On the other hand, not all boundary points are equally useful: the design focuses on points where the model is uncertain and the A/B decision is likely to change.
 	        </p>
       </header>
 
@@ -203,8 +203,7 @@
       <section class="section">
         <h2>Key takeaway</h2>
         <p>
-          Even in this simplified model, the useful next test moves around. I would not want to pick these samples by
-          intuition alone.
+          Even in this simple model, the best next test point around, and strongly depends on the current state of the model. Note also that towards the bottom boundary, more B ads were chosen, whereas the left boundary, A ads tended to be optimal. I would not want to rely on intuition alone here.
         </p>
       </section>
 
