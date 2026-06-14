@@ -21,7 +21,7 @@
           <p class="eyebrow">Sum-Product Network Demo</p>
           <h1>Probabilistic Database</h1>
           <p class="intro-copy">
-            Explore tractable probabilistic queries for mixed data. Select exact, missing, interval/censored, or set-valued evidence, then inspect updated distributions, relationships, and plausible sample rows entirely computed in the browser.
+            Explore a probabilistic model trained on incomplete data and queried like a database. Filter on exact, missing, interval/censored, or set-valued evidence, then inspect updated distributions, relationships, and plausible sample rows entirely computed in the browser.
           </p>
         </div>
       </header>
@@ -30,7 +30,7 @@
         <div>
           <h2>What This Is</h2>
           <p>
-            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. Instead of building a new model or custom analysis each time you have a follow-up question, the data is first turned into a learned probabilistic model. You can then ask many different questions about the relationships in the data interactively: condition on partial evidence, leave some values unknown, use ranges or censored observations, and see the implied distributions, trends, and realistic example records update immediately.
+            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. The trained SPN acts like a probabilistic data table: you can condition on partial row values, leave fields unknown, query ranges, and ask for distributions or plausible rows. That means you can ask many follow-up questions interactively without building a new model or custom analysis each time.
           </p>
           <p>
             This approach sits somewhere between a very fast database and a hand-designed statistical model. It is intended for situations where you have hypotheses, incomplete observations, and follow-up questions that evolve as you explore the data. In this example, each model is trained once offline, then exported and computed in the browser, so many follow-up probability and sampling queries can be answered locally and almost instantly, without a backend or network I/O.
