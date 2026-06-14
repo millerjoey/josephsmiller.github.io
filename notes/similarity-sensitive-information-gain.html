@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The similarity-sensitive (nonlocal) scoring rule · Joseph S. Miller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How similarity-sensitive entropy generates a proper scoring rule, cross-entropy, divergence, and information-gain objective for task-aligned experiment design.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+      svg: {
+        fontCache: 'global',
+      },
+    };
+  </script>
+  <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Crimson Pro", "Times New Roman", serif;
+      --ink: #1f2a37;
+      --muted: #5b6673;
+      --bg: #eef1f5;
+      --panel: #ffffff;
+      --accent: #8b3a3a;
+      --accent-strong: #6d2b2b;
+      --accent-soft: rgba(139, 58, 58, 0.14);
+      --line: rgba(31, 42, 55, 0.12);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
+        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+      color: var(--ink);
+    }
+
+    .shell {
+      width: min(1000px, 100%);
+      background: #ffffff;
+      border-radius: 26px;
+      padding: 3rem;
+      border: 1px solid rgba(31, 42, 55, 0.08);
+      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(31, 42, 55, 0.08);
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .hero {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.7rem;
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.25rem, 4.2vw, 3.3rem);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 78ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .button {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.65rem 1.3rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 10px 18px rgba(31, 42, 55, 0.16);
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      background: var(--accent-strong);
+      box-shadow: 0 14px 24px rgba(31, 42, 55, 0.2);
+    }
+
+    a {
+      color: var(--accent-strong);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: var(--accent);
+    }
+
+    .text-link {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .text-link:hover,
+    .text-link:focus-visible {
+      color: var(--accent-strong);
+    }
+
+    .stack {
+      margin-top: 2.75rem;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
+      position: relative;
+      min-width: 0;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      left: 1.75rem;
+      top: 0.85rem;
+      width: 42px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .panel h2 {
+      margin: 0 0 1rem;
+      font-size: 0.92rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .panel h3 {
+      margin: 1.85rem 0 0.85rem;
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .panel h3:first-of-type {
+      margin-top: 0.5rem;
+    }
+
+    .panel h4 {
+      margin: 1.55rem 0 0.65rem;
+      font-size: 1.08rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    .panel h4:first-of-type {
+      margin-top: 0.5rem;
+    }
+
+    .panel p + p {
+      margin-top: 0.9rem;
+    }
+
+    .panel p + .bullets {
+      margin-top: 0.9rem;
+    }
+
+    .panel .bullets + p {
+      margin-top: 0.9rem;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+
+    .bullets {
+      margin: 0;
+      padding-left: 1.25rem;
+      line-height: 1.7;
+    }
+
+    .bullets li {
+      margin: 0.35rem 0;
+    }
+
+    .math-block {
+      margin: 0.5rem 0 0;
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    mjx-container[jax="SVG"][display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    figure {
+      margin: 0;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    figure img {
+      width: 100%;
+      height: auto;
+    }
+
+    .panel p + figure,
+    .panel figure + p,
+    .panel figure + figure {
+      margin-top: 1rem;
+    }
+
+    figcaption {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+
+    figcaption strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .table-wrap {
+      margin-top: 1rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .score-table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: collapse;
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    .score-table th,
+    .score-table td {
+      padding: 0.55rem 0.5rem;
+      border-bottom: 1px solid rgba(31, 42, 55, 0.1);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .score-table th {
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .score-table .num {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .score-table strong {
+      color: var(--accent-strong);
+      font-weight: 600;
+    }
+
+    .table-wrap + p {
+      margin-top: 0.85rem;
+    }
+
+    details {
+      padding-top: 0.9rem;
+      border-top: 1px solid rgba(31, 42, 55, 0.08);
+    }
+
+    details:first-of-type {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details p {
+      margin-top: 0.65rem;
+      color: var(--muted);
+    }
+
+    .callout {
+      background: rgba(139, 58, 58, 0.04);
+      border-color: rgba(139, 58, 58, 0.18);
+    }
+
+    .callout::before {
+      background: var(--accent-strong);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 700px) {
+      .shell {
+        padding: 2.25rem 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav class="top-nav">
+      <a class="text-link" href="../index.html">&larr; Home</a>
+      <div class="nav-right">
+        <a class="text-link" href="index.html">Explanations</a>
+        <a class="text-link" href="mailto:joe@josephsmiller.com">Email</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="eyebrow">Scoring rules</div>
+      <h1>The similarity-sensitive (nonlocal) scoring rule</h1>
+      <p class="lede">
+        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a discrete space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the nonlocal proper scoring rule derived from it. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
+      </p>
+    </header>
+
+    <main class="stack">
+      <section class="panel">
+        <h2>Examples</h2>
+        <h3>A discrete forecast</h3>
+        <p>
+          Start with a finite example. Suppose the outcome is rain, cloudy, or sunny. If the task treats confusing rain
+          with cloudy as a smaller mistake than confusing either with sunny, we can encode that with a similarity kernel
+          such as
+        </p>
+        <div class="math-block">
+          $$K=\begin{pmatrix}
+          1&0.3&0\\
+          0.3&1&0\\
+          0&0&1
+          \end{pmatrix}.$$
+        </div>
+        <p>
+          Then probability assigned to cloudy should give some partial credit when rain occurs, while probability assigned
+          to sunny should not. Ordinary log loss cannot express that distinction because it only sees the probability assigned to the exact observed state.
+        </p>
+        <p>
+          For example, take the truth to be $p=(0.8,0.1,0.1)$ over rain, cloudy, and sunny, and compare
+          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives
+          them the same risk because the reports assign the same probability to rain and only swap the equal-mass cloudy
+          and sunny terms under the truth. But rain-or-cloudy has $90\%$ probability under the truth, so a
+          similarity-sensitive cross-entropy should prefer the report that puts the higher mass on cloudy rather than
+          sunny: both are "wrong" reports, but one is less wrong for the task.
+        </p>
+        <p>
+           You may note that in practice, you can coarsen by merging rain and cloudy into a single "not sunny" category. This is true, but it is  throws away information that the forecaster might have, and leads to biasing the model in a way that is not transparent. We can do this more transparently (and equivalently) by setting the 0.3 similarity to 1. The next examples show that the problem of rewarding near-misses is not just a discrete issue, so coarsening by merging labels is never a complete answer.
+        </p>
+        <h3>Wrapped likelihood</h3>
+        <p>
+          Consider a simple misspecified model-fitting problem. Let the true distribution be uniform on $[0,1]$, and fit only
+          the location $\mu$ of a fixed-variance Gaussian that is wrapped around the interval:
+        </p>
+        <div class="math-block">
+          $$P=\mathrm{Unif}[0,1],\qquad
+          q_\mu(x)=\sum_{m\in\mathbb Z}\phi_\sigma(x+m-\mu),\qquad x\in[0,1].$$
+        </div>
+        <p>
+          Here $\phi_\sigma$ is the centered Gaussian density with standard deviation $\sigma$. The sum turns it into a wrapped Gaussian density: it is the law of $\mu+\sigma Z \pmod 1$, written as a density on $[0,1]$.
+        </p>
+        <p>
+          Because $q_\mu$ is just a circular translate of the same density, ordinary cross-entropy cannot choose between them:
+        </p>
+        <div class="math-block">
+          $$\operatorname{CE}(P,q_\mu)=-\int_0^1 \log q_\mu(x)\,dx$$
+        </div>
+        <p>
+          is the same for every $\mu$. The centered Gaussian and an off-center Gaussian tie under MLE.
+        </p>
+        <p>
+          Now imagine that we care about the geometry of the interval: values close to each other are more similar. A reasonable task kernel for this geometry is a Gaussian kernel that uses ordinary distance:
+        </p>
+        <div class="math-block">
+          $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|^2}{2\ell^2}\right).$$
+        </div>
+        <p>
+          A task-aligned loss should have a way to say that these two reports are different, but a loss that looks only at the density at each observed point cannot measure this difference.
+        </p>
+        <figure>
+          <img
+            src="assets/k_mle_wrapped_uniform.svg"
+            alt="An off-center candidate and centered candidate for a fixed-variance wrapped Gaussian model, each shown against a uniform truth with equal ordinary cross-entropy."
+          >
+          <figcaption>
+            <strong>Wrapped model, distance kernel.</strong> Ordinary cross-entropy thinks all circular
+            translates of the fixed-width density are equivalent. If you want to reward a model for near-misses, you need a nonlocal loss that considers the geometry of the interval.
+          </figcaption>
+        </figure>
+        <h3>Shuffled likelihoods</h3>
+        <p>
+          A difference begins to appear when we incorporate neighborhood information via $K$ directly. For a reported probability law $q$, the typicality of $x$ is
+        </p>
+        <div class="math-block">
+          $$(Kq)(x)=\int K(x,y)\,q(dy).$$
+        </div>
+        <p>
+          The plot below compares normalized typicality for
+          a Gaussian-shaped density and for a version of the same density cut into equal-width pieces and shuffled across
+          the interval. Ordinary cross-entropy is the same for both, but the shuffled version has more uniform typicality
+          because it spreads out the high-density pieces and the similarity kernel smooths over them.
+        </p>
+        <figure>
+          <img
+            src="assets/k_mle_shuffled_chunks.svg"
+            alt="A contiguous Gaussian and a version cut into equal-width chunks and shuffled across the interval, with ordinary cross-entropy and normalized Kq typicality."
+          >
+          <figcaption>
+            <strong>Piecewise shuffling.</strong> Cutting a density into equal-width pieces and permuting the pieces is
+            irrelevant to ordinary cross-entropy under a uniform true distribution. It is however important for a local task kernel. Once high-density pieces are spread across the interval, the smoothed typicality $Kq$ is much closer to flat.
+          </figcaption>
+        </figure>
+        <h3>Finite atoms</h3>
+        <p>
+          Now, we approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is annoyingly infinite for any finite-atom approximation, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
+        </p>
+        <figure>
+          <img
+            src="assets/k_mle_discrete_atoms.svg"
+            alt="Finite-atom approximations to a uniform distribution. Ordinary cross-entropy is infinite because the model has zero density between atoms, while normalized Kq remains finite."
+          >
+          <figcaption>
+            <strong>Finite atoms.</strong> An empirical or particle approximation is singular with respect to a
+            continuous truth, so ordinary log loss gives infinite risk. But the local typicality $(Kq)(x)$ is positive between atoms, and agrees with intuition that a higher density of atoms is a better approximation.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>The Scoring Rule</h2>
+        <h4>Probability versus similarity</h4>
+        <p>
+          Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let
+          $K:\mathcal X\times\mathcal X\to(0,1]$ be a similarity kernel. Philosophically, we want to keep these conceptually separate:
+          $p$ says what I believe will happen, while $K$ says which outcomes the task treats as similar.
+        </p>
+        <p>
+          For a law $p$, the typicality function again is
+        </p>
+        <div class="math-block">
+          $$(Kp)(x)=\int K(x,y)\,p(dy).$$
+        </div>
+        <p>
+          Similarity-sensitive entropy is expected surprisal of that typicality:
+        </p>
+        <div class="math-block">
+          $$H_K(p)=-\mathbb E_{X\sim p}\log (Kp)(X).$$
+        </div>
+        <p>
+          In finite notation, $(Kp)_i=\sum_j K_{ij}p_j$ and
+          $H_K(p)=-\sum_i p_i\log (Kp)_i$. When $K$ is the identity kernel, this is Shannon entropy.
+        </p>
+        <h4>Log-typicality loss</h4>
+        <p>
+          The first scoring rule to try is the log-typicality loss, which is nonlocal and looks at the typicality of the observed state under the report:
+        </p>
+        <div class="math-block">
+          $$S_{\mathrm{typ}}(q,x)=-\log (Kq)(x).$$
+        </div>
+        <p>
+          This is somewhat meaningful, but it is not enough. A report can make $x$
+          typical by putting mass on states near $x$, without paying attention to how much probability is assigned to
+          $x$ by itself. In that sense, log-typicality blurs identity as well as distance.
+        </p>
+        <p>
+          The issue shows up even with two states. Let
+        </p>
+        <div class="math-block">
+          $$K=\begin{pmatrix}1&1/2\\1/2&1\end{pmatrix},\qquad p=(0.8,0.2).$$
+        </div>
+        <p>
+          Truthful reporting gives $(Kp)=(0.9,0.6)$, so
+        </p>
+        <div class="math-block">
+          $$\mathbb E_p[-\log(Kp)(X)]
+          =-0.8\log 0.9-0.2\log 0.6\approx 0.186.$$
+        </div>
+        <p>
+          But the overly confident report that puts all mass on the first state $q=(1,0)$ gives $(Kq)=(1,0.5)$ and lower risk:
+        </p>
+        <div class="math-block">
+          $$\mathbb E_p[-\log(Kq)(X)]
+          =-0.8\log 1-0.2\log 0.5\approx 0.139.$$
+        </div>
+        <p>
+          The score prefers the report that denies the second state but keeps it typical through similarity to the
+          first. So log-typicality is an <a href="https://en.wikipedia.org/wiki/Scoring_rule#Propriety_and_consistency" target="_blank" rel="noreferrer">improper scoring rule</a>.
+        </p>
+        <h4>The $K$-corrected log-typicality rule</h4>
+        <p>
+          The correction is to keep the log-typicality term and add a reward for observations that represent a large
+          share of the similarity mass under the report:
+        </p>
+        <div class="math-block">
+          $$S_K(q,x)=-\log (Kq)(x)
+          -\left[
+          \mathbb E_{Y\sim q}\frac{K(Y,x)}{(Kq)(Y)}-1
+          \right].$$
+        </div>
+        <p>
+          In the bracketed part, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
+        </p>
+        <p>
+          This reward is normalized under the report itself:
+        </p>
+        <div class="math-block">
+          $$\mathbb E_{X\sim q}\left[
+          \mathbb E_{Y\sim q}\frac{K(Y,X)}{(Kq)(Y)}
+          \right]=1.$$
+        </div>
+        <p>
+          So the extra term has mean zero when the data really come from $q$, while still rewarding observed points that are representative of the report as a whole, which is what log-typicality alone was missing.
+        </p>
+        <p>
+          In finite notation, it looks like
+        </p>
+        <div class="math-block">
+          $$S_K(q,j)=-\log (Kq)_j
+          -\left[
+          \sum_i q_i\frac{K_{ij}}{(Kq)_i}-1
+          \right].$$
+        </div>
+        <p>
+          If $K=I$, then $(Kq)_j=q_j$ and $\sum_i q_iK_{ij}/(Kq)_i=1$, so the expression collapses to
+          $-\log q_j$. Log loss is the identity-kernel special case.
+        </p>
+        <h4>Where the rule comes from</h4>
+        <p>
+          On Kernel classes where this entropy is concave, the corrected score is the tangent loss rule generated by similarity-sensitive entropy:
+        </p>
+        <div class="math-block">
+          $$H_K(q)=-\sum_i q_i\log (Kq)_i.$$
+        </div>
+        <p>
+          More generally, any concave entropy functional $H$ generates a proper score by taking the tangent plane at
+          the reported distribution $q$:
+        </p>
+        <div class="math-block">
+          $$S_H(q,j)=H(q)+\nabla H(q)\cdot(e_j-q).$$
+        </div>
+        <p>
+          Concavity gives $\mathbb E_{X\sim p}S_H(q,X)\ge H(p)$, with equality at $q=p$. That ensures "properness": if I believe $p$, I should report $p$.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Examples again</h2>
+        <p>
+          Using the proper score, we can check the examples above to see if this works. The entries below are risks under the truth used in each example.
+        </p>
+        <div class="table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>Example</th>
+                <th>Report</th>
+                <th class="num">Ordinary CE</th>
+                <th class="num">$K$-CE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="2">Weather forecast</td>
+                <td>Rain + sunny mass</td>
+                <td class="num">0.759</td>
+                <td class="num">0.605</td>
+              </tr>
+              <tr>
+                <td>Rain + cloudy mass</td>
+                <td class="num">0.759</td>
+                <td class="num"><strong>0.566</strong></td>
+              </tr>
+              <tr>
+                <td rowspan="2">Wrapped Gaussian</td>
+                <td>Off-center</td>
+                <td class="num">2.767</td>
+                <td class="num">3.731</td>
+              </tr>
+              <tr>
+                <td>Centered</td>
+                <td class="num">2.767</td>
+                <td class="num"><strong>3.500</strong></td>
+              </tr>
+              <tr>
+                <td rowspan="2">Shuffled pieces</td>
+                <td>Contiguous bump</td>
+                <td class="num">1.692</td>
+                <td class="num">3.959</td>
+              </tr>
+              <tr>
+                <td>Shuffled pieces</td>
+                <td class="num">1.692</td>
+                <td class="num"><strong>2.461</strong></td>
+              </tr>
+              <tr>
+                <td rowspan="2">Finite atoms</td>
+                <td>11 atoms</td>
+                <td class="num">$\infty$</td>
+                <td class="num">2.474</td>
+              </tr>
+              <tr>
+                <td>31 atoms</td>
+                <td class="num">$\infty$</td>
+                <td class="num"><strong>2.345</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Lower is better within each pair. Ordinary cross-entropy ties or fails in these comparisons; $K$-CE separates
+          the reports in the preferred direction.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Information gain is risk reduction</h2>
+        <p>
+          Returning to experiment design. Suppose the future quantity we care about is $Y$. Before performing experiment $a$, the predictive law is $p_Y$. After observing data $Z$ from that experiment, the predictive law becomes $p_{Y\mid Z,a}$.
+        </p>
+        <p>
+          If future reports will be evaluated by the proper $K$-score and a calibrated model, then the value of action $a$ is
+        </p>
+        <div class="math-block">
+          $$\operatorname{IG}_K(a;Y)=H_K(p_Y)
+          -\mathbb E_{Z\mid a}H_K(p_{Y\mid Z,a}).$$
+        </div>
+        <p>
+          This is the expected reduction in future $K$-proper cross-entropy risk. Before seeing $Z$, the best
+          report is $p_Y$ and the risk is $H_K(p_Y)$. After seeing $Z$, the best report is
+          $p_{Y\mid Z,a}$, and the expected risk is the second term.
+        </p>
+        <p>
+          This is the exact same interpretation as ordinary predictive MI, except allowing for a flexible and transparent evaluation geometry.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Fitting models</h2>
+        <p>
+          Maximum likelihood minimizes ordinary cross-entropy:
+        </p>
+        <div class="math-block">
+          $$\theta_{\mathrm{MLE}}=\arg\min_\theta
+          \mathbb E_{X\sim P}[-\log q_\theta(X)].$$
+        </div>
+        <p>
+          Under misspecification this chooses the KL projection of $P$ onto the model class.
+        </p>
+        <p>
+          If the task kernel is known, the aligned estimator is instead
+        </p>
+        <div class="math-block">
+          $$\theta_K=\arg\min_\theta \mathbb E_{X\sim P}S_K(q_\theta,X).$$
+        </div>
+        <p>
+          With a correctly specified model and infinite data, strictly proper scores target the same true law.
+          Under misspecification, finite data, regularization, approximate inference, or model selection, the scoring rule changes the projection because it changes the shape of the tradeoff for being wrong.
+        </p>
+      </section>
+
+      <section class="panel callout">
+        <h2>Takeaway</h2>
+        <p>
+          Shannon entropy generates the logarithmic scoring rule, which gives ordinary cross-entropy, KL divergence,
+          mutual information, and maximum likelihood. Similarity-sensitive entropy gives the parallel construction:
+          a similarity-sensitive scoring rule, $K$-cross-entropy, $K$-divergence, $K$-information gain, and corresponding model fitting.
+        </p>
+        <p>
+          With the identity kernel, the similarity-sensitive version becomes local and recovers the above Shannon/log-loss family. With a task-specific kernel, the same construction asks models and experiments to reduce the mistakes that matter for the task, rather than treating every wrong answer as equally unrelated.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
