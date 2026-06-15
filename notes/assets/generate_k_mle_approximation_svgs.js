@@ -8,6 +8,7 @@ const ell = 0.04;
 const ink = "#1f2a37";
 const muted = "#5b6673";
 const accent = "#8b3a3a";
+const kqLabel = `normalized Kq (ℓ = ${ell.toFixed(2)})`;
 
 function fmt(value) {
   return value.toFixed(2);
@@ -245,7 +246,7 @@ function renderChunkShuffle() {
     svg.push(`  <rect class="density-fill" x="${fmt(panel.x + 124)}" y="${fmt(y - 16)}" width="26.00" height="12.00" />`);
     svg.push(`  <text class="small" x="${fmt(panel.x + 158)}" y="${fmt(y - 3)}">density q</text>`);
     svg.push(`  <line class="coverage" x1="${fmt(panel.x + 238)}" y1="${fmt(y - 7)}" x2="${fmt(panel.x + 268)}" y2="${fmt(y - 7)}" />`);
-    svg.push(`  <text class="small" x="${fmt(panel.x + 276)}" y="${fmt(y - 3)}">normalized Kq</text>`);
+    svg.push(`  <text class="small" x="${fmt(panel.x + 276)}" y="${fmt(y - 3)}">${kqLabel}</text>`);
     svg.push(`  <text class="small" x="${fmt(panel.x)}" y="${fmt(y + 18)}">ordinary CE = ${fmt3(example.ce)}</text>`);
   });
 
@@ -338,7 +339,7 @@ function renderAtomApproximation() {
     svg.push(`  <line class="truth" x1="${fmt(panel.x)}" y1="${fmt(y - 7)}" x2="${fmt(panel.x + 30)}" y2="${fmt(y - 7)}" />`);
     svg.push(`  <text class="small" x="${fmt(panel.x + 38)}" y="${fmt(y - 3)}">uniform reference</text>`);
     svg.push(`  <line class="coverage" x1="${fmt(panel.x + 160)}" y1="${fmt(y - 7)}" x2="${fmt(panel.x + 190)}" y2="${fmt(y - 7)}" />`);
-    svg.push(`  <text class="small" x="${fmt(panel.x + 198)}" y="${fmt(y - 3)}">normalized Kq</text>`);
+    svg.push(`  <text class="small" x="${fmt(panel.x + 198)}" y="${fmt(y - 3)}">${kqLabel}</text>`);
     svg.push(`  <text class="small" x="${fmt(panel.x)}" y="${fmt(y + 18)}">ordinary CE = ∞</text>`);
   });
 
