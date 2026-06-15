@@ -63,7 +63,7 @@
   <line class="truth" x1="64.00" y1="379.00" x2="94.00" y2="379.00" />
   <text class="small" x="102.00" y="383.00">uniform reference</text>
   <line class="coverage" x1="224.00" y1="379.00" x2="254.00" y2="379.00" />
-  <text class="small" x="262.00" y="383.00">normalized Kq</text>
+  <text class="small" x="262.00" y="383.00">normalized Kq (ℓ = 0.04)</text>
   <text class="small" x="64.00" y="404.00">ordinary CE = ∞</text>
   <text class="label" x="541.00" y="34.00" fill="#1f2a37">31 equally weighted atoms</text>
   <text class="small" x="541.00" y="52.00">finer support, same kernel</text>
@@ -151,6 +151,6 @@
   <line class="truth" x1="541.00" y1="379.00" x2="571.00" y2="379.00" />
   <text class="small" x="579.00" y="383.00">uniform reference</text>
   <line class="coverage" x1="701.00" y1="379.00" x2="731.00" y2="379.00" />
-  <text class="small" x="739.00" y="383.00">normalized Kq</text>
+  <text class="small" x="739.00" y="383.00">normalized Kq (ℓ = 0.04)</text>
   <text class="small" x="541.00" y="404.00">ordinary CE = ∞</text>
 </svg>

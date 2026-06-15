@@ -46,7 +46,7 @@
   <rect class="density-fill" x="188.00" y="370.00" width="26.00" height="12.00" />
   <text class="small" x="222.00" y="383.00">density q</text>
   <line class="coverage" x1="302.00" y1="379.00" x2="332.00" y2="379.00" />
-  <text class="small" x="340.00" y="383.00">normalized Kq</text>
+  <text class="small" x="340.00" y="383.00">normalized Kq (ℓ = 0.04)</text>
   <text class="small" x="64.00" y="404.00">ordinary CE = 1.692</text>
   <text class="label" x="541.00" y="34.00" fill="#1f2a37">Shuffled equal-width pieces</text>
   <text class="small" x="541.00" y="52.00">high-mass pieces distributed across the interval</text>
@@ -77,6 +77,6 @@
   <rect class="density-fill" x="665.00" y="370.00" width="26.00" height="12.00" />
   <text class="small" x="699.00" y="383.00">density q</text>
   <line class="coverage" x1="779.00" y1="379.00" x2="809.00" y2="379.00" />
-  <text class="small" x="817.00" y="383.00">normalized Kq</text>
+  <text class="small" x="817.00" y="383.00">normalized Kq (ℓ = 0.04)</text>
   <text class="small" x="541.00" y="404.00">ordinary CE = 1.692</text>
 </svg>

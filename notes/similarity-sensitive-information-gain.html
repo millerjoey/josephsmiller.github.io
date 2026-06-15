@@ -391,18 +391,16 @@
       <div class="eyebrow">Scoring rules</div>
       <h1>The similarity-sensitive (nonlocal) scoring rule</h1>
       <p class="lede">
-        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a discrete space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the nonlocal proper scoring rule derived from it. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
+        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a categorical space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the nonlocal proper scoring rule derived from it. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
       </p>
     </header>
 
     <main class="stack">
       <section class="panel">
         <h2>Examples</h2>
-        <h3>A discrete forecast</h3>
+        <h3>Weather forecast</h3>
         <p>
-          Suppose the outcome we want to predict is rain, cloudy, or sunny. If the task treats confusing rain
-          with cloudy as a smaller mistake than confusing either with sunny, we can encode that with a similarity kernel
-          such as
+          Suppose the outcome we want to predict is rain, cloudy, or sunny. If the consumer of the forecast treats confusing rain with cloudy as a smaller mistake than confusing either with sunny, we can encode that with a similarity kernel such as
         </p>
         <div class="math-block">
           $$K=\begin{pmatrix}
@@ -412,19 +410,14 @@
           \end{pmatrix}.$$
         </div>
         <p>
-          Then probability assigned to cloudy should give some partial credit when rain occurs, while probability assigned
-          to sunny should not. Ordinary log loss cannot express that distinction because it only sees the probability assigned to the exact observed state.
+          Then probability assigned to cloudy should count as partial credit when rain occurs (and vice versa), while probability assigned to sunny should not. Ordinary log loss cannot express that distinction because it only cares about the probability assigned to the exact observed state.
         </p>
         <p>
           For example, take the truth to be $p=(0.8,0.1,0.1)$ over rain, cloudy, and sunny, and compare
-          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives
-          them the same risk because the reports assign the same probability to rain and only swap the equal-mass cloudy
-          and sunny terms under the truth. But rain-or-cloudy has $90\%$ probability under the truth, so a
-          similarity-sensitive cross-entropy should prefer the report that puts the higher mass on cloudy rather than
-          sunny: both are "wrong" reports, but one is less wrong for the task.
+          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives them the same risk/reward because the reports assign the same probability to rain and only swap the equal-mass cloudy and sunny terms. But rain-or-cloudy has $90\%$ probability under the truth, so a similarity-sensitive cross-entropy should prefer the report that confuses between those two.
         </p>
         <p>
-           You may note that in practice, you can coarsen by merging rain and cloudy into a single "not sunny" category. This is true, but it is  throws away information that the forecaster might have, and leads to biasing the model in a way that is not transparent. We can do this more transparently (and equivalently) by setting the 0.3 similarity to 1. The next examples show that the problem of rewarding near-misses is not just a discrete issue, so coarsening by merging labels is never a complete answer.
+           You may note that in practice, you can coarsen by merging rain and cloudy into a single "not sunny" category. This is true, but it throws away information that the forecaster might have, and leads to biasing the model in a way that is not transparent. We can do this more transparently (and equivalently) by setting the 0.3 similarity to 1. The next examples show that the problem of rewarding near-misses is not just a discrete issue, so coarsening by merging labels is never a complete answer.
         </p>
         <h3>Wrapped likelihood</h3>
         <p>
@@ -445,7 +438,7 @@
           $$\operatorname{CE}(P,q_\mu)=-\int_0^1 \log q_\mu(x)\,dx$$
         </div>
         <p>
-          is the same for every $\mu$. The centered Gaussian and an off-center Gaussian tie under MLE.
+          is the same for every $\mu$. The centered Gaussian and an off-center Gaussian would tie under MLE (in the theoretical limit).
         </p>
         <p>
           Now imagine that we care about the geometry of the interval: values close to each other are more similar. A reasonable task kernel for this geometry is a Gaussian kernel that uses ordinary distance:
@@ -454,7 +447,7 @@
           $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|^2}{2\ell^2}\right).$$
         </div>
         <p>
-          A task-aligned loss should have a way to say that these two reports are different, but a loss that looks only at the density at each observed point cannot measure this difference.
+          A loss that accounts for similarity should have a way to say that these two reports are different, but a loss that looks only at the density at each observed point cannot measure this difference.
         </p>
         <figure>
           <img
@@ -477,7 +470,8 @@
           The plot below compares normalized typicality for
           a Gaussian-shaped density and for a version of the same density cut into equal-width pieces and shuffled across
           the interval. Ordinary cross-entropy is the same for both, but the shuffled version has more uniform typicality
-          because it spreads out the high-density pieces and the similarity kernel smooths over them.
+          because it spreads out the high-density pieces and the similarity kernel smooths over them. The plotted $Kq$
+          curves below use $\ell=0.04$ on the unit interval.
         </p>
         <figure>
           <img
@@ -499,8 +493,7 @@
             alt="Finite-atom approximations to a uniform distribution. Ordinary cross-entropy is infinite because the model has zero density between atoms, while normalized Kq remains finite."
           >
           <figcaption>
-            <strong>Finite atoms.</strong> An empirical or particle approximation is singular with respect to a
-            continuous truth, so ordinary log loss gives infinite risk. But the local typicality $(Kq)(x)$ is positive between atoms, and agrees with intuition that a higher density of atoms is a better approximation.
+            <strong>Finite atoms.</strong> An empirical or particle approximation is singular with respect to a uniform true distribution, so ordinary log loss gives infinite risk. But the local typicality $(Kq)(x)$ is positive between atoms, and agrees with intuition that a higher density of atoms is a better approximation.
           </figcaption>
         </figure>
       </section>
@@ -567,7 +560,7 @@
         </p>
         <h4>The $K$-corrected log-typicality rule</h4>
         <p>
-          The correction is to keep the log-typicality term and add a reward for observations that represent a large
+          The correction is to keep the log-typicality term and add a reward (negative risk) for observations that represent a large
           share of the similarity mass under the report:
         </p>
         <div class="math-block">
@@ -580,7 +573,7 @@
           In the bracketed part, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
         </p>
         <p>
-          This reward is normalized under the report itself:
+          This reward cancels out under the report itself:
         </p>
         <div class="math-block">
           $$\mathbb E_{X\sim q}\left[
@@ -625,7 +618,7 @@
       <section class="panel">
         <h2>Examples again</h2>
         <p>
-          Using the proper score, we can check the examples above to see if this works. The entries below are risks under the truth used in each example.
+          Using the proper score, we can check the examples above to see if this works. The entries below are risks under the true distribution used in each example.
         </p>
         <div class="table-wrap">
           <table class="score-table">
@@ -685,10 +678,6 @@
             </tbody>
           </table>
         </div>
-        <p>
-          Lower is better within each pair. Ordinary cross-entropy ties or fails in these comparisons; $K$-CE separates
-          the reports in the preferred direction.
-        </p>
       </section>
 
       <section class="panel">
@@ -741,11 +730,11 @@
         <h2>Takeaway</h2>
         <p>
           Shannon entropy generates the logarithmic scoring rule, which gives ordinary cross-entropy, KL divergence,
-          mutual information, and maximum likelihood. Similarity-sensitive entropy gives the parallel construction:
+          mutual information, and maximum likelihood. Similarity-sensitive entropy gives the parallel quantities:
           a similarity-sensitive scoring rule, $K$-cross-entropy, $K$-divergence, $K$-information gain, and corresponding model fitting.
         </p>
         <p>
-          With the identity kernel, the similarity-sensitive version becomes local and recovers the above Shannon/log-loss family. With a task-specific kernel, the same construction asks models and experiments to reduce the mistakes that matter for the task, rather than treating every wrong answer as equally unrelated.
+          With the identity kernel, the similarity-sensitive version becomes local and recovers the above Shannon/log-loss family. With a task-specific kernel, the same construction asks models and experiments to reduce the mistakes that matter for the task, rather than treating every imperfect prediction as equally wrong.
         </p>
       </section>
     </main>
