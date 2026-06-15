@@ -439,7 +439,7 @@
           Here $\phi_\sigma$ is the centered Gaussian density with standard deviation $\sigma$. The sum turns it into a wrapped Gaussian density: it is the law of $\mu+\sigma Z \pmod 1$, written as a density on $[0,1]$.
         </p>
         <p>
-          Because $q_\mu$ is just a circular translate of the same density, ordinary cross-entropy cannot choose between them:
+          Because $q_\mu$ is just a circular translation of the same density, ordinary cross-entropy cannot choose between them:
         </p>
         <div class="math-block">
           $$\operatorname{CE}(P,q_\mu)=-\int_0^1 \log q_\mu(x)\,dx$$
@@ -463,7 +463,7 @@
           >
           <figcaption>
             <strong>Wrapped model, distance kernel.</strong> Ordinary cross-entropy thinks all circular
-            translates of the fixed-width density are equivalent. If you want to reward a model for near-misses, you need a nonlocal loss that considers the geometry of the interval.
+            translations of the fixed-width density are equivalent. If you want to reward a model for near-misses, you need a nonlocal loss that considers the geometry of the interval.
           </figcaption>
         </figure>
         <h3>Shuffled likelihoods</h3>
