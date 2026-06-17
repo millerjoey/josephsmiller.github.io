@@ -334,7 +334,7 @@ function addRiskAxes(svg, panel, minLog, maxLog) {
   svg.push(`  <line class="marker" x1="${fmt(optimumX)}" y1="${fmt(panel.y)}" x2="${fmt(optimumX)}" y2="${fmt(panel.y + panel.h)}" />`);
   svg.push(`  <text class="small" x="${fmt(optimumX - 10)}" y="${fmt(panel.y + 18)}" text-anchor="end">K-CE best σ ≈ ${fmt(bestKWidth.sigma)}</text>`);
   svg.push(`  <line class="floor-marker" x1="${fmt(panel.x)}" y1="${fmt(panel.y)}" x2="${fmt(panel.x)}" y2="${fmt(panel.y + panel.h)}" />`);
-  svg.push(`  <text class="small" x="${fmt(panel.x + 6)}" y="${fmt(panel.y + 18)}">CE floor</text>`);
+  svg.push(`  <text class="small" x="${fmt(panel.x + 6)}" y="${fmt(panel.y + 18)}">σ floor</text>`);
   const labelX = panel.x - 46;
   const labelY = panel.y + panel.h / 2;
   svg.push(`  <text class="small" x="${fmt(labelX)}" y="${fmt(labelY)}" text-anchor="middle" transform="rotate(-90 ${fmt(labelX)} ${fmt(labelY)})">relative excess empirical risk</text>`);
