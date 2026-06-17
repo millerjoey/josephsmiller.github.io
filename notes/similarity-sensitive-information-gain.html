@@ -681,28 +681,6 @@
       </section>
 
       <section class="panel">
-        <h2>Information gain is risk reduction</h2>
-        <p>
-          Returning to experiment design. Suppose the future quantity we care about is $Y$. Before performing experiment $a$, the predictive law is $p_Y$. After observing data $Z$ from that experiment, the predictive law becomes $p_{Y\mid Z,a}$.
-        </p>
-        <p>
-          If future reports will be evaluated by the proper $K$-score and a calibrated model, then the value of action $a$ is
-        </p>
-        <div class="math-block">
-          $$\operatorname{IG}_K(a;Y)=H_K(p_Y)
-          -\mathbb E_{Z\mid a}H_K(p_{Y\mid Z,a}).$$
-        </div>
-        <p>
-          This is the expected reduction in future $K$-proper cross-entropy risk. Before seeing $Z$, the best
-          report is $p_Y$ and the risk is $H_K(p_Y)$. After seeing $Z$, the best report is
-          $p_{Y\mid Z,a}$, and the expected risk is the second term.
-        </p>
-        <p>
-          This is the exact same interpretation as ordinary predictive MI, except allowing for a flexible and transparent evaluation geometry.
-        </p>
-      </section>
-
-      <section class="panel">
         <h2>Fitting models</h2>
         <p>
           Maximum likelihood minimizes ordinary cross-entropy:
@@ -724,6 +702,44 @@
           With a correctly specified model and infinite data, strictly proper scores target the same true law.
           Under misspecification, finite data, regularization, approximate inference, or model selection, the scoring rule changes the projection because it changes the shape of the tradeoff for being wrong.
         </p>
+        <h3>Fitting a mixture model</h3>
+        <p>
+          Another important example where this matters is in fitting a Gaussian mixture to two small clusters of data. Ideally, we'd want to assign one component to each cluster. Ordinary MLE can instead spend a component on one point and use the other component more broadly, leading to arbitrary minimum variance decisions, priors, cross-validation, or other forms of regularization. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
+        </p>
+        <p>
+          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance floor, and under proper $K$-CE with a Gaussian kernel using $\ell=0.15$. The CE fit uses that minimum variance to make a spke on that one observation; the $K$-CE optimum is interior and instead fits two natural groups. 
+        </p>
+        <figure>
+          <img
+            src="assets/k_score_gmm_singularity.svg"
+            alt="A two-component Gaussian mixture example comparing an optimized ordinary cross-entropy fit with a variance floor against an optimized proper K cross-entropy fit."
+          >
+          <figcaption>
+            <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and proper $K$-CE along the corresponding one-dimensional second-component variance.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>Information gain is risk reduction</h2>
+        <p>
+          Returning to experiment design. Suppose the future quantity we care about is $Y$. Before performing experiment $a$, the predictive law is $p_Y$. After observing data $Z$ from that experiment, the predictive law becomes $p_{Y\mid Z,a}$.
+        </p>
+        <p>
+          If future reports will be evaluated by the proper $K$-score and a calibrated model, then the value of action $a$ is
+        </p>
+        <div class="math-block">
+          $$\operatorname{IG}_K(a;Y)=H_K(p_Y)
+          -\mathbb E_{Z\mid a}H_K(p_{Y\mid Z,a}).$$
+        </div>
+        <p>
+          This is the expected reduction in future $K$-proper cross-entropy risk. Before seeing $Z$, the best
+          report is $p_Y$ and the risk is $H_K(p_Y)$. After seeing $Z$, the best report is
+          $p_{Y\mid Z,a}$, and the expected risk is the second term.
+        </p>
+        <p>
+          This is the exact same interpretation as ordinary predictive MI, except allowing for a flexible and transparent evaluation geometry.
+        </p>
       </section>
 
       <section class="panel callout">
@@ -734,7 +750,7 @@
           a similarity-sensitive scoring rule, $K$-cross-entropy, $K$-divergence, $K$-information gain, and corresponding model fitting.
         </p>
         <p>
-          With the identity kernel, the similarity-sensitive version becomes local and recovers the above Shannon/log-loss family. With a task-specific kernel, the same construction asks models and experiments to reduce the mistakes that matter for the task, rather than treating every imperfect prediction as equally wrong.
+          With the identity kernel, the similarity-sensitive version becomes local and recovers the above Shannon/log-loss family. With an explicit similarity kernel designed for the task, we fit models and evaluate experiments to reduce the mistakes that matter for the task, rather than treating every imperfect prediction as equally wrong and infinitely precise ones as infinitely right.
         </p>
       </section>
     </main>
