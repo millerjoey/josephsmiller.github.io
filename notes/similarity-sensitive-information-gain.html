@@ -331,6 +331,172 @@
       margin-top: 0.85rem;
     }
 
+    .fit-lab {
+      margin-top: 1.15rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(31, 42, 55, 0.08);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .fit-lab-controls {
+      display: grid;
+      grid-template-columns: minmax(72px, 0.62fr) minmax(112px, 0.85fr) minmax(82px, 0.62fr) auto;
+      gap: 0.6rem;
+      align-items: end;
+    }
+
+    .fit-note {
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .fit-control {
+      display: grid;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .fit-control span,
+    .fit-actions-label {
+      color: var(--accent-strong);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .fit-control select,
+    .fit-control input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(31, 42, 55, 0.16);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      padding: 0.42rem 0.5rem;
+      min-height: 2.2rem;
+    }
+
+    .fit-control input[type="range"] {
+      padding-inline: 0;
+    }
+
+    .fit-actions {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .fit-actions-wrap {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .fit-actions button {
+      border: 1px solid rgba(31, 42, 55, 0.14);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      padding: 0.42rem 0.62rem;
+      min-height: 2.2rem;
+      white-space: nowrap;
+    }
+
+    .fit-actions button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .fit-actions button:hover,
+    .fit-actions button:focus-visible {
+      border-color: var(--accent);
+      color: var(--accent-strong);
+    }
+
+    .fit-actions button.primary:hover,
+    .fit-actions button.primary:focus-visible {
+      background: var(--accent-strong);
+      color: #fff;
+    }
+
+    .fit-lab-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(190px, 0.3fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .fit-plot {
+      width: 100%;
+      aspect-ratio: 1.75;
+      min-height: 285px;
+      border: 1px solid rgba(31, 42, 55, 0.08);
+      background: #fff;
+      cursor: crosshair;
+      touch-action: manipulation;
+    }
+
+    .fit-metrics {
+      display: grid;
+      gap: 0.65rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .fit-status {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .fit-metric {
+      border-top: 1px solid rgba(31, 42, 55, 0.08);
+      padding-top: 0.55rem;
+    }
+
+    .fit-metric:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .fit-metric strong {
+      color: var(--ink);
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .fit-summary {
+      color: var(--muted);
+      display: grid;
+      gap: 0.18rem;
+      font-size: 0.86rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fit-risk {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .fit-component {
+      display: grid;
+      grid-template-columns: 3.1em 4.1em 4.4em;
+      gap: 0.35rem;
+      align-items: baseline;
+    }
+
+    .fit-component span {
+      white-space: nowrap;
+    }
+
     details {
       padding-top: 0.9rem;
       border-top: 1px solid rgba(31, 42, 55, 0.08);
@@ -373,6 +539,15 @@
     @media (max-width: 700px) {
       .shell {
         padding: 2.25rem 1.75rem;
+      }
+
+      .fit-lab-controls,
+      .fit-lab-stage {
+        grid-template-columns: 1fr;
+      }
+
+      .fit-plot {
+        min-height: 240px;
       }
     }
   </style>
@@ -704,10 +879,10 @@
         </p>
         <h3>Fitting a mixture model</h3>
         <p>
-          Another important example where this matters is in fitting a Gaussian mixture to two small clusters of data. Ideally, we'd want to assign one component to each cluster. Ordinary MLE can instead spend a component on one point and use the other component more broadly, leading to arbitrary minimum variance decisions, priors, cross-validation, or other forms of regularization. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
+          Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can often get infinite reward spending a component on one point and use the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to control the fit. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
         </p>
         <p>
-          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance floor, and under proper $K$-CE with a Gaussian kernel using $\ell=0.15$. The CE fit uses that minimum variance to make a spke on that one observation; the $K$-CE optimum is interior and instead fits two natural groups. 
+          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance minimum, and under proper $K$-CE with a Gaussian kernel using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance components as a spike on that one observation; the $K$-CE optimum is interior and instead fits two natural groups.
         </p>
         <figure>
           <img
@@ -718,6 +893,57 @@
             <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and proper $K$-CE along the corresponding one-dimensional second-component variance.
           </figcaption>
         </figure>
+        <div class="fit-lab" id="gmm-fit-lab">
+          <p class="fit-note">
+            To show how favorable this degenerate fit is, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from one fixed mixture distribution. The unbounded reward in ordinary CE leads to fits strongly favoring individual points; proper $K$-CE always keeps a finite score and encourages more balanced allocation. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
+          </p>
+          <div class="fit-lab-controls">
+            <label class="fit-control">
+              <span>Samples</span>
+              <input data-role="sample-count" type="number" min="3" max="40" step="1" value="3">
+            </label>
+            <label class="fit-control">
+              <span>Components</span>
+              <select data-role="components">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+              </select>
+            </label>
+            <label class="fit-control">
+              <span>$\ell$</span>
+              <input data-role="ell" type="number" min="0.04" max="0.5" step="0.01" value="0.15">
+            </label>
+            <div class="fit-actions-wrap">
+              <div class="fit-actions-label">Data</div>
+              <div class="fit-actions">
+                <button type="button" data-action="sample">Sample</button>
+                <button type="button" data-action="clear">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div class="fit-lab-stage">
+            <svg class="fit-plot" data-role="plot" viewBox="0 0 840 480" role="img" aria-labelledby="fit-lab-title fit-lab-desc">
+              <title id="fit-lab-title">Interactive Gaussian mixture fitting comparison</title>
+              <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and proper K-cross-entropy Gaussian mixture fits.</desc>
+            </svg>
+            <div class="fit-metrics">
+              <div class="fit-status" data-role="status">Ready</div>
+              <div class="fit-metric">
+                <strong>Ordinary CE</strong>
+                <div class="fit-summary" data-role="ce-summary">-</div>
+              </div>
+              <div class="fit-metric">
+                <strong>Proper K-CE</strong>
+                <div class="fit-summary" data-role="k-summary">-</div>
+              </div>
+              <div class="fit-metric">
+                <strong>Samples</strong>
+                <div class="fit-summary" data-role="sample-summary">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="panel">
@@ -755,5 +981,6 @@
       </section>
     </main>
   </div>
+  <script src="assets/interactive_gmm_fit.js?v=tradeoff-16"></script>
 </body>
 </html>
