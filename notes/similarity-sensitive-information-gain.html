@@ -938,7 +938,7 @@
         </p>
         <h3>Fitting a mixture model</h3>
         <p>
-          Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can often get infinite reward spending a component on one point and use the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to control the fit. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
+          Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can get infinite reward placing a mixture component on one point and using the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to select among fits. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
         </p>
         <p>
           In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance minimum, and under proper $K$-CE with a Gaussian kernel using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance components as a spike on that one observation; the $K$-CE optimum is interior and instead fits two natural groups.
@@ -1001,7 +1001,7 @@
             </div>
           </div>
           <p class="fit-note">
-            The comparison below asks the same question for one through five fitted components: how much empirical risk is reduced by moving from the best $k-1$ component fit to the best $k$ component fit?
+            The comparison below shows how much empirical risk is reduced by moving from the best $k-1$ component fit to the best $k$ component fit.
           </p>
           <div class="component-gain" data-role="component-gain"></div>
         </div>
