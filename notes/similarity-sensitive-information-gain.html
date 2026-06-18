@@ -336,7 +336,7 @@
       padding-top: 1rem;
       border-top: 1px solid rgba(31, 42, 55, 0.08);
       display: grid;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .fit-lab-controls {
@@ -349,6 +349,8 @@
     .fit-note {
       color: var(--muted);
       font-size: 0.98rem;
+      line-height: 1.45;
+      margin: 0;
     }
 
     .fit-control {
@@ -428,19 +430,76 @@
 
     .fit-lab-stage {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(190px, 0.3fr);
-      gap: 1rem;
+      grid-template-columns: minmax(0, 1fr) minmax(180px, 0.26fr);
+      gap: 0.85rem;
       align-items: start;
     }
 
     .fit-plot {
       width: 100%;
-      aspect-ratio: 1.75;
-      min-height: 285px;
+      aspect-ratio: 1.95;
+      min-height: 255px;
       border: 1px solid rgba(31, 42, 55, 0.08);
       background: #fff;
       cursor: crosshair;
       touch-action: manipulation;
+    }
+
+    .component-gain {
+      border: 1px solid rgba(31, 42, 55, 0.08);
+      background: #fff;
+      padding: 0.85rem;
+    }
+
+    .gain-title {
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .gain-subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .gain-grid {
+      display: grid;
+      grid-template-columns: minmax(5.5rem, 0.55fr) repeat(2, minmax(7.5rem, 1fr));
+      gap: 0.5rem 0.75rem;
+      align-items: start;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .gain-header {
+      color: var(--accent-strong);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .gain-row {
+      display: contents;
+    }
+
+    .gain-rule,
+    .gain-score-main {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .gain-score-sub {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 0.1rem;
+    }
+
+    .gain-empty {
+      color: var(--muted);
+      font-size: 0.9rem;
     }
 
     .fit-metrics {
@@ -895,7 +954,7 @@
         </figure>
         <div class="fit-lab" id="gmm-fit-lab">
           <p class="fit-note">
-            To show how favorable this degenerate fit is, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from one fixed mixture distribution. The unbounded reward in ordinary CE leads to fits strongly favoring individual points; proper $K$-CE always keeps a finite score and encourages more balanced allocation. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
+            To show how favored this degenerate fit is by MLE, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from a synthetic distribution with the selected number of components. The -infinite loss in ordinary CE leads to fits strongly favoring individual points; proper $K$-CE always keeps a finite score and encourages more balanced allocation. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
           </p>
           <div class="fit-lab-controls">
             <label class="fit-control">
@@ -908,6 +967,8 @@
                 <option value="1">1</option>
                 <option value="2" selected>2</option>
                 <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
               </select>
             </label>
             <label class="fit-control">
@@ -922,8 +983,8 @@
               </div>
             </div>
           </div>
-          <div class="fit-lab-stage">
-            <svg class="fit-plot" data-role="plot" viewBox="0 0 840 480" role="img" aria-labelledby="fit-lab-title fit-lab-desc">
+            <div class="fit-lab-stage">
+            <svg class="fit-plot" data-role="plot" viewBox="0 0 840 430" role="img" aria-labelledby="fit-lab-title fit-lab-desc">
               <title id="fit-lab-title">Interactive Gaussian mixture fitting comparison</title>
               <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and proper K-cross-entropy Gaussian mixture fits.</desc>
             </svg>
@@ -937,12 +998,12 @@
                 <strong>Proper K-CE</strong>
                 <div class="fit-summary" data-role="k-summary">-</div>
               </div>
-              <div class="fit-metric">
-                <strong>Samples</strong>
-                <div class="fit-summary" data-role="sample-summary">-</div>
-              </div>
             </div>
           </div>
+          <p class="fit-note">
+            The comparison below asks the same question for one through five fitted components: how much empirical risk is reduced by moving from the best $k-1$ component fit to the best $k$ component fit?
+          </p>
+          <div class="component-gain" data-role="component-gain"></div>
         </div>
       </section>
 
@@ -981,6 +1042,6 @@
       </section>
     </main>
   </div>
-  <script src="assets/interactive_gmm_fit.js?v=tradeoff-16"></script>
+  <script src="assets/interactive_gmm_fit.js?v=tradeoff-31"></script>
 </body>
 </html>
