@@ -3,13 +3,13 @@
   if (!root) return;
 
   const svg = root.querySelector('[data-role="plot"]');
+  const gainNode = root.querySelector('[data-role="component-gain"]');
   const sampleCountInput = root.querySelector('[data-role="sample-count"]');
   const componentsInput = root.querySelector('[data-role="components"]');
   const ellInput = root.querySelector('[data-role="ell"]');
   const statusNode = root.querySelector('[data-role="status"]');
   const ceSummaryNode = root.querySelector('[data-role="ce-summary"]');
   const kSummaryNode = root.querySelector('[data-role="k-summary"]');
-  const sampleSummaryNode = root.querySelector('[data-role="sample-summary"]');
   const ns = "http://www.w3.org/2000/svg";
   const domain = [-0.75, 1.75];
   const panel = { x: 58, y: 44, w: 718, h: 330 };
@@ -19,6 +19,7 @@
   const ceDash = "2 6";
   const minNumericalSigma = 1e-8;
   const maxSigma = 1.4;
+  const maxComparedComponents = 5;
   const minDisplaySigmaValue = 0.0001;
   const minCoordinateStep = 0.006;
   const maxSweeps = 90;
@@ -45,6 +46,7 @@
     frame: null,
     ce: null,
     k: null,
+    gain: null,
     initialized: false,
   };
 
@@ -84,10 +86,22 @@
 
   function sampleData() {
     const n = clamp(Number(sampleCountInput.value) || 3, 3, 40);
-    return Array.from({ length: n }, () => {
-      const localRegion = Math.random() < 0.72;
-      const center = localRegion ? 0.04 : 0.86;
-      const width = localRegion ? 0.30 : 0.42;
+    const k = clamp(Number(componentsInput.value) || 2, 1, maxComparedComponents);
+    const centers = Array.from({ length: k }, (_, i) => (
+      k === 1 ? 0.45 : -0.12 + (1.24 * i) / (k - 1)
+    ));
+    const widths = {
+      1: 0.86,
+      2: 0.34,
+      3: 0.28,
+      4: 0.22,
+      5: 0.18,
+    };
+    const width = widths[k] || 0.22;
+    const componentIndices = Array.from({ length: n }, (_, index) => index % k)
+      .sort(() => Math.random() - 0.5);
+    return componentIndices.map((componentIndex) => {
+      const center = centers[componentIndex];
       return clamp(center + (Math.random() - 0.5) * width, domain[0], domain[1]);
     }).sort((a, b) => a - b);
   }
@@ -176,14 +190,16 @@
     return components.reduce((s, c) => s + c.weight * componentKq(x, c, ell), 0);
   }
 
-  function ceRiskFromParams(params, k, sigmaMin) {
-    const components = paramsToComponents(params, k, sigmaMin);
+  function ceRiskFromComponents(components) {
     const total = state.samples.reduce((s, x) => s - Math.log(Math.max(mixtureDensity(x, components), 1e-300)), 0);
     return total / state.samples.length;
   }
 
-  function kRiskFromParams(params, k, ell, sigmaMin) {
-    const components = paramsToComponents(params, k, sigmaMin);
+  function ceRiskFromParams(params, k, sigmaMin) {
+    return ceRiskFromComponents(paramsToComponents(params, k, sigmaMin));
+  }
+
+  function kRiskFromComponents(components, ell) {
     const correctionTerms = Array(state.samples.length).fill(0);
 
     for (const component of components) {
@@ -202,6 +218,10 @@
       return s + logTerm - (correctionTerms[index] - 1);
     }, 0);
     return total / state.samples.length;
+  }
+
+  function kRiskFromParams(params, k, ell, sigmaMin) {
+    return kRiskFromComponents(paramsToComponents(params, k, sigmaMin), ell);
   }
 
   function quantileGroups(samples, k) {
@@ -301,8 +321,9 @@
     return [...mus, ...logSigmas, ...logits];
   }
 
-  function makeOptimizer(kind) {
-    const k = Math.min(Number(componentsInput.value) || 2, state.samples.length);
+  function makeOptimizer(kind, kOverride = null) {
+    const requestedK = kOverride == null ? (Number(componentsInput.value) || 2) : kOverride;
+    const k = clamp(requestedK, 1, maxComparedComponents);
     const sigmaMin = minNumericalSigma;
     const ell = Math.max(Number(ellInput.value) || 0.15, 0.01);
     const starts = initialComponentSets(k, kind, sigmaMin);
@@ -315,6 +336,20 @@
       ? (p) => ceRiskFromParams(p, k, sigmaMin)
       : (p) => kRiskFromParams(p, k, ell, sigmaMin);
     return createOptimizerEnsemble(starts, steps, objective, kind, k, sigmaMin, ell);
+  }
+
+  function makeGainComparison() {
+    const maxK = maxComparedComponents;
+    return {
+      maxK,
+      ce: Array.from({ length: maxK }, (_, index) => makeOptimizer("ce", index + 1)),
+      k: Array.from({ length: maxK }, (_, index) => makeOptimizer("k", index + 1)),
+    };
+  }
+
+  function gainOptimizers() {
+    if (!state.gain) return [];
+    return [...state.gain.ce, ...state.gain.k];
   }
 
   function sanitizeParam(params, index, k, sigmaMin) {
@@ -430,12 +465,14 @@
     if (state.samples.length < 2) {
       state.ce = null;
       state.k = null;
+      state.gain = null;
       state.initialized = false;
       render("Add samples");
       return;
     }
     state.ce = makeOptimizer("ce");
     state.k = makeOptimizer("k");
+    state.gain = makeGainComparison();
     state.initialized = true;
     render("Ready");
   }
@@ -444,6 +481,7 @@
     stopRun();
     state.ce = null;
     state.k = null;
+    state.gain = null;
     state.initialized = false;
     render(status || "Ready");
   }
@@ -451,13 +489,17 @@
   function stepOptimizers(count) {
     if (!state.initialized) resetOptimizers();
     if (!state.ce || !state.k) return;
+    const optimizers = [state.ce, state.k, ...gainOptimizers()];
     for (let i = 0; i < count; i += 1) {
-      if (!state.ce.done()) state.ce.sweep();
-      if (!state.k.done()) state.k.sweep();
+      optimizers.forEach((optimizer) => {
+        if (!optimizer.done()) optimizer.sweep();
+      });
     }
-    const done = state.ce.done() && state.k.done();
+    const done = optimizers.every((optimizer) => optimizer.done());
     render(done ? "Fit complete" : "Fitting");
-    if (done) stopRun();
+    if (done) {
+      stopRun();
+    }
   }
 
   function startRun() {
@@ -578,13 +620,97 @@
     components.forEach((component) => appendComponentRow(node, component, optimizer.sigmaMin));
   }
 
-  function renderSamples(node) {
-    node.replaceChildren();
-    if (!state.samples.length) {
-      node.textContent = "-";
+  function riskText(optimizer) {
+    const components = optimizer.components();
+    const singularCount = components.filter((component) => isPointMassComponent(component, optimizer.sigmaMin)).length;
+    if (optimizer.kind === "ce" && singularCount) return "-> -∞";
+    return fmt(optimizer.value);
+  }
+
+  function gainText(one, two) {
+    const oneComponents = one.components();
+    const twoComponents = two.components();
+    const oneSingular = oneComponents.filter((component) => isPointMassComponent(component, one.sigmaMin)).length;
+    const singularCount = twoComponents.filter((component) => isPointMassComponent(component, two.sigmaMin)).length;
+    if (two.kind === "ce" && singularCount && !oneSingular) return "∞";
+    if (two.kind === "ce" && singularCount && oneSingular) return "ill-posed";
+    return fmt(Math.max(0, one.value - two.value));
+  }
+
+  function appendGainCell(row, text, className = "") {
+    const cell = document.createElement("div");
+    cell.className = className;
+    cell.textContent = text;
+    row.appendChild(cell);
+  }
+
+  function appendScoreCell(row, optimizer, previous) {
+    const cell = document.createElement("div");
+    cell.className = "gain-score";
+    const score = document.createElement("div");
+    score.className = "gain-score-main";
+    score.textContent = riskText(optimizer);
+    cell.appendChild(score);
+
+    const gain = document.createElement("div");
+    gain.className = "gain-score-sub";
+    gain.textContent = previous ? `gain ${gainText(previous, optimizer)}` : "baseline";
+    cell.appendChild(gain);
+    row.appendChild(cell);
+  }
+
+  function appendGainRow(parent, k) {
+    const row = document.createElement("div");
+    row.className = "gain-row";
+    appendGainCell(row, String(k), "gain-rule");
+    appendScoreCell(row, state.gain.k[k - 1], k > 1 ? state.gain.k[k - 2] : null);
+    appendScoreCell(row, state.gain.ce[k - 1], k > 1 ? state.gain.ce[k - 2] : null);
+    parent.appendChild(row);
+  }
+
+  function renderGainSummary() {
+    if (!gainNode) return;
+    gainNode.replaceChildren();
+
+    const title = document.createElement("div");
+    title.className = "gain-title";
+    title.textContent = "Marginal value of extra components";
+    gainNode.appendChild(title);
+
+    const subtitle = document.createElement("div");
+    subtitle.className = "gain-subtitle";
+    subtitle.textContent = "Rows show fitted risk for k components; gain is the reduction from the previous row.";
+    gainNode.appendChild(subtitle);
+
+    const grid = document.createElement("div");
+    grid.className = "gain-grid";
+    ["Components", "Proper K-CE", "Ordinary CE"].forEach((text) => {
+      const cell = document.createElement("div");
+      cell.className = "gain-header";
+      cell.textContent = text;
+      grid.appendChild(cell);
+    });
+
+    if (!state.gain) {
+      const empty = document.createElement("div");
+      empty.className = "gain-empty";
+      empty.textContent = "Add at least two samples.";
+      gainNode.appendChild(empty);
       return;
     }
-    appendTextRow(node, "", state.samples.map((x) => fmt(x, 2)).join(", "));
+
+    if (state.gain.maxK < 2) {
+      const empty = document.createElement("div");
+      empty.className = "gain-empty";
+      empty.textContent = "Choose at least two components.";
+      gainNode.appendChild(empty);
+      return;
+    }
+
+    for (let k = 1; k <= state.gain.maxK; k += 1) {
+      appendGainRow(grid, k);
+    }
+    gainNode.appendChild(grid);
   }
 
   function render(status) {
@@ -594,7 +720,7 @@
     const group = svgEl("g");
     svg.appendChild(group);
 
-    group.appendChild(svgEl("rect", { x: 0, y: 0, width: 840, height: 480, fill: "#fff" }));
+    group.appendChild(svgEl("rect", { x: 0, y: 0, width: 840, height: 430, fill: "#fff" }));
     group.appendChild(svgEl("rect", {
       x: panel.x,
       y: panel.y,
@@ -641,7 +767,6 @@
       addText(group, x, panel.y + panel.h + 24, String(tick), { anchor: "middle", size: 12 });
     }
 
-    addText(group, panel.x + panel.w / 2, panel.y + panel.h + 44, "x", { anchor: "middle", size: 12 });
     addText(group, panel.x - 42, panel.y + panel.h / 2, "density", {
       anchor: "middle",
       size: 12,
@@ -682,7 +807,7 @@
       }));
     }
 
-    const legendY = 424;
+    const legendY = 410;
     group.appendChild(svgEl("line", { x1: panel.x, y1: legendY, x2: panel.x + 34, y2: legendY, stroke: accent, "stroke-width": 2.4 }));
     addText(group, panel.x + 44, legendY + 4, "proper K-CE fit", { size: 13 });
     group.appendChild(svgEl("line", { x1: panel.x + 190, y1: legendY, x2: panel.x + 224, y2: legendY, stroke: muted, "stroke-width": 2.2, "stroke-dasharray": ceDash, "stroke-linecap": "round" }));
@@ -690,7 +815,7 @@
     statusNode.textContent = status || "Ready";
     renderSummary(ceSummaryNode, state.ce, ceComponents);
     renderSummary(kSummaryNode, state.k, kComponents);
-    renderSamples(sampleSummaryNode);
+    renderGainSummary();
   }
 
   function pointerToX(event) {
@@ -735,10 +860,13 @@
     startRun();
   });
 
-  [componentsInput, ellInput].forEach((input) => {
-    input.addEventListener("change", () => {
-      fitCurrentSamples();
-    });
+  componentsInput.addEventListener("change", () => {
+    state.samples = sampleData();
+    fitCurrentSamples();
+  });
+
+  ellInput.addEventListener("change", () => {
+    fitCurrentSamples();
   });
 
   sampleCountInput.addEventListener("change", () => {
