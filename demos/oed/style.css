@@ -747,6 +747,26 @@ button[disabled] {
   line-height: 1.35;
 }
 
+.record-fields {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.3rem 0.65rem;
+  margin: 0;
+}
+
+.record-fields dt {
+  color: rgba(31, 42, 55, 0.58);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.record-fields dd {
+  margin: 0;
+  min-width: 0;
+  font-weight: 650;
+  word-break: break-word;
+}
+
 .pair-score {
   display: flex;
   gap: 0.5rem;
