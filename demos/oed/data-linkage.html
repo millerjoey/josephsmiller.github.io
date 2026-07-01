@@ -329,6 +329,7 @@
         let batch = [];
         let cursor = 0;
         let lastScoreKind = null; // "sim" | "prob"
+        let uploadedRecords = { left: [], right: null };
         const uiState = {
           remaining: null,
           lastLabelSummary: "",
@@ -683,6 +684,37 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           return rows;
         }
 
+        function recordsFromCsv(csvText) {
+          const rows = parseCsvRows(csvText);
+          const seen = new Map();
+          const header = (rows[0] || []).map((column, index) => {
+            const base = column || `column_${index + 1}`;
+            const count = seen.get(base) || 0;
+            seen.set(base, count + 1);
+            return count ? `${base}_${count + 1}` : base;
+          });
+          return rows.slice(1).map((values) => {
+            const record = {};
+            header.forEach((column, index) => {
+              record[column] = values[index] ?? "";
+            });
+            return record;
+          });
+        }
+
+        async function recordsFromFiles(leftFile, rightFile) {
+          try {
+            const leftText = leftFile ? await leftFile.text() : "";
+            const rightText = rightFile ? await rightFile.text() : "";
+            return {
+              left: leftText ? recordsFromCsv(leftText) : [],
+              right: rightText ? recordsFromCsv(rightText) : null,
+            };
+          } catch {
+            return { left: [], right: null };
+          }
+        }
+
         function sampleRowCount(csvText) {
           return Math.max(0, parseCsvRows(csvText).length - 1);
         }
@@ -821,7 +853,27 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
         }
 
         function extraFieldsForDisplay(item) {
-          const known = new Set(["left", "right", "i", "j", "similarity", "prob", "is_probability"]);
+          const known = new Set([
+            "left",
+            "right",
+            "i",
+            "j",
+            "similarity",
+            "prob",
+            "is_probability",
+            "left_record",
+            "right_record",
+            "leftRecord",
+            "rightRecord",
+            "left_row",
+            "right_row",
+            "leftRow",
+            "rightRow",
+            "left_fields",
+            "right_fields",
+            "leftFields",
+            "rightFields",
+          ]);
           const extra = {};
           for (const [k, v] of Object.entries(item || {})) {
             if (known.has(k)) continue;
@@ -839,6 +891,67 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
             }
           }
           return extra;
+        }
+
+        function normalizeRecord(record) {
+          if (!record || typeof record !== "object" || Array.isArray(record)) return null;
+          const normalized = {};
+          for (const [key, value] of Object.entries(record)) {
+            if (value === undefined || value === null) normalized[key] = "";
+            else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean")
+              normalized[key] = String(value);
+            else {
+              try {
+                normalized[key] = JSON.stringify(value);
+              } catch {
+                normalized[key] = String(value);
+              }
+            }
+          }
+          return Object.keys(normalized).length ? normalized : null;
+        }
+
+        function recordFromItem(item, side) {
+          const capitalized = side === "left" ? "Left" : "Right";
+          const direct =
+            item?.[`${side}_record`] ||
+            item?.[`${side}Record`] ||
+            item?.[`${side}_row`] ||
+            item?.[`${side}Row`] ||
+            item?.[`${side}_fields`] ||
+            item?.[`${side}Fields`];
+          const directRecord = normalizeRecord(direct);
+          if (directRecord) return directRecord;
+
+          const index = Number.parseInt(side === "left" ? item?.i : item?.j, 10);
+          const rows = side === "right" && uploadedRecords.right ? uploadedRecords.right : uploadedRecords.left;
+          const localRecord = Number.isFinite(index) ? normalizeRecord(rows?.[index]) : null;
+          if (localRecord) return localRecord;
+
+          const fallback = item?.[side];
+          return fallback ? { [capitalized]: String(fallback) } : null;
+        }
+
+        function renderRecord(container, record) {
+          container.innerHTML = "";
+          if (!record) return;
+
+          const entries = Object.entries(record);
+          if (entries.length === 1 && (entries[0][0] === "Left" || entries[0][0] === "Right")) {
+            container.textContent = entries[0][1];
+            return;
+          }
+
+          const list = document.createElement("dl");
+          list.className = "record-fields";
+          entries.forEach(([key, value]) => {
+            const term = document.createElement("dt");
+            term.textContent = key;
+            const description = document.createElement("dd");
+            description.textContent = value;
+            list.append(term, description);
+          });
+          container.appendChild(list);
         }
 
         function keyFor(item) {
@@ -943,7 +1056,7 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
             leftLabel.textContent = "Left";
             const leftValue = document.createElement("div");
             leftValue.className = "pair-value";
-            leftValue.textContent = item.left ?? "";
+            renderRecord(leftValue, recordFromItem(item, "left"));
             left.append(leftLabel, leftValue);
 
             const right = document.createElement("div");
@@ -952,7 +1065,7 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
             rightLabel.textContent = "Right";
             const rightValue = document.createElement("div");
             rightValue.className = "pair-value";
-            rightValue.textContent = item.right ?? "";
+            renderRecord(rightValue, recordFromItem(item, "right"));
             right.append(rightLabel, rightValue);
 
             names.append(left, right);
@@ -1208,8 +1321,10 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           elements.runStatus.textContent = "";
           elements.uploadStatus.textContent = sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...";
           renderMessage(sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...");
+          uploadedRecords = { left: [], right: null };
 
           try {
+            uploadedRecords = await recordsFromFiles(left, right);
             const fd = new FormData();
             fd.append("left", left);
             if (right) fd.append("right", right);
