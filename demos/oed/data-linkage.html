@@ -118,13 +118,26 @@
               <option value="restaurant_linkage">Restaurant linkage sample (two CSVs)</option>
               <option value="dedup">Dedup sample (one CSV)</option>
               <option value="linkage_people">Linkage sample: people (two CSVs)</option>
-              <option value="linkage_companies">Linkage sample: companies (two CSVs)</option>
             </select>
           </label>
-          <a id="sampleLeft" class="button secondary small" href="#" download="left_sample.csv">Download sample left CSV</a>
-          <a id="sampleRight" class="button secondary small" href="#" download="right_sample.csv"
-            >Download sample right CSV</a
-          >
+          <button id="sampleUse" class="button small" type="button">Use selected sample</button>
+        </div>
+
+        <div class="sample-viewer" aria-live="polite">
+          <div class="sample-viewer-head">
+            <div>
+              <div class="sample-viewer-title">Sample preview</div>
+              <p id="sampleSummary" class="muted small"></p>
+            </div>
+            <div class="segmented" role="group" aria-label="Sample file preview">
+              <button id="samplePreviewLeft" class="view-toggle" type="button" aria-pressed="true">Left</button>
+              <button id="samplePreviewRight" class="view-toggle" type="button" aria-pressed="false">Right</button>
+            </div>
+          </div>
+          <div id="samplePreview" class="sample-preview"></div>
+          <div class="sample-viewer-foot">
+            <button id="sampleDownload" class="button secondary small" type="button">Download sample CSVs</button>
+          </div>
         </div>
 
         <p class="muted small" style="margin-top: 0.6rem">
@@ -283,8 +296,12 @@
           leftFile: $("leftFile"),
           rightFile: $("rightFile"),
           sampleDataset: $("sampleDataset"),
-          sampleLeft: $("sampleLeft"),
-          sampleRight: $("sampleRight"),
+          sampleUse: $("sampleUse"),
+          sampleDownload: $("sampleDownload"),
+          sampleSummary: $("sampleSummary"),
+          samplePreview: $("samplePreview"),
+          samplePreviewLeft: $("samplePreviewLeft"),
+          samplePreviewRight: $("samplePreviewRight"),
           upload: $("upload"),
           uploadStatus: $("uploadStatus"),
           jobId: $("jobId"),
@@ -349,6 +366,7 @@
           elements.apiStatus.textContent = "Backend: checking…";
           elements.apiStatus.title = API_BASE;
           elements.upload.disabled = true;
+          if (elements.sampleUse) elements.sampleUse.disabled = true;
           if (elements.tokenHint) elements.tokenHint.style.display = "none";
           const res =
             (await probe(api("/api/health"))) ||
@@ -358,6 +376,7 @@
             elements.apiStatus.textContent = "Backend: offline";
             elements.apiStatus.title = API_BASE;
             elements.upload.disabled = true;
+            if (elements.sampleUse) elements.sampleUse.disabled = true;
             return false;
           }
           if (res.status === 401) {
@@ -367,6 +386,7 @@
             elements.apiStatus.textContent = res.ok ? "Backend: connected" : "Backend: reachable";
           }
           elements.upload.disabled = false;
+          if (elements.sampleUse) elements.sampleUse.disabled = false;
           return true;
         }
 
@@ -457,9 +477,8 @@
           }
         }
 
-        function toDataUrlCsv(csvText) {
-          return `data:text/csv;charset=utf-8,${encodeURIComponent(csvText)}`;
-        }
+        let currentSampleDataset = null;
+        let currentSamplePreviewSide = "left";
 
         function setSampleDataset(key) {
           const datasets = {
@@ -530,9 +549,9 @@ Jane A. Doe
 Janet Doe
 ACME Corporation
 Acme Corp.
-Acme, Inc.
+"Acme, Inc."
 Globex LLC
-Globex, L.L.C.
+"Globex, L.L.C."
 Initech
 initech
 Umbrella Co.
@@ -549,117 +568,213 @@ Wayne Enterprises
             linkage_people: {
               leftName: "linkage_people_left.csv",
               rightName: "linkage_people_right.csv",
-              leftCsv: `name
-Alex Johnson | 14 Cedar St | Austin TX
-Maria Garcia | 55 Lakeview Dr | Phoenix AZ
-Wei Chen | 220 Pine Ave | San Jose CA
-Aisha Khan | 8 Market St | Chicago IL
-Liam O'Connor | 77 River Rd | Boston MA
-Sofia Martinez | 19 Sunset Blvd | Los Angeles CA
-Noah Brown | 301 Elm St | Denver CO
-Emma Wilson | 9 Birch Ln | Seattle WA
-Olivia Davis | 410 Maple Rd | Portland OR
-Ethan Miller | 600 Oak St | Dallas TX
-Mia Anderson | 12 Spruce Ct | Miami FL
-Jacob Thomas | 88 Highland Ave | Atlanta GA
-Isabella Moore | 5 Cherry St | Raleigh NC
-Lucas Martin | 2000 Park Ave | New York NY
-Amelia Lee | 63 Ridge Rd | Newark NJ
-Benjamin Clark | 1 Hill St | San Diego CA
-Harper Lewis | 44 Forest Dr | Columbus OH
-Daniel Walker | 72 Adams St | Minneapolis MN
-Charlotte Hall | 16 King St | Nashville TN
-Henry Young | 90 Queen St | Salt Lake City UT
+              leftCsv: `name,addr,city,state
+Alex Johnson,14 Cedar St,Austin,TX
+Maria Garcia,55 Lakeview Dr,Phoenix,AZ
+Wei Chen,220 Pine Ave,San Jose,CA
+Aisha Khan,8 Market St,Chicago,IL
+Liam O'Connor,77 River Rd,Boston,MA
+Sofia Martinez,19 Sunset Blvd,Los Angeles,CA
+Noah Brown,301 Elm St,Denver,CO
+Emma Wilson,9 Birch Ln,Seattle,WA
+Olivia Davis,410 Maple Rd,Portland,OR
+Ethan Miller,600 Oak St,Dallas,TX
+Mia Anderson,12 Spruce Ct,Miami,FL
+Jacob Thomas,88 Highland Ave,Atlanta,GA
+Isabella Moore,5 Cherry St,Raleigh,NC
+Lucas Martin,2000 Park Ave,New York,NY
+Amelia Lee,63 Ridge Rd,Newark,NJ
+Benjamin Clark,1 Hill St,San Diego,CA
+Harper Lewis,44 Forest Dr,Columbus,OH
+Daniel Walker,72 Adams St,Minneapolis,MN
+Charlotte Hall,16 King St,Nashville,TN
+Henry Young,90 Queen St,Salt Lake City,UT
 `,
-              rightCsv: `name
-Alex J. Johnson | 14 Cedar Street | Austin Texas
-Maria G. | 55 Lake View Dr | Phoenix AZ
-Wei-Chen | 220 Pine Avenue | San Jose CA
-Aisha Kahn | 8 Market Street | Chicago IL
-Liam OConnor | 77 River Road | Boston MA
-S. Martinez | 19 Sunset Boulevard | Los Angeles CA
-Noah B. Brown | 301 Elm Street | Denver CO
-Emma Willson | 9 Birch Lane | Seattle WA
-Olivia D. | 410 Maple Road | Portland OR
-Ethan Miler | 600 Oak Street | Dallas TX
-Mia Andersson | 12 Spruce Court | Miami FL
-Jacob T. | 88 Highland Avenue | Atlanta GA
-Isabella M. Moore | 5 Cherry Street | Raleigh NC
-Luke Martin | 2000 Park Avenue | New York NY
-Amelia Li | 63 Ridge Road | Newark NJ
-Ben Clark | 1 Hill Street | San Diego CA
-Harper L. | 44 Forest Drive | Columbus OH
-Dan Walker | 72 Adams Street | Minneapolis MN
-Charlotte H. | 16 King Street | Nashville TN
-Henry Yong | 90 Queen Street | Salt Lake City UT
-`,
-            },
-            linkage_companies: {
-              leftName: "linkage_companies_left.csv",
-              rightName: "linkage_companies_right.csv",
-              leftCsv: `name
-Acme Corporation
-Globex LLC
-Initech
-Umbrella Company
-Soylent Corporation
-Stark Industries
-Wayne Enterprises
-Wonka Industries
-Hooli
-Vandelay Industries
-Massive Dynamic
-Cyberdyne Systems
-Tyrell Corporation
-Oceanic Airlines
-Pied Piper
-Gekko & Co.
-Duff Brewing Co.
-Monsters Incorporated
-Gringotts Bank
-Prestige Worldwide
-`,
-              rightCsv: `name
-Acme Corp.
-Globex LLC
-Initech Inc
-Umbrella Co.
-Soylent Corp
-Stark Ind.
-Wayne Ent.
-Wonka Ind.
-Hooli Inc.
-Vandelay Ind.
-Massive Dynamic LLC
-Cyberdyne Systemz
-Tyrell Corp.
-Oceanic Air Lines
-PiedPiper
-Gekko and Company
-Duff Brewing Company
-Monsters Inc.
-Gringotts Bank Ltd
-Prestige Worldwide LLC
+              rightCsv: `name,addr,city,state
+Alex J. Johnson,14 Cedar Street,Austin,Texas
+Maria G.,55 Lake View Dr,Phoenix,AZ
+Wei-Chen,220 Pine Avenue,San Jose,CA
+Aisha Kahn,8 Market Street,Chicago,IL
+Liam OConnor,77 River Road,Boston,MA
+S. Martinez,19 Sunset Boulevard,Los Angeles,CA
+Noah B. Brown,301 Elm Street,Denver,CO
+Emma Willson,9 Birch Lane,Seattle,WA
+Olivia D.,410 Maple Road,Portland,OR
+Ethan Miler,600 Oak Street,Dallas,TX
+Mia Andersson,12 Spruce Court,Miami,FL
+Jacob T.,88 Highland Avenue,Atlanta,GA
+Isabella M. Moore,5 Cherry Street,Raleigh,NC
+Luke Martin,2000 Park Avenue,New York,NY
+Amelia Li,63 Ridge Road,Newark,NJ
+Ben Clark,1 Hill Street,San Diego,CA
+Harper L.,44 Forest Drive,Columbus,OH
+Dan Walker,72 Adams Street,Minneapolis,MN
+Charlotte H.,16 King Street,Nashville,TN
+Henry Yong,90 Queen Street,Salt Lake City,UT
 `,
             },
           };
 
-          const normalizedKey = key === "linkage_orgs" ? "linkage_companies" : key;
-          const ds = datasets[normalizedKey] || datasets.dedup;
-          if (elements.sampleLeft) {
-            elements.sampleLeft.href = toDataUrlCsv(ds.leftCsv);
-            elements.sampleLeft.download = ds.leftName;
+          const ds = datasets[key] || datasets.dedup;
+          currentSampleDataset = ds;
+          currentSamplePreviewSide = "left";
+          renderSamplePreview();
+        }
+
+        function sampleFile(csvText, filename) {
+          return new File([csvText], filename, { type: "text/csv;charset=utf-8" });
+        }
+
+        function setFileInputFiles(input, files) {
+          if (!input) return;
+          try {
+            const transfer = new DataTransfer();
+            files.forEach((file) => {
+              if (file) transfer.items.add(file);
+            });
+            input.files = transfer.files;
+          } catch {
+            input.value = "";
           }
-          if (elements.sampleRight) {
-            if (ds.rightCsv) {
-              elements.sampleRight.href = toDataUrlCsv(ds.rightCsv);
-              elements.sampleRight.download = ds.rightName || "right_sample.csv";
-              elements.sampleRight.style.display = "inline-flex";
-            } else {
-              elements.sampleRight.removeAttribute("href");
-              elements.sampleRight.style.display = "none";
+        }
+
+        function getCurrentSampleFiles() {
+          const ds = currentSampleDataset;
+          if (!ds?.leftCsv) throw new Error("Choose a sample dataset first.");
+          const left = sampleFile(ds.leftCsv, ds.leftName || "left_sample.csv");
+          const right = ds.rightCsv ? sampleFile(ds.rightCsv, ds.rightName || "right_sample.csv") : null;
+          return { left, right };
+        }
+
+        function parseCsvRows(csvText) {
+          const rows = [];
+          let row = [];
+          let field = "";
+          let inQuotes = false;
+
+          for (let i = 0; i < csvText.length; i += 1) {
+            const ch = csvText[i];
+            const next = csvText[i + 1];
+            if (inQuotes) {
+              if (ch === '"' && next === '"') {
+                field += '"';
+                i += 1;
+              } else if (ch === '"') {
+                inQuotes = false;
+              } else {
+                field += ch;
+              }
+            } else if (ch === '"') {
+              inQuotes = true;
+            } else if (ch === ",") {
+              row.push(field);
+              field = "";
+            } else if (ch === "\n") {
+              row.push(field);
+              if (row.some((value) => value !== "")) rows.push(row);
+              row = [];
+              field = "";
+            } else if (ch !== "\r") {
+              field += ch;
             }
           }
+
+          row.push(field);
+          if (row.some((value) => value !== "")) rows.push(row);
+          return rows;
+        }
+
+        function sampleRowCount(csvText) {
+          return Math.max(0, parseCsvRows(csvText).length - 1);
+        }
+
+        function renderSamplePreview() {
+          const ds = currentSampleDataset;
+          if (!elements.samplePreview || !ds?.leftCsv) return;
+
+          const hasRight = Boolean(ds.rightCsv);
+          if (!hasRight) currentSamplePreviewSide = "left";
+          const showingRight = hasRight && currentSamplePreviewSide === "right";
+          const csvText = showingRight ? ds.rightCsv : ds.leftCsv;
+          const filename = showingRight ? ds.rightName || "right_sample.csv" : ds.leftName || "left_sample.csv";
+          const rows = parseCsvRows(csvText);
+          const header = rows[0] || [];
+          const body = rows.slice(1, 9);
+
+          if (elements.samplePreviewLeft) {
+            elements.samplePreviewLeft.textContent = hasRight ? "Left" : "CSV";
+            elements.samplePreviewLeft.setAttribute("aria-pressed", String(!showingRight));
+          }
+          if (elements.samplePreviewRight) {
+            elements.samplePreviewRight.style.display = hasRight ? "" : "none";
+            elements.samplePreviewRight.disabled = !hasRight;
+            elements.samplePreviewRight.setAttribute("aria-pressed", String(showingRight));
+          }
+          if (elements.sampleDownload) {
+            elements.sampleDownload.textContent = hasRight ? "Download sample CSVs" : "Download sample CSV";
+          }
+          if (elements.sampleSummary) {
+            const leftRows = sampleRowCount(ds.leftCsv);
+            const rightRows = hasRight ? sampleRowCount(ds.rightCsv) : null;
+            elements.sampleSummary.textContent = hasRight
+              ? `${ds.leftName} (${leftRows} rows) and ${ds.rightName} (${rightRows} rows)`
+              : `${ds.leftName} (${leftRows} rows)`;
+          }
+
+          elements.samplePreview.innerHTML = "";
+          if (!rows.length || !header.length) {
+            const empty = document.createElement("p");
+            empty.className = "muted small sample-preview-empty";
+            empty.textContent = "No rows to preview.";
+            elements.samplePreview.appendChild(empty);
+            return;
+          }
+
+          const table = document.createElement("table");
+          table.setAttribute("aria-label", `${filename} preview`);
+          const thead = document.createElement("thead");
+          const headRow = document.createElement("tr");
+          header.forEach((column) => {
+            const th = document.createElement("th");
+            th.textContent = column || "(blank)";
+            headRow.appendChild(th);
+          });
+          thead.appendChild(headRow);
+
+          const tbody = document.createElement("tbody");
+          body.forEach((values) => {
+            const tr = document.createElement("tr");
+            header.forEach((_, index) => {
+              const td = document.createElement("td");
+              td.textContent = values[index] ?? "";
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          elements.samplePreview.appendChild(table);
+        }
+
+        function downloadTextFile(csvText, filename) {
+          const blob = new Blob([csvText], { type: "text/csv;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          link.style.display = "none";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function downloadCurrentSample() {
+          const ds = currentSampleDataset;
+          if (!ds?.leftCsv) throw new Error("Choose a sample dataset first.");
+          downloadTextFile(ds.leftCsv, ds.leftName || "left_sample.csv");
+          if (ds.rightCsv) downloadTextFile(ds.rightCsv, ds.rightName || "right_sample.csv");
         }
 
         function scoreDisplay(item) {
@@ -1064,15 +1179,14 @@ Prestige Worldwide LLC
           await checkBackend();
         });
 
-        elements.upload.addEventListener("click", async () => {
-          const left = elements.leftFile.files?.[0];
-          const right = elements.rightFile.files?.[0];
+        async function uploadFiles(left, right, { sourceLabel = "" } = {}) {
           if (!left) {
             alert("Select a left CSV first.");
             return;
           }
 
           elements.upload.disabled = true;
+          if (elements.sampleUse) elements.sampleUse.disabled = true;
           elements.loadBatch.disabled = true;
           elements.submitLabels.disabled = true;
           elements.runFull.disabled = true;
@@ -1084,7 +1198,8 @@ Prestige Worldwide LLC
           if (elements.scoreMode) elements.scoreMode.textContent = "--";
           if (elements.poolRemaining) elements.poolRemaining.textContent = "--";
           elements.runStatus.textContent = "";
-          renderMessage("Uploading…");
+          elements.uploadStatus.textContent = sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...";
+          renderMessage(sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...");
 
           try {
             const fd = new FormData();
@@ -1111,8 +1226,52 @@ Prestige Worldwide LLC
             renderMessage("Upload failed.");
           } finally {
             elements.upload.disabled = false;
+            if (elements.sampleUse) elements.sampleUse.disabled = false;
           }
+        }
+
+        elements.upload.addEventListener("click", async () => {
+          await uploadFiles(elements.leftFile.files?.[0], elements.rightFile.files?.[0]);
         });
+
+        if (elements.sampleUse) {
+          elements.sampleUse.addEventListener("click", async () => {
+            try {
+              const { left, right } = getCurrentSampleFiles();
+              setFileInputFiles(elements.leftFile, [left]);
+              setFileInputFiles(elements.rightFile, right ? [right] : []);
+              await uploadFiles(left, right, { sourceLabel: right ? "sample CSVs" : "sample CSV" });
+            } catch (err) {
+              console.error(err);
+              alert(err.message);
+            }
+          });
+        }
+
+        if (elements.sampleDownload) {
+          elements.sampleDownload.addEventListener("click", () => {
+            try {
+              downloadCurrentSample();
+            } catch (err) {
+              console.error(err);
+              alert(err.message);
+            }
+          });
+        }
+
+        if (elements.samplePreviewLeft) {
+          elements.samplePreviewLeft.addEventListener("click", () => {
+            currentSamplePreviewSide = "left";
+            renderSamplePreview();
+          });
+        }
+
+        if (elements.samplePreviewRight) {
+          elements.samplePreviewRight.addEventListener("click", () => {
+            currentSamplePreviewSide = "right";
+            renderSamplePreview();
+          });
+        }
 
         elements.loadBatch.addEventListener("click", async () => {
           elements.loadBatch.disabled = true;
