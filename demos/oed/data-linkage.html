@@ -263,11 +263,11 @@
         <div class="metrics">
           <div class="metric">
             <div class="metric-value" id="positivesCount">0</div>
-            <div class="metric-label">Match labels</div>
+            <div class="metric-label">Matches labeled</div>
           </div>
           <div class="metric">
             <div class="metric-value" id="negativesCount">0</div>
-            <div class="metric-label">No-match labels</div>
+            <div class="metric-label">No-matches labeled</div>
           </div>
         </div>
         <p class="muted small" style="margin-top: 0.8rem">
@@ -917,6 +917,37 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           return Object.keys(normalized).length ? normalized : null;
         }
 
+        function comparableDisplayText(value) {
+          return String(value ?? "")
+            .trim()
+            .toLowerCase()
+            .replace(/&/g, " and ")
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+        }
+
+        function recordMatchesDisplay(record, displayValue) {
+          const expected = comparableDisplayText(displayValue);
+          if (!expected) return false;
+          return Object.values(record || {}).some((value) => comparableDisplayText(value) === expected);
+        }
+
+        function recordFromIndexedRows(rows, rawIndex, displayValue) {
+          const index = Number.parseInt(rawIndex, 10);
+          if (!Array.isArray(rows) || !Number.isFinite(index)) return null;
+
+          const candidates = [];
+          const addCandidate = (record) => {
+            const normalized = normalizeRecord(record);
+            if (normalized && !candidates.includes(normalized)) candidates.push(normalized);
+          };
+
+          addCandidate(rows[index]);
+          addCandidate(rows[index - 1]);
+
+          return candidates.find((record) => recordMatchesDisplay(record, displayValue)) || candidates[0] || null;
+        }
+
         function recordFromItem(item, side) {
           const capitalized = side === "left" ? "Left" : "Right";
           const direct =
@@ -929,12 +960,11 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           const directRecord = normalizeRecord(direct);
           if (directRecord) return directRecord;
 
-          const index = Number.parseInt(side === "left" ? item?.i : item?.j, 10);
           const rows = side === "right" && uploadedRecords.right ? uploadedRecords.right : uploadedRecords.left;
-          const localRecord = Number.isFinite(index) ? normalizeRecord(rows?.[index]) : null;
+          const fallback = item?.[side];
+          const localRecord = recordFromIndexedRows(rows, side === "left" ? item?.i : item?.j, fallback);
           if (localRecord) return localRecord;
 
-          const fallback = item?.[side];
           return fallback ? { [capitalized]: String(fallback) } : null;
         }
 
@@ -1222,10 +1252,25 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           );
           updateModelMetrics(data);
           uiState.remaining = Number.isFinite(data?.remaining) ? data.remaining : null;
-          const items = Array.isArray(data?.batch) ? data.batch.slice(0, batchSize) : [];
+          const items = chooseBatchItems(data?.batch, batchSize);
           renderBatch(items);
           if (elements.poolRemaining)
             elements.poolRemaining.textContent = Number.isFinite(uiState.remaining) ? String(uiState.remaining) : "--";
+        }
+
+        function chooseBatchItems(items, batchSize) {
+          const list = Array.isArray(items) ? items.slice() : [];
+          if (list.length <= batchSize) return list;
+          if (list.some((item) => item?.is_probability)) return list.slice(0, batchSize);
+
+          return list
+            .map((item, index) => {
+              const score = Number(item?.similarity);
+              return { item, index, score: Number.isFinite(score) ? score : -Infinity };
+            })
+            .sort((a, b) => b.score - a.score || a.index - b.index)
+            .slice(0, batchSize)
+            .map(({ item }) => item);
         }
 
         async function submitLabels() {
