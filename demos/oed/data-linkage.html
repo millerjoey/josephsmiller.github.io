@@ -375,8 +375,8 @@
           if (!res) {
             elements.apiStatus.textContent = "Backend: offline";
             elements.apiStatus.title = API_BASE;
-            elements.upload.disabled = true;
-            if (elements.sampleUse) elements.sampleUse.disabled = true;
+            elements.upload.disabled = false;
+            if (elements.sampleUse) elements.sampleUse.disabled = false;
             return false;
           }
           if (res.status === 401) {
@@ -428,6 +428,12 @@
           el.className = "muted small";
           el.textContent = message;
           elements.pairList.appendChild(el);
+        }
+
+        function setUploadStatus(message, state = "") {
+          elements.uploadStatus.textContent = message;
+          elements.uploadStatus.classList.remove("status-working", "status-success", "status-error");
+          if (state) elements.uploadStatus.classList.add(`status-${state}`);
         }
 
         function updateLabelStatus() {
@@ -1196,7 +1202,7 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
         }
 
         async function pollReady(jobId) {
-          elements.uploadStatus.textContent = "Processing…";
+          setUploadStatus("Processing CSVs and building candidate pairs...", "working");
           for (let attempts = 0; attempts < 90; attempts++) {
             const data = await fetchJson(api(`/api/job/${encodeURIComponent(jobId)}`));
             if (data?.status === "ready") return;
@@ -1228,7 +1234,6 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
 
           const inputs = elements.pairList.querySelectorAll('input[type="radio"]:checked');
           const labels = [];
-          let autoSuggested = 0;
           inputs.forEach((input) => {
             if (input.value === "skip") return;
             const name = input.name || "";
@@ -1237,24 +1242,12 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
             const [i, j] = key.split(":").map((n) => Number.parseInt(n, 10));
             if (!Number.isFinite(i) || !Number.isFinite(j)) return;
             labels.push({ i, j, label: Number.parseInt(input.value, 10) });
-            if (input.dataset.auto === "1") autoSuggested += 1;
           });
           if (!labels.length) throw new Error("No labels selected.");
 
           const prevButtonText = elements.submitLabels.textContent;
           elements.labelStatus.textContent = `Submitting ${labels.length} label${labels.length === 1 ? "" : "s"}…`;
           elements.submitLabels.textContent = "Submitting…";
-
-          if (autoSuggested >= 3 && autoSuggested >= Math.ceil(labels.length * 0.5)) {
-            const ok = window.confirm(
-              `You are submitting ${labels.length} labels (${autoSuggested} auto-suggested). Continue?`,
-            );
-            if (!ok) {
-              elements.submitLabels.textContent = prevButtonText;
-              updateLabelStatus();
-              return;
-            }
-          }
 
           const data = await fetchJson(api(`/api/job/${encodeURIComponent(jobId)}/label`), {
             method: "POST",
@@ -1319,8 +1312,9 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           if (elements.scoreMode) elements.scoreMode.textContent = "--";
           if (elements.poolRemaining) elements.poolRemaining.textContent = "--";
           elements.runStatus.textContent = "";
-          elements.uploadStatus.textContent = sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...";
-          renderMessage(sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...");
+          const uploadMessage = sourceLabel ? `Uploading ${sourceLabel}...` : "Uploading...";
+          setUploadStatus(uploadMessage, "working");
+          renderMessage(uploadMessage);
           uploadedRecords = { left: [], right: null };
 
           try {
@@ -1333,19 +1327,20 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
             const jobId = data?.job_id;
             if (!jobId) throw new Error("Upload succeeded but job_id was missing.");
             elements.jobId.value = jobId;
-            elements.uploadStatus.textContent = `Job: ${jobId}`;
+            setUploadStatus(`Job ${jobId}: preparing pairs...`, "working");
             if (elements.positivesCount) elements.positivesCount.textContent = "0";
             if (elements.negativesCount) elements.negativesCount.textContent = "0";
 
             await pollReady(jobId);
-            elements.uploadStatus.textContent = "Ready.";
+            setUploadStatus("Loading first batch...", "working");
             elements.loadBatch.disabled = false;
             elements.runFull.disabled = true;
             elements.runStatus.textContent = "Label at least one pair to enable full scoring.";
             await loadBatch();
+            setUploadStatus("Ready. First batch loaded.", "success");
           } catch (err) {
             console.error(err);
-            elements.uploadStatus.textContent = `Error: ${err.message}`;
+            setUploadStatus(`Error: ${err.message}`, "error");
             renderMessage("Upload failed.");
           } finally {
             elements.upload.disabled = false;
@@ -1437,7 +1432,25 @@ Henry Yong,90 Queen Street,Salt Lake City,UT
           const active = document.activeElement;
           const isEditable = (node) => {
             if (!(node instanceof HTMLElement)) return false;
-            if (["INPUT", "TEXTAREA", "SELECT"].includes(node.tagName)) return true;
+            if (node instanceof HTMLInputElement) {
+              const editableTypes = new Set([
+                "date",
+                "datetime-local",
+                "email",
+                "file",
+                "month",
+                "number",
+                "password",
+                "search",
+                "tel",
+                "text",
+                "time",
+                "url",
+                "week",
+              ]);
+              return editableTypes.has((node.type || "text").toLowerCase());
+            }
+            if (["TEXTAREA", "SELECT"].includes(node.tagName)) return true;
             if (node.isContentEditable) return true;
             if (node.closest && node.closest("[contenteditable='true']")) return true;
             return false;
