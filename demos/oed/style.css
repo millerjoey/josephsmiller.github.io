@@ -401,6 +401,48 @@ button[disabled] {
   font-weight: 750;
 }
 
+.status-working,
+.status-success,
+.status-error {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 800;
+}
+
+.status-working {
+  color: #8b3a3a;
+}
+
+.status-success {
+  color: #2f6f3e;
+}
+
+.status-error {
+  color: #9b2f2f;
+}
+
+.status-working::before {
+  content: "";
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 999px;
+  background: currentColor;
+  animation: status-pulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes status-pulse {
+  from {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .sample-viewer {
   margin-top: 0.9rem;
   border: 1px solid var(--line);
