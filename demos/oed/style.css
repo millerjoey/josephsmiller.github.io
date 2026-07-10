@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap");
 
 /* Minimal, self-contained styling for the OED demo pages. */
 
@@ -887,4 +887,42 @@ button[disabled] {
   .pair-names {
     grid-template-columns: 1fr;
   }
+}
+
+/* Minimal-professional site system: preserve the demo controls, remove the product-card shell. */
+:root {
+  --font-sans: "Crimson Pro", "Times New Roman", serif;
+  --font-serif: "Crimson Pro", "Times New Roman", serif;
+  --bg: #f0f1f2;
+  --panel: transparent;
+  --accent: #7d3438;
+  --accent-strong: #7d3438;
+  --accent-soft: rgba(125, 52, 56, 0.08);
+  --line: rgba(32, 42, 53, 0.18);
+  --shadow-lg: none;
+  --shadow: none;
+  --radius-lg: 0;
+  --radius: 0;
+}
+
+body { display: block; padding: 0; background: var(--bg); }
+.shell { width: min(1050px, calc(100% - 3rem)); margin: 0 auto; padding: 1.25rem 0 5rem; border: 0; border-radius: 0; box-shadow: none; animation: none; }
+.nav, .topbar { padding: 0 0 1.25rem; margin-bottom: clamp(3rem, 8vw, 6rem); border-bottom: 1px solid var(--line); }
+.nav-brand, .eyebrow { font-family: Arial, Helvetica, sans-serif; font-size: 0.72rem; letter-spacing: 0.14em; }
+.hero { padding-bottom: clamp(2rem, 5vw, 4rem); margin-bottom: clamp(3rem, 7vw, 5rem); border-bottom: 2px solid var(--accent); }
+h1 { max-width: 18ch; font-size: clamp(2.8rem, 7vw, 5.2rem); font-weight: 500; letter-spacing: -0.05em; line-height: 0.94; }
+h2 { font-family: Arial, Helvetica, sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; }
+.section { margin-top: 3.5rem; animation: none; }
+.panel, .card, .pair { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+.panel { padding: 1.15rem 0 0; }
+.card, .pair { padding: 1rem 0; }
+.cta-panel { background: transparent; border-color: var(--accent); }
+.button, .button.secondary, .segmented, .choice, input[type="text"], input[type="url"], input[type="number"], input[type="file"] { border-radius: 0; box-shadow: none; }
+.button { background: var(--accent); }
+.button.secondary { background: transparent; }
+.tag, .pill { border-radius: 0; background: transparent; padding-left: 0; }
+
+@media (max-width: 850px) {
+  .shell { width: min(100% - 2rem, 1050px); padding-bottom: 3.5rem; }
+  .nav, .topbar { margin-bottom: 3rem; }
 }

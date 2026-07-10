@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&family=Fraunces:wght@600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap");
 
 :root {
   color-scheme: light;
@@ -966,4 +966,41 @@ td {
   .bar-row b {
     text-align: left;
   }
+}
+
+/* Minimal-professional site system: preserve the interactive workspace, simplify its frame. */
+:root {
+  --font-sans: "Crimson Pro", "Times New Roman", serif;
+  --font-serif: "Crimson Pro", "Times New Roman", serif;
+  --paper: #f0f1f2;
+  --surface: transparent;
+  --accent: #7d3438;
+  --accent-strong: #7d3438;
+  --accent-soft: rgba(125, 52, 56, 0.08);
+  --line: rgba(32, 42, 53, 0.18);
+  --shadow-lg: none;
+  --shadow: none;
+  --radius-lg: 0;
+  --radius: 0;
+}
+
+body { display: block; padding: 0; background: var(--paper); }
+.shell { width: min(1360px, calc(100% - 3rem)); margin: 0 auto; border: 0; border-radius: 0; box-shadow: none; animation: none; overflow: visible; }
+.app-header { padding: 1.25rem 0 clamp(2rem, 5vw, 4rem); border-bottom: 2px solid var(--accent); }
+.app-header h1 { max-width: 18ch; font-size: clamp(2.8rem, 7vw, 5.2rem); font-weight: 500; letter-spacing: -0.05em; line-height: 0.94; }
+.eyebrow, .panel-head h2, .section-head h2, .chart-card h3, .subhead { font-family: Arial, Helvetica, sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; }
+.demo-nav { padding-bottom: 1.25rem; margin-bottom: clamp(3rem, 8vw, 6rem); border-bottom: 1px solid var(--line); font-family: Arial, Helvetica, sans-serif; font-size: 0.85rem; }
+.what-panel { padding: 2rem 0; background: transparent; border-bottom: 1px solid var(--line); }
+.workspace { padding: 2rem 0 5rem; }
+.panel, .chart-card { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+.panel { padding: 1.15rem 0 0; }
+.chart-card { padding: 1rem 0; }
+button, select, input[type="number"], .evidence-row, .scatter-plot { border-radius: 0; box-shadow: none; }
+button { color: #fff; background: var(--accent); border-color: var(--accent); }
+button:hover { background: #5f272b; }
+.preset { background: transparent; }
+
+@media (max-width: 980px) {
+  .shell { width: min(100% - 2rem, 1360px); }
+  .workspace { padding-bottom: 3.5rem; }
 }

@@ -7,316 +7,76 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-Y06DGSC9SW');
   </script>
   <meta charset="UTF-8">
-  <title>Joseph S. Miller</title>
+  <title>Joseph S. Miller · Statistical Research and Consulting</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Research and consulting in Bayesian experimental design, statistical inference, and measurement.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      color-scheme: light;
-      font-family: "Crimson Pro", "Times New Roman", serif;
-      --ink: #1f2a37;
-      --muted: #5b6673;
-      --bg: #eef1f5;
-      --panel: #ffffff;
-      --accent: #8b3a3a;
-      --accent-strong: #6d2b2b;
-      --accent-bright: #c98d8d;
-      --accent-soft: rgba(139, 58, 58, 0.14);
-      --line: rgba(31, 42, 55, 0.12);
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
-        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
-        var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2.5rem 1.5rem;
-      color: var(--ink);
-    }
-
-    .shell {
-      width: min(1000px, 100%);
-      background: #ffffff;
-      border-radius: 26px;
-      padding: 3rem;
-      border: 1px solid rgba(31, 42, 55, 0.08);
-      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
-      align-items: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: 0.28em;
-      font-size: 0.7rem;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    h1 {
-      margin: 0.35rem 0 1rem;
-      font-family: "Crimson Pro", "Times New Roman", serif;
-      font-size: clamp(2.4rem, 4.6vw, 3.4rem);
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .lede {
-      margin: 0 0 1.6rem;
-      font-size: 1.08rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-    }
-
-    .button {
-      background: var(--accent);
-      color: #fff;
-      padding: 0.65rem 1.3rem;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      box-shadow: 0 10px 18px rgba(31, 42, 55, 0.16);
-    }
-
-    .button:hover,
-    .button:focus-visible {
-      background: var(--accent-strong);
-      box-shadow: 0 14px 24px rgba(31, 42, 55, 0.2);
-    }
-
-    .button.small {
-      padding: 0.55rem 1.1rem;
-      font-size: 0.95rem;
-    }
-
-    a {
-      color: var(--accent-strong);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    a:hover,
-    a:focus-visible {
-      color: var(--accent);
-    }
-
-    .text-link {
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .text-link:hover,
-    .text-link:focus-visible {
-      color: var(--accent-strong);
-    }
-
-    .grid {
-      margin-top: 2.75rem;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 1.75rem;
-      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
-      position: relative;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      left: 1.75rem;
-      top: 0.85rem;
-      width: 42px;
-      height: 2px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
-
-    .panel h2 {
-      margin: 0 0 0.75rem;
-      font-family: "Crimson Pro", "Times New Roman", serif;
-      font-size: 0.92rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .panel p {
-      margin: 0;
-      line-height: 1.7;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-      margin-top: 0.8rem;
-    }
-
-    .tag {
-      padding: 0.25rem 0.85rem;
-      border-radius: 999px;
-      border: 1px solid rgba(139, 58, 58, 0.18);
-      background: var(--accent-soft);
-      color: var(--accent-strong);
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-
-    @media (max-width: 700px) {
-      .shell {
-        padding: 2.25rem 1.75rem;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .panel::before {
-        left: 1.5rem;
-      }
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .shell {
-        animation: fadeIn 0.8s ease forwards;
-      }
-
-      .panel {
-        animation: riseUp 0.8s ease forwards;
-      }
-
-      .panel:nth-of-type(1) { animation-delay: 0.2s; }
-      .panel:nth-of-type(2) { animation-delay: 0.3s; }
-      .panel:nth-of-type(3) { animation-delay: 0.4s; }
-      .panel:nth-of-type(4) { animation-delay: 0.5s; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes riseUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    :root { color-scheme: light; --ink: #202a35; --muted: #5f6973; --canvas: #f0f1f2; --accent: #7d3438; --line: rgba(32, 42, 53, 0.18); }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font-family: "Crimson Pro", "Times New Roman", serif; }
+    a { color: inherit; text-underline-offset: 0.2em; }
+    .shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding: 1.25rem 0 5rem; }
+    .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); font-family: Arial, Helvetica, sans-serif; font-size: 0.85rem; }
+    .wordmark { font-weight: 700; text-decoration: none; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--accent); }
+    .hero { max-width: 51rem; padding: clamp(4rem, 11vw, 8.5rem) 0 clamp(3rem, 7vw, 5rem); }
+    .eyebrow, h2 { margin: 0 0 0.75rem; color: var(--accent); font-family: Arial, Helvetica, sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+    h1 { max-width: 16ch; margin: 0 0 1.35rem; font-size: clamp(3rem, 8vw, 6.3rem); font-weight: 500; letter-spacing: -0.055em; line-height: 0.92; }
+    .lede { max-width: 42rem; margin: 0; color: var(--muted); font-size: clamp(1.18rem, 2.3vw, 1.45rem); line-height: 1.55; }
+    .email-button { display: inline-block; margin-top: 1.6rem; padding: 0.7rem 1rem; color: #fff; background: var(--accent); font-family: Arial, Helvetica, sans-serif; font-size: 0.86rem; font-weight: 700; text-decoration: none; }
+    .email-button:hover, .email-button:focus-visible { background: #5f272b; }
+    .intro { max-width: 44rem; padding: 1.4rem 0 3.75rem; border-top: 2px solid var(--accent); font-size: 1.12rem; line-height: 1.68; }
+    .content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(2.5rem, 7vw, 6rem) 3rem; }
+    .section { border-top: 1px solid var(--line); padding-top: 1rem; }
+    .item { padding: 0.95rem 0 1.1rem; border-top: 1px solid var(--line); }
+    .item:last-child { border-bottom: 1px solid var(--line); }
+    .item a, .item strong { font-size: 1.1rem; font-weight: 600; }
+    .item p { margin: 0.4rem 0 0; color: var(--muted); line-height: 1.55; }
+    @media (max-width: 680px) { .shell { width: min(100% - 2rem, 1040px); } .site-nav { align-items: flex-start; flex-direction: column; } .content-grid { grid-template-columns: 1fr; } h1 { max-width: 13ch; } }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <main class="shell">
+    <nav class="site-nav" aria-label="Site navigation">
+      <a class="wordmark" href="index.html">Joseph S. Miller</a>
+      <div class="nav-links"><a href="notes/index.html">Notes</a><a href="mailto:joe@josephsmiller.com">Email me</a></div>
+    </nav>
     <header class="hero">
-      <div class="hero-text">
-        <div class="eyebrow">Statistical Consulting & Research</div>
-        <h1>Joseph S. Miller</h1>
-        <p class="lede">
-          Designing efficient experiments and statistical modeling strategies.
-        </p>
-        <div class="actions">
-          <a class="button" href="mailto:joe@josephsmiller.com">Start a project</a>
-          <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>
-        </div>
-      </div>
+      <p class="eyebrow">Statistical research and consulting</p>
+      <h1>Joseph S. Miller</h1>
+      <p class="lede">Research and consulting in Bayesian experimental design, statistical inference, and measurement.</p>
+      <a class="email-button" href="mailto:joe@josephsmiller.com">Email me</a>
     </header>
-
-    <div class="grid">
-      <section class="panel">
-        <h2>About</h2>
-        <p>
-          I'm a statistician developing efficient optimal experiment design tools that work for survey
-          sampling, A/B testing, and other data collection challenges. My work blends new frameworks in
-          information theory with applied modeling to quantify uncertainty and make adaptive experiment design
-          practical. I also specialize in tractable probabilistic modeling, enabling efficient probabilistic
-          queries and inference. For marketing teams, I work on marketing mix modeling, incrementality
-          measurement, and experiment design for marketing decisions.
-        </p>
+    <section class="intro" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      I am a statistician working on Bayesian experimental design, probabilistic modeling, and information-theoretic methods. I develop practical tools for adaptive data collection and uncertainty quantification. I also collaborate with teams on experimental measurement, survey design, and marketing effectiveness.
+    </section>
+    <div class="content-grid">
+      <section class="section" aria-labelledby="research-title">
+        <h2 id="research-title">Research</h2>
+        <article class="item"><a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy under Representation Change and Inference</a><p>Preprint on information theory and inference.</p></article>
+        <article class="item"><a href="notes/index.html">Technical explanations</a><p>Essays on experimental design, scoring rules, and information.</p></article>
       </section>
-
-      <section class="panel">
-        <h2>Consulting</h2>
-        <p class="muted">Things I work on:</p>
-        <div class="tag-list">
-          <span class="tag">Efficient experiment design</span>
-          <span class="tag">Survey sampling strategy</span>
-          <span class="tag">A/B testing pipelines</span>
-          <span class="tag">Marketing mix modeling</span>
-          <span class="tag">Bayesian modeling</span>
-          <span class="tag">Tractable probabilistic modeling</span>
-        </div>
+      <section class="section" aria-labelledby="collaboration-title">
+        <h2 id="collaboration-title">Applied work</h2>
+        <article class="item"><strong>Experiment design</strong><p>Efficient testing and adaptive data collection.</p></article>
+        <article class="item"><strong>Survey sampling</strong><p>Sampling strategies for limited or incomplete observations.</p></article>
+        <article class="item"><strong>Marketing measurement</strong><p>Incrementality, mix modeling, and decision-focused experiments.</p></article>
       </section>
-
-      <section class="panel">
-        <h2>Papers</h2>
-        <p>
-          Similarity-Sensitive Entropy under Representation Change and Inference
-          (<a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">arXiv:2601.03064</a>).
-        </p>
+      <section class="section" aria-labelledby="demos-title">
+        <h2 id="demos-title">Demonstrations</h2>
+        <article class="item"><a href="demos/oed/index.html">Optimal experiment design</a><p>Adaptive A/B testing and active learning for record linkage.</p></article>
+        <article class="item"><a href="demos/spn/index.html">SPN uncertain data explorer</a><p>Probabilistic queries over mixed, missing, interval-censored, and set-valued observations.</p></article>
       </section>
-
-      <section class="panel">
-        <h2>Demos</h2>
-        <p class="muted">
-          <a href="demos/oed/index.html">Optimal experiment design demos</a>: adaptive A/B testing and active learning for record linkage.<br>
-          <a href="demos/spn/index.html">SPN uncertain data explorer</a>: Probabilistic model trained on incomplete data and
-          queried like a database for mixed, missing, interval/censored, and set-valued observations.
-        </p>
-      </section>
-
-
-      <section class="panel">
-        <h2>Explanations</h2>
-        <p class="muted"><a href="notes/index.html">Technical explanations</a>, including:</p>
-        <p>
-          <a href="notes/kerneled-coarse-graining.html">Kerneled Coarse Graining</a>.
-        </p>
-        <p>
-          <a href="notes/oed-mutual-information.html">Mutual information for Bayesian experimental design</a>.
-        </p>
-        <p>
-          <a href="notes/similarity-sensitive-scoring-rule.html">The similarity-sensitive (nonlocal) scoring rule</a>.
-        </p>
-      </section>
-
     </div>
-  </div>
+  </main>
 </body>
 </html>
