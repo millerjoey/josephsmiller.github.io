@@ -13,7 +13,7 @@
 body { display: block; padding: 0; color: var(--ink); background: var(--bg); }
 
 .shell {
-  width: min(920px, calc(100% - 3rem));
+  width: min(1040px, calc(100% - 3rem));
   margin: 0 auto;
   padding: 1.25rem 0 5rem;
   background: transparent;
@@ -25,7 +25,7 @@ body { display: block; padding: 0; color: var(--ink); background: var(--bg); }
 
 .top-nav {
   padding-bottom: 1.25rem;
-  margin-bottom: clamp(3rem, 8vw, 6rem);
+  margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
   border-bottom: 1px solid var(--line);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.85rem;
@@ -33,7 +33,7 @@ body { display: block; padding: 0; color: var(--ink); background: var(--bg); }
 
 .text-link { color: var(--muted); }
 .text-link:hover, .text-link:focus-visible { color: var(--accent); }
-.hero, .shell > header:not(.hero) { max-width: 47rem; }
+.hero, .shell > header:not(.hero) { max-width: 52rem; margin-left: auto; margin-right: auto; }
 
 .eyebrow {
   color: var(--accent-strong);
@@ -43,7 +43,7 @@ body { display: block; padding: 0; color: var(--ink); background: var(--bg); }
   letter-spacing: 0.14em;
 }
 
-h1 { margin: 0.35rem 0 1.15rem; font-size: clamp(2.8rem, 7vw, 5.2rem); font-weight: 500; letter-spacing: -0.05em; line-height: 0.94; }
+h1 { margin: 0.35rem 0 1.15rem; font-size: clamp(2.6rem, 6vw, 4.6rem); font-weight: 500; letter-spacing: -0.05em; line-height: 0.94; }
 .lede { color: var(--muted); font-size: 1.18rem; line-height: 1.62; }
 a { color: var(--accent-strong); }
 a:hover, a:focus-visible { color: #5f272b; }
@@ -60,7 +60,7 @@ a:hover, a:focus-visible { color: #5f272b; }
 }
 
 .button:hover, .button:focus-visible { background: #5f272b; box-shadow: none; }
-.stack { margin-top: clamp(3.5rem, 8vw, 6rem); gap: 3rem; }
+.stack { width: min(56rem, 100%); margin: clamp(3.5rem, 8vw, 6rem) auto 0; gap: 3rem; }
 .stack-tight { gap: 1.5rem; }
 .grid { gap: 3rem; }
 
@@ -92,7 +92,7 @@ a:hover, a:focus-visible { color: #5f272b; }
 .math-block { border-left-color: var(--accent); }
 
 @media (max-width: 700px) {
-  .shell { width: min(100% - 2rem, 920px); padding-bottom: 3.5rem; }
+  .shell { width: min(100% - 2rem, 1040px); padding-bottom: 3.5rem; }
   .top-nav { margin-bottom: 3rem; }
   .grid { grid-template-columns: 1fr; gap: 2rem; }
 }

@@ -21,55 +21,43 @@
     * { box-sizing: border-box; }
     body { margin: 0; color: var(--ink); background: var(--canvas); font-family: "Crimson Pro", "Times New Roman", serif; }
     a { color: inherit; text-underline-offset: 0.2em; }
-    .shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding: 1.25rem 0 5rem; }
-    .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); font-family: Arial, Helvetica, sans-serif; font-size: 0.85rem; }
-    .wordmark { font-weight: 700; text-decoration: none; }
-    .nav-links { display: flex; flex-wrap: wrap; gap: 1rem; }
-    .nav-links a { color: var(--muted); }
-    .nav-links a:hover, .nav-links a:focus-visible { color: var(--accent); }
-    .hero { max-width: 51rem; padding: clamp(4rem, 11vw, 8.5rem) 0 clamp(3rem, 7vw, 5rem); }
+    .shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding: 0 0 5rem; }
+    .hero { max-width: 48rem; margin: 0 auto; padding: clamp(3rem, 8vw, 5.5rem) 0 clamp(3rem, 7vw, 5rem); text-align: center; }
     .eyebrow, h2 { margin: 0 0 0.75rem; color: var(--accent); font-family: Arial, Helvetica, sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-    h1 { max-width: 16ch; margin: 0 0 1.35rem; font-size: clamp(3rem, 8vw, 6.3rem); font-weight: 500; letter-spacing: -0.055em; line-height: 0.92; }
-    .lede { max-width: 42rem; margin: 0; color: var(--muted); font-size: clamp(1.18rem, 2.3vw, 1.45rem); line-height: 1.55; }
-    .email-button { display: inline-block; margin-top: 1.6rem; padding: 0.7rem 1rem; color: #fff; background: var(--accent); font-family: Arial, Helvetica, sans-serif; font-size: 0.86rem; font-weight: 700; text-decoration: none; }
-    .email-button:hover, .email-button:focus-visible { background: #5f272b; }
-    .intro { max-width: 44rem; padding: 1.4rem 0 3.75rem; border-top: 2px solid var(--accent); font-size: 1.12rem; line-height: 1.68; }
-    .content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(2.5rem, 7vw, 6rem) 3rem; }
+    h1 { margin: 0 0 1.35rem; font-size: clamp(2.8rem, 6vw, 4.25rem); font-weight: 500; letter-spacing: -0.055em; line-height: 0.92; }
+    .lede { max-width: 42rem; margin: 0 auto; color: var(--muted); font-size: clamp(1.18rem, 2.3vw, 1.45rem); line-height: 1.55; }
+    .email-link { display: inline-block; margin-top: 1.4rem; color: var(--accent); font-family: Arial, Helvetica, sans-serif; font-size: 0.86rem; font-weight: 700; }
+    .email-link:hover, .email-link:focus-visible { color: #5f272b; }
+    .intro { max-width: 48rem; margin: 0 auto; padding: 1.4rem 0 3.75rem; border-top: 2px solid var(--accent); font-size: 1.12rem; line-height: 1.68; }
+    .intro p { margin: 0; }
+    .intro p + p { margin-top: 1rem; color: var(--muted); }
+    .content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(2.5rem, 7vw, 5rem) 3rem; }
     .section { border-top: 1px solid var(--line); padding-top: 1rem; }
     .item { padding: 0.95rem 0 1.1rem; border-top: 1px solid var(--line); }
     .item:last-child { border-bottom: 1px solid var(--line); }
     .item a, .item strong { font-size: 1.1rem; font-weight: 600; }
     .item p { margin: 0.4rem 0 0; color: var(--muted); line-height: 1.55; }
-    @media (max-width: 680px) { .shell { width: min(100% - 2rem, 1040px); } .site-nav { align-items: flex-start; flex-direction: column; } .content-grid { grid-template-columns: 1fr; } h1 { max-width: 13ch; } }
+    @media (max-width: 760px) { .shell { width: min(100% - 2rem, 1040px); } .content-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <main class="shell">
-    <nav class="site-nav" aria-label="Site navigation">
-      <a class="wordmark" href="index.html">Joseph S. Miller</a>
-      <div class="nav-links"><a href="notes/index.html">Notes</a><a href="mailto:joe@josephsmiller.com">Email me</a></div>
-    </nav>
     <header class="hero">
       <p class="eyebrow">Statistical research and consulting</p>
       <h1>Joseph S. Miller</h1>
       <p class="lede">Research and consulting in Bayesian experimental design, statistical inference, and measurement.</p>
-      <a class="email-button" href="mailto:joe@josephsmiller.com">Email me</a>
+      <a class="email-link" href="mailto:joe@josephsmiller.com">Email me</a>
     </header>
     <section class="intro" aria-labelledby="about-title">
       <h2 id="about-title">About</h2>
-      I am a statistician working on Bayesian experimental design, probabilistic modeling, and information-theoretic methods. I develop practical tools for adaptive data collection and uncertainty quantification. I also collaborate with teams on experimental measurement, survey design, and marketing effectiveness.
+      <p>I am a statistician working on Bayesian experimental design, probabilistic modeling, and information-theoretic methods. I develop practical tools for adaptive data collection and uncertainty quantification.</p>
+      <p>Applied work includes survey sampling strategy, A/B testing pipelines, Bayesian modeling, and tractable probabilistic modeling for efficient probabilistic queries and inference. For marketing teams, I work on marketing mix modeling, incrementality measurement, and experiment design for marketing decisions.</p>
     </section>
     <div class="content-grid">
       <section class="section" aria-labelledby="research-title">
         <h2 id="research-title">Research</h2>
-        <article class="item"><a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy under Representation Change and Inference</a><p>Preprint on information theory and inference.</p></article>
-        <article class="item"><a href="notes/index.html">Technical explanations</a><p>Essays on experimental design, scoring rules, and information.</p></article>
-      </section>
-      <section class="section" aria-labelledby="collaboration-title">
-        <h2 id="collaboration-title">Applied work</h2>
-        <article class="item"><strong>Experiment design</strong><p>Efficient testing and adaptive data collection.</p></article>
-        <article class="item"><strong>Survey sampling</strong><p>Sampling strategies for limited or incomplete observations.</p></article>
-        <article class="item"><strong>Marketing measurement</strong><p>Incrementality, mix modeling, and decision-focused experiments.</p></article>
+        <article class="item"><a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy under Representation Change and Inference</a><p>arXiv preprint on information theory and inference.</p></article>
+        <article class="item"><a href="notes/index.html">Notes on experimental design and information theory</a><p>Essays on experimental design, scoring rules, and information.</p></article>
       </section>
       <section class="section" aria-labelledby="demos-title">
         <h2 id="demos-title">Demonstrations</h2>
