@@ -738,8 +738,8 @@
         <h4>Probability versus similarity</h4>
         <p>
           Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let
-          $K:\mathcal X\times\mathcal X\to(0,1]$ be a similarity kernel. Philosophically, we want to keep these conceptually separate:
-          $p$ says what I believe will happen, while $K$ says which outcomes the task treats as similar.
+          $K:\mathcal X\times\mathcal X\to(0,1]$ be a similarity kernel. We have two separate concepts:
+          $p$ says what the reporter believes will happen, while $K$ says how interchangeable the outcomes are.
         </p>
         <p>
           For a law $p$, the typicality function again is
@@ -790,13 +790,13 @@
           =-0.8\log 1-0.2\log 0.5\approx 0.139.$$
         </div>
         <p>
-          The score prefers the report that denies the second state but keeps it typical through similarity to the
+          The score prefers the report that assigned 0 probability to the second state but keeps typicality high through similarity to the
           first. So log-typicality is an <a href="https://en.wikipedia.org/wiki/Scoring_rule#Propriety_and_consistency" target="_blank" rel="noreferrer">improper scoring rule</a>.
         </p>
-        <h4>The $K$-corrected log-typicality rule</h4>
+        <h4>The corrected log-typicality rule</h4>
         <p>
-          The correction is to keep the log-typicality term and add a reward (negative risk) for observations that represent a large
-          share of the similarity mass under the report:
+          We can correct this by keeping the log-typicality term and adding a reward (negative risk) for observations that represent a large
+          share of the similarity mass under the reporting distribution:
         </p>
         <div class="math-block">
           $$S_K(q,x)=-\log (Kq)(x)
@@ -805,7 +805,7 @@
           \right].$$
         </div>
         <p>
-          In the bracketed part, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
+          In the second term, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
         </p>
         <p>
           This reward cancels out under the report itself:
