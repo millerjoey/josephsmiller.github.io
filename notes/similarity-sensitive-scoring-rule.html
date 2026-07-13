@@ -11,7 +11,7 @@
     gtag('config', 'G-Y06DGSC9SW');
   </script>
   <meta charset="UTF-8">
-  <title>The similarity-sensitive (nonlocal) scoring rule · Joseph S. Miller</title>
+  <title>Similarity-sensitive scoring rules · Joseph S. Miller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="How similarity-sensitive entropy generates a proper scoring rule, cross-entropy, divergence, and information-gain objective for task-aligned experiment design.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -624,7 +624,7 @@
 
     <header class="hero">
       <div class="eyebrow">Scoring rules</div>
-      <h1>The similarity-sensitive (nonlocal) scoring rule</h1>
+      <h1>Similarity-sensitive scoring rules</h1>
       <p class="lede">
         The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a categorical space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the nonlocal proper scoring rule derived from it. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
       </p>
