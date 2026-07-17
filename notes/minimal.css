@@ -172,6 +172,7 @@ details p {
 }
 
 :where(.blog-scoring) .panel p + figure,
+:where(.blog-scoring) .panel .bullets + figure,
 :where(.blog-scoring) .panel figure + p,
 :where(.blog-scoring) .panel figure + figure {
   margin-top: 1rem;
@@ -216,6 +217,18 @@ details p {
 
 :where(.blog-scoring) .table-wrap + p {
   margin-top: 0.85rem;
+}
+
+:where(.blog-scoring) .table-wrap + .bullets {
+  margin-top: 1rem;
+}
+
+:where(.blog-scoring) p + .table-wrap {
+  margin-top: 1rem;
+}
+
+:where(.blog-coverage) .sensitivity-table {
+  min-width: 760px;
 }
 
 :where(.blog-scoring) .fit-lab {

@@ -44,15 +44,15 @@
       <div class="eyebrow">Blog · Coverage</div>
       <h1>Coverage and coresets with kernel entropy</h1>
       <p class="lede">
-        Suppose I can keep only $N$ points. I might want those points to cover as many distinct possibilities as possible, or I might want them to approximate a particular population. Those sound similar, but they are different optimization problems. A single similarity-sensitive entropy makes the distinction precise.
+        Selecting $N$ points from a sample can be useful as either a data-coverage problem or a coreset problem. In coverage, an equally weighted subset is chosen to minimize redundancy under the kernel. In coreset construction, a sparse weighted distribution approximates a specified target. I want to show how both objectives can be formulated using basic concepts derived from similarity-sensitive entropy.
       </p>
     </header>
 
     <main class="stack">
       <section class="panel">
-        <h2>One entropy, two questions</h2>
+        <h2>Kernel entropy and bandwidth</h2>
         <p>
-          I previously motivated <a href="kerneled-coarse-graining.html">similarity-sensitive entropy</a> and derived its associated <a href="similarity-sensitive-scoring-rule.html">tangent scoring rule</a>. I will use the same entropy here without rederiving typicality:
+          I previously described <a href="kerneled-coarse-graining.html">similarity-sensitive entropy</a> and derived its associated <a href="similarity-sensitive-scoring-rule.html">tangent scoring rule</a>. The entropy is
         </p>
         <div class="math-block">
           $$H_K(q)=-\mathbb E_{X\sim q}\log (Kq)(X).$$
@@ -64,37 +64,34 @@
           $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|}{\ell}\right).$$
         </div>
         <p>
-          The scale $\ell$ says which numerical differences matter. This choice is useful for more than its simple interpretation: $H_K$ is concave for the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>. That makes the tangent loss below proper. A Gaussian RBF can still be useful as a coverage kernel, but it does not give the same general concavity guarantee.
+          The scale $\ell$ determines which numerical differences are treated as similar. For the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>, $H_K$ is concave, so the tangent loss below is proper.
         </p>
       </section>
 
       <section class="panel">
-        <h2>Coverage is target-free, not mass-free</h2>
+        <h2>Coverage objective</h2>
         <p>
-          The clean coverage problem has no external population distribution. The design $q$ is itself the object we choose:
+          Let $\mathcal X_M=\{x_1,\ldots,x_M\}$ be the candidate points. Sampling $N$ points without repeats gives a set $S\subseteq\mathcal X_M$ with $|S|=N$ and the uniform distribution
         </p>
         <div class="math-block">
-          $$q_{\mathrm{cov}}\in
-          \arg\max_{q:\,|\operatorname{supp}(q)|\le N} H_K(q).$$
+          $$u_S=\frac1N\sum_{z\in S}\delta_z.$$
         </div>
         <p>
-          So coverage is not literally distribution-free: $H_K$ always acts on a distribution. It is <em>target-free</em>. There is no separate law $p$ whose prevalence the selected points are supposed to reproduce.
-        </p>
-        <p>
-          If I will run each selected design exactly once, the mass is fixed by that experimental constraint: $q=u_S$ is uniform on a set $S$ of size $N$. Then the problem is
+          The coverage objective is
         </p>
         <div class="math-block">
-          $$S_{\mathrm{cov}}\in\arg\max_{|S|=N}H_K(u_S).$$
+          $$S_{\mathrm{cov}}\in
+          \arg\max_{S\subseteq\mathcal X_M:\,|S|=N}H_K(u_S).$$
         </div>
         <p>
-          If repeated allocation is allowed, the weights should be optimized too. Equal mass is therefore not part of the definition of coverage. It represents the special, common design in which each retained point receives one unit of attention.
+          The set constraint excludes exact repeats. The entropy then distinguishes among those subsets: kernel-similar selections increase one another's local similarity and reduce $H_K(u_S)$. There is no external target distribution, and the weights are fixed at $1/N$ rather than optimized.
         </p>
       </section>
 
       <section class="panel">
-        <h2>The coreset version has a target</h2>
+        <h2>Coreset objective</h2>
         <p>
-          Now suppose I observe $M$ points $x_1,\ldots,x_M$. Their empirical law is explicit:
+          Suppose I observe $M$ points $x_1,\ldots,x_M$, with empirical law
         </p>
         <div class="math-block">
           $$p_M=\frac1M\sum_{i=1}^M\delta_{x_i}.$$
@@ -108,7 +105,7 @@
           \qquad w\in\Delta_N.$$
         </div>
         <p>
-          Here the weights are not design effort. They say how much population mass each retained atom represents. The natural loss is the regret of reporting $q$ when the target is $p_M$:
+          Here the weights represent population mass rather than design effort. The coreset loss is the regret of reporting $q$ when the target is $p_M$:
         </p>
         <div class="math-block">
           $$\begin{aligned}
@@ -118,78 +115,98 @@
           &amp;\in\arg\min_{|S|\le N,\,w\in\Delta_N}D_K(p_M,q_{S,w}).
           \end{aligned}$$
         </div>
-        <p>
-          Concavity of $H_K$ gives $D_K(p,q)\ge 0$. This makes the coreset objective a loss with a real reference point: zero means that $q$ is as good as the target itself under the kernel scoring rule.
-        </p>
+        <ul class="bullets">
+          <li>$q$ is the sparse model reported for the target $p_M$.</li>
+          <li>$D_K(p_M,q)$ is its regret under the kernel scoring rule.</li>
+          <li>Concavity of $H_K$ gives $D_K(p,q)\ge 0$.</li>
+          <li>$D_K(p,q)=0$ means no loss relative to reporting the target.</li>
+        </ul>
       </section>
 
       <section class="panel">
-        <h2>The same points give different answers</h2>
-        <p>
-          Consider 20 observations on the line: 13 fill the interval from $-1.5$ to $-0.3$, five fill $0.45$ to $0.85$, and two sit at $1.65$ and $1.75$. Set $\ell=0.30$ and keep four atoms.
-        </p>
+        <h2>Argument outline</h2>
+        <ul class="bullets">
+          <li><strong>Coverage.</strong> Maximize $H_K(u_S)$ over equally weighted $N$-point subsets; there is no external target.</li>
+          <li><strong>Ordinary-entropy limit.</strong> With $K=I$, every uniform $N$-point subset has entropy $\log N$; subset geometry disappears.</li>
+          <li><strong>Coreset.</strong> Treat the sparse weighted law $q$ as a model for $p_M$.</li>
+          <li><strong>Ordinary cross-entropy.</strong> If $q$ omits any target atom, its loss is infinite.</li>
+          <li><strong>Common workaround.</strong> Introduce a task-specific discrepancy, feature map, query class, moment criterion, or other compression objective.</li>
+          <li><strong>Kernel model.</strong> $K$ makes nearby atoms partial substitutes, so omitted atoms can still receive finite predictive similarity.</li>
+          <li><strong>Scoring interpretation.</strong> The coreset objective is the regret $D_K(p_M,q)$ induced by $H_K$, rather than a separate compression heuristic.</li>
+          <li><strong>Main claim to develop.</strong> Coreset construction becomes model selection under a proper similarity-aware scoring rule.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>Example</h2>
+        <ul class="bullets">
+          <li>Target: 20 observations; group sizes $13$, $5$, and $2$.</li>
+          <li>Support budget: $N=4$.</li>
+          <li>Reference bandwidth: $\ell=0.30$.</li>
+          <li>Coverage: equal weights; maximize $H_K(u_S)$.</li>
+          <li>Coreset: optimized weights; minimize $D_K(p_M,q_{S,w})$.</li>
+        </ul>
         <figure>
           <img
             src="assets/coverage-versus-coreset.svg"
             alt="A one-dimensional empirical sample, followed by four equally weighted coverage points spread across its range and four weighted coreset points that preserve its uneven population mass."
           >
           <figcaption>
-            <strong>One sample, two objectives.</strong> Exact enumeration of the four-point supports gives the coverage set shown in the middle. For the coreset, the best solution found by enumerating supports and optimizing their weights gives the bottom approximation. The coverage solution spends one point on each resolvable region; the coreset spends about $65\%$ of its mass on two representatives of the dense left group.
+            Exact solutions at $\ell=0.30$ and $N=4$.
           </figcaption>
         </figure>
-        <p>
-          Neither answer dominates the other. Coverage deliberately ignores the observed frequencies and asks for an even allocation across distinctions. The coreset deliberately preserves those frequencies. Asking the coverage solution to match prevalence would quietly turn it into the coreset problem.
-        </p>
       </section>
 
       <section class="panel">
-        <h2>Why ordinary entropy cannot do this</h2>
+        <h2>Bandwidth results</h2>
         <div class="table-wrap">
-          <table class="score-table">
+          <table class="score-table sensitivity-table">
             <thead>
               <tr>
-                <th></th>
-                <th>Coverage</th>
-                <th>Coreset</th>
+                <th>$\ell$</th>
+                <th>Coverage support</th>
+                <th>$H_K(u_S)$</th>
+                <th>Coreset point (weight)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>External target</td>
-                <td>None</td>
-                <td>$p_M$</td>
+                <td class="num">$0.15$</td>
+                <td>$-1.50, -0.40, 0.65, 1.75$</td>
+                <td class="num">$1.385$</td>
+                <td>$-1.20$ ($0.325$), $-0.60$ ($0.325$)<br>$0.65$ ($0.250$), $1.65$ ($0.100$)</td>
               </tr>
               <tr>
-                <td>Objective</td>
-                <td>Maximize $H_K(q)$</td>
-                <td>Minimize $D_K(p_M,q)$</td>
+                <td class="num">$0.30$</td>
+                <td>$-1.50, -0.40, 0.65, 1.75$</td>
+                <td class="num">$1.346$</td>
+                <td>$-1.20$ ($0.324$), $-0.60$ ($0.325$)<br>$0.65$ ($0.248$), $1.65$ ($0.103$)</td>
               </tr>
               <tr>
-                <td>Meaning of mass</td>
-                <td>Allocation of attention</td>
-                <td>Population mass represented</td>
-              </tr>
-              <tr>
-                <td>Identity-kernel failure</td>
-                <td>Every uniform $N$-point set has entropy $\log N$</td>
-                <td>Every strict sparse approximation has infinite ordinary cross-entropy</td>
+                <td class="num">$1.50$</td>
+                <td>$-1.50, -0.60, 0.85, 1.75$</td>
+                <td class="num">$0.693$</td>
+                <td>$-1.20$ ($0.319$), $-0.60$ ($0.324$)<br>$0.65$ ($0.247$), $1.65$ ($0.110$)</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p>
-          The two failures are almost opposites. Shannon entropy cannot distinguish the geometry of two equally sized subsets, while ordinary cross-entropy refuses to compare a discrete coreset with mass it omits. The Laplace kernel fixes both by making nearby atoms partial substitutes at the declared scale $\ell$.
-        </p>
+        <ul class="bullets">
+          <li>$\ell=0.15$: coverage entropy is nearly $\log 4$; equal-cardinality subsets are nearly tied.</li>
+          <li>$\ell=0.30$: reference calculation shown in the figure.</li>
+          <li>$\ell=1.50$: longer-range similarity moves the interior coverage points outward.</li>
+          <li>Coreset support is stable across the three values; optimized weights change slightly.</li>
+        </ul>
       </section>
 
-      <section class="panel callout">
-        <h2>Takeaway</h2>
-        <p>
-          Coverage asks: <em>how should I distribute $N$ units of attention across distinct possibilities?</em> A coreset asks: <em>how well can $N$ weighted atoms reproduce this target distribution?</em> Both can use the same kernel entropy, but only the second has an external target.
-        </p>
-        <p>
-          This leaves one important modeling choice visible rather than hidden: the scale $\ell$. If it is tiny, near-points stop substituting for one another and the ordinary pathologies return. If it is huge, meaningful distinctions disappear. Here I assume that scale is supplied by the task; learning it is a separate problem.
-        </p>
+      <section class="panel">
+        <h2>Points to develop</h2>
+        <ul class="bullets">
+          <li>Specify which conventional coreset objectives provide the relevant contrast.</li>
+          <li>Separate principled task-specific losses from ad hoc compression criteria.</li>
+          <li>State the role of $\ell$ as the declared resolution of substitution.</li>
+          <li>Decide whether the final post needs the bandwidth table or only the reference example.</li>
+        </ul>
       </section>
     </main>
   </div>
