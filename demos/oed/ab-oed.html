@@ -363,33 +363,13 @@
         const imageCache = new Map();
         let lastMainSrc = "";
 
-        function setImageWithFallback(imgEl, src) {
+        function setImage(imgEl, src) {
           if (!imgEl) return;
           if (!src) {
             imgEl.removeAttribute("src");
             return;
           }
-
-          // If the PNG doesn't exist (or fails to decode), fall back to the SVG with the same basename.
-          if (src.endsWith(".png")) {
-            imgEl.dataset.fallbackSrc = src.replace(/\.png$/, ".svg");
-          } else {
-            delete imgEl.dataset.fallbackSrc;
-          }
-
           imgEl.src = src;
-        }
-
-        function ensureFallbackHandler(imgEl) {
-          if (!imgEl || imgEl.dataset.fallbackHandler === "1") return;
-          imgEl.dataset.fallbackHandler = "1";
-          imgEl.addEventListener("error", () => {
-            const fb = imgEl.dataset.fallbackSrc;
-            if (fb && imgEl.src && imgEl.src.endsWith(".png") && fb !== imgEl.src) {
-              delete imgEl.dataset.fallbackSrc;
-              imgEl.src = fb;
-            }
-          });
         }
 
         function renderMath(root) {
@@ -536,10 +516,9 @@
           const f = frames[idx] || {};
           const viewObj = getViewObj(f, view);
 
-          ensureFallbackHandler(els.frame);
           const nextSrc = viewObj.image || "";
           if (nextSrc && nextSrc !== lastMainSrc) {
-            setImageWithFallback(els.frame, nextSrc);
+            setImage(els.frame, nextSrc);
             lastMainSrc = nextSrc;
           }
           els.frame.alt = (VIEW_META[view] && VIEW_META[view].alt) || "Plot frame";
@@ -589,8 +568,7 @@
 
         function renderUniform(n) {
           if (!els.uniformFrame) return;
-          ensureFallbackHandler(els.uniformFrame);
-          setImageWithFallback(els.uniformFrame, uniformDecisionImage(n));
+          setImage(els.uniformFrame, uniformDecisionImage(n));
           if (els.uniformLabel) els.uniformLabel.textContent = `N = ${n}`;
           if (els.uniformHeadline) {
             els.uniformHeadline.textContent = `Decision regions learned from ${n} random (non-adaptive) samples (no OED).`;

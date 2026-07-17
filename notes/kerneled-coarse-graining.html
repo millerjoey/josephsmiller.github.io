@@ -16,7 +16,7 @@
   <meta name="description" content="How a many-to-one observation map can be rewritten as an indistinguishability kernel, turning entropy into expected surprisal of typicality and motivating similarity-sensitive entropy.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <script>
     window.MathJax = {
       tex: {
@@ -29,325 +29,19 @@
     };
   </script>
   <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-  <style>
-    :root {
-      color-scheme: light;
-      font-family: "Crimson Pro", "Times New Roman", serif;
-      --ink: #1f2a37;
-      --muted: #5b6673;
-      --bg: #eef1f5;
-      --panel: #ffffff;
-      --accent: #8b3a3a;
-      --accent-strong: #6d2b2b;
-      --accent-soft: rgba(139, 58, 58, 0.14);
-      --line: rgba(31, 42, 55, 0.12);
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
-        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
-        var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2.5rem 1.5rem;
-      color: var(--ink);
-    }
-
-    .shell {
-      width: min(880px, 100%);
-      background: #ffffff;
-      border-radius: 26px;
-      padding: 3rem;
-      border: 1px solid rgba(31, 42, 55, 0.08);
-      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .top-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      padding-bottom: 1.25rem;
-      margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(31, 42, 55, 0.08);
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .hero {
-      display: grid;
-      gap: 1.25rem;
-    }
-
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: 0.28em;
-      font-size: 0.7rem;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2.25rem, 4.2vw, 3.3rem);
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    p {
-      margin: 0;
-      line-height: 1.7;
-    }
-
-    .lede {
-      color: var(--muted);
-      font-size: 1.1rem;
-      max-width: 78ch;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      margin-top: 0.25rem;
-    }
-
-    .button {
-      background: var(--accent);
-      color: #fff;
-      padding: 0.65rem 1.3rem;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      box-shadow: 0 10px 18px rgba(31, 42, 55, 0.16);
-    }
-
-    .button:hover,
-    .button:focus-visible {
-      background: var(--accent-strong);
-      box-shadow: 0 14px 24px rgba(31, 42, 55, 0.2);
-    }
-
-    a {
-      color: var(--accent-strong);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    a:hover,
-    a:focus-visible {
-      color: var(--accent);
-    }
-
-    .text-link {
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .text-link:hover,
-    .text-link:focus-visible {
-      color: var(--accent-strong);
-    }
-
-    .stack {
-      margin-top: 2.75rem;
-      display: grid;
-      gap: 1.5rem;
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 1.75rem;
-      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
-      position: relative;
-      min-width: 0;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      left: 1.75rem;
-      top: 0.85rem;
-      width: 42px;
-      height: 2px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
-
-    .panel h2 {
-      margin: 0 0 1rem;
-      font-size: 0.92rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .panel h3 {
-      margin: 1.85rem 0 0.85rem;
-      font-size: 1.35rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .panel h3:first-of-type {
-      margin-top: 0.5rem;
-    }
-
-    .panel p + p {
-      margin-top: 0.9rem;
-    }
-
-    .panel p + .bullets {
-      margin-top: 0.9rem;
-    }
-
-    .panel .bullets + p {
-      margin-top: 0.9rem;
-    }
-
-    code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.95em;
-    }
-
-    .bullets {
-      margin: 0;
-      padding-left: 1.25rem;
-      line-height: 1.7;
-    }
-
-    .bullets li {
-      margin: 0.35rem 0;
-    }
-
-    .math-block {
-      margin: 0.5rem 0 0;
-      overflow-x: auto;
-      max-width: 100%;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    mjx-container[jax="SVG"][display="true"] {
-      max-width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    figure {
-      margin: 0;
-      display: grid;
-      gap: 0.85rem;
-    }
-
-    .figure-placeholder {
-      border-radius: 14px;
-      border: 1px dashed rgba(31, 42, 55, 0.18);
-      background: rgba(31, 42, 55, 0.03);
-      padding: 1.25rem 1.35rem;
-      display: grid;
-      gap: 0.4rem;
-    }
-
-    figcaption {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 1rem;
-    }
-
-    figcaption strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    details {
-      padding-top: 0.9rem;
-      border-top: 1px solid rgba(31, 42, 55, 0.08);
-    }
-
-    details:first-of-type {
-      padding-top: 0;
-      border-top: none;
-    }
-
-    summary {
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--ink);
-      list-style: none;
-    }
-
-    summary::-webkit-details-marker {
-      display: none;
-    }
-
-    details p {
-      margin-top: 0.65rem;
-      color: var(--muted);
-    }
-
-    .callout {
-      background: rgba(139, 58, 58, 0.04);
-      border-color: rgba(139, 58, 58, 0.18);
-    }
-
-    .callout::before {
-      background: var(--accent-strong);
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 700px) {
-      .shell {
-        padding: 2.25rem 1.75rem;
-      }
-    }
-  </style>
   <link rel="stylesheet" href="minimal.css">
 </head>
-<body>
+<body class="blog-kernel">
   <div class="shell">
     <nav class="top-nav">
       <a class="text-link" href="../index.html">← Home</a>
       <div class="nav-right">
-        <a class="text-link" href="index.html">Explanations</a>
-        <a class="text-link" href="mailto:joe@josephsmiller.com">Email me</a>
+        <a class="text-link" href="index.html">Blog</a>
       </div>
     </nav>
 
     <header class="hero">
-      <div class="eyebrow">Technical explanation</div>
+      <div class="eyebrow">Blog · Information theory</div>
       <h1>Kernel-based coarse-graining</h1>
       <p class="lede">
         We can motivate similarity-sensitive entropy with the following idea: keep a latent uniform seed
@@ -359,9 +53,6 @@
         <li>A many-to-one map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
         <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,d\lambda(u')$.</li>
       </ul>
-      <div class="actions">
-        <a class="button" href="mailto:joe@josephsmiller.com?subject=kerneled%20Coarse%20Graining">Email me</a>
-      </div>
     </header>
 
     <main class="stack">

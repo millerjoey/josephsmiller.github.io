@@ -11,189 +11,25 @@
     gtag('config', 'G-Y06DGSC9SW');
   </script>
   <meta charset="UTF-8">
-  <title>Explanations · Joseph S. Miller</title>
+  <title>Blog · Joseph S. Miller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Some thoughts on statistical topics.">
+  <meta name="description" content="Essays on experimental design, scoring rules, and information theory by Joseph S. Miller.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      color-scheme: light;
-      font-family: "Crimson Pro", "Times New Roman", serif;
-      --ink: #1f2a37;
-      --muted: #5b6673;
-      --bg: #eef1f5;
-      --panel: #ffffff;
-      --accent: #8b3a3a;
-      --accent-strong: #6d2b2b;
-      --accent-soft: rgba(139, 58, 58, 0.14);
-      --line: rgba(31, 42, 55, 0.12);
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
-        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
-        var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2.5rem 1.5rem;
-      color: var(--ink);
-    }
-
-    .shell {
-      width: min(880px, 100%);
-      background: #ffffff;
-      border-radius: 26px;
-      padding: 3rem;
-      border: 1px solid rgba(31, 42, 55, 0.08);
-      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .top-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      padding-bottom: 1.25rem;
-      margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(31, 42, 55, 0.08);
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: 0.28em;
-      font-size: 0.7rem;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    h1 {
-      margin: 0.35rem 0 0;
-      font-size: clamp(2.2rem, 4vw, 3rem);
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    p {
-      margin: 0;
-      line-height: 1.7;
-    }
-
-    .lede {
-      margin-top: 0.9rem;
-      color: var(--muted);
-      font-size: 1.08rem;
-    }
-
-    a {
-      color: var(--accent-strong);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    a:hover,
-    a:focus-visible {
-      color: var(--accent);
-    }
-
-    .text-link {
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .text-link:hover,
-    .text-link:focus-visible {
-      color: var(--accent-strong);
-    }
-
-    .stack {
-      margin-top: 2.5rem;
-      display: grid;
-      gap: 1.5rem;
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 1.75rem;
-      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
-      position: relative;
-      min-width: 0;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      left: 1.75rem;
-      top: 0.85rem;
-      width: 42px;
-      height: 2px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
-
-    .panel h2 {
-      margin: 0 0 1rem;
-      font-size: 0.92rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .post-list {
-      margin: 0;
-      padding-left: 1.25rem;
-      line-height: 1.7;
-    }
-
-    .post-list li {
-      margin: 0.4rem 0;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    @media (max-width: 700px) {
-      .shell {
-        padding: 2.25rem 1.75rem;
-      }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="minimal.css">
 </head>
-<body>
+<body class="blog-index">
   <div class="shell">
     <nav class="top-nav">
       <a class="text-link" href="../index.html">← Home</a>
-      <div class="nav-right">
-        <a class="text-link" href="mailto:joe@josephsmiller.com">Email me</a>
-      </div>
     </nav>
 
     <header>
-      <div class="eyebrow">Explanations</div>
-      <h1>Technical explanations</h1>
+      <div class="eyebrow">Blog</div>
+      <h1>Blog</h1>
       <p class="lede">
-        Some thoughts on statistical topics.
+        Essays on experimental design, scoring rules, and information theory.
       </p>
     </header>
 
@@ -202,8 +38,12 @@
         <h2>Posts</h2>
         <ul class="post-list">
           <li>
+            <a href="coverage-and-coresets.html">Coverage and coresets with kernel entropy</a>
+            <span class="muted"> &mdash; Target-free spread versus sparse approximation.</span>
+          </li>
+          <li>
             <a href="similarity-sensitive-scoring-rule.html">Similarity-sensitive scoring rules</a>
-            <span class="muted"> &mdash; A proper yet nonlocal scoring rule.</span>
+            <span class="muted"> &mdash; A nonlocal tangent score, proper under concavity.</span>
           </li>
           <li>
             <a href="kerneled-coarse-graining.html">Kernel-based coarse-graining</a>

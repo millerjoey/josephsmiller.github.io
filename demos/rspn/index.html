@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y06DGSC9SW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Y06DGSC9SW');
+    </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Relational RSPN Demo</title>
+    <meta
+      name="description"
+      content="Static demo of a recursive Sum-Product Network over related Customer, Order, and LineItem records."
+    >
+    <meta name="theme-color" content="#8b3a3a">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="app-header">
+        <div class="header-copy">
+          <nav class="demo-nav" aria-label="Demo navigation">
+            <a href="https://josephsmiller.com/">Home</a>
+            <a href="../spn/index.html">Flat SPN demo</a>
+          </nav>
+          <p class="eyebrow">Recursive Sum-Product Network Demo</p>
+          <h1>Relational Database Explorer</h1>
+          <p class="intro-copy">
+            Inspect a trained RSPN over nested records. Pick a root customer scenario, then compare the tree schema, structure decisions, recursive likelihood decomposition, context distributions, and representative nested record exported from the model run.
+          </p>
+        </div>
+      </header>
+
+      <section class="summary-strip" aria-label="Dataset summary">
+        <div class="summary-item">
+          <span class="summary-label">Root records</span>
+          <strong id="rootCount">...</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Order rows</span>
+          <strong id="orderCount">...</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Line items</span>
+          <strong id="lineItemCount">...</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Root CE</span>
+          <strong id="modelCe">...</strong>
+        </div>
+      </section>
+
+      <nav class="view-switcher" aria-label="Demo views">
+        <button type="button" class="view-button is-active" data-view="explore">Explore</button>
+        <button type="button" class="view-button" data-view="data">Data Shape</button>
+        <button type="button" class="view-button" data-view="diagnostics">Diagnostics</button>
+      </nav>
+
+      <div class="workspace">
+        <aside class="sidebar">
+          <section class="panel" data-view-panel="explore">
+            <div class="panel-head">
+              <h2>Conditions</h2>
+            </div>
+            <div id="conditionBuilder" class="condition-builder"></div>
+            <button id="resetConditions" class="reset-button" type="button">Reset conditions</button>
+          </section>
+
+          <section class="panel" data-view-panel="data diagnostics">
+            <div class="panel-head">
+              <h2>Scenarios</h2>
+            </div>
+            <div id="scenarioList" class="scenario-list"></div>
+          </section>
+
+          <section class="panel" data-view-panel="explore diagnostics">
+            <div class="panel-head">
+              <h2>Model</h2>
+            </div>
+            <dl id="modelFacts" class="fact-list"></dl>
+          </section>
+        </aside>
+
+        <section class="results">
+          <section class="panel model-panel">
+            <div>
+              <p id="modelName" class="model-name">Loading...</p>
+              <p id="modelSubtitle" class="model-subtitle"></p>
+            </div>
+            <div id="activeEvidence" class="chips"></div>
+          </section>
+
+          <section class="panel" data-view-panel="explore">
+            <div class="panel-head">
+              <h2>Query Results</h2>
+            </div>
+            <div id="queryResults" class="query-results"></div>
+          </section>
+
+          <section class="panel schema-panel" data-view-panel="data">
+            <div class="panel-head">
+              <h2>Tree Schema</h2>
+            </div>
+            <div id="schemaTree" class="schema-tree"></div>
+          </section>
+
+          <section class="panel table-browser-panel" data-view-panel="data">
+            <div class="panel-head">
+              <div>
+                <h2>Tables And Subtables</h2>
+                <p id="tableBrowserNote" class="panel-note"></p>
+              </div>
+            </div>
+            <div id="tableTabs" class="table-tabs" role="tablist" aria-label="Scenario table slices"></div>
+            <div id="tableViewer" class="table-viewer"></div>
+          </section>
+
+          <section class="panel" data-view-panel="diagnostics">
+            <div class="panel-head">
+              <h2>Recursive Score</h2>
+            </div>
+            <div id="metrics" class="metrics-grid"></div>
+            <div id="factorBars" class="factor-bars"></div>
+          </section>
+
+          <section data-view-panel="explore">
+            <div class="section-head">
+              <h2>Conditional Distributions</h2>
+            </div>
+            <div id="charts" class="chart-grid"></div>
+          </section>
+
+          <section class="panel" data-view-panel="diagnostics">
+            <div class="panel-head">
+              <h2>Structure Decisions</h2>
+            </div>
+            <div id="structureEdges" class="edge-grid"></div>
+          </section>
+
+          <section class="panel" data-view-panel="data">
+            <div class="panel-head">
+              <h2>Nested Record</h2>
+            </div>
+            <div id="recordTree" class="record-tree"></div>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="dist/app.js?v=20260629-shared-regime"></script>
+  </body>
+</html>

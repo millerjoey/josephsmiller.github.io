@@ -684,7 +684,7 @@
 
     const grid = document.createElement("div");
     grid.className = "gain-grid";
-    ["Components", "Proper K-CE", "Ordinary CE"].forEach((text) => {
+    ["Components", "Gaussian K-CE", "Ordinary CE"].forEach((text) => {
       const cell = document.createElement("div");
       cell.className = "gain-header";
       cell.textContent = text;
@@ -809,7 +809,7 @@
 
     const legendY = 410;
     group.appendChild(svgEl("line", { x1: panel.x, y1: legendY, x2: panel.x + 34, y2: legendY, stroke: accent, "stroke-width": 2.4 }));
-    addText(group, panel.x + 44, legendY + 4, "proper K-CE fit", { size: 13 });
+    addText(group, panel.x + 44, legendY + 4, "Gaussian K-CE fit", { size: 13 });
     group.appendChild(svgEl("line", { x1: panel.x + 190, y1: legendY, x2: panel.x + 224, y2: legendY, stroke: muted, "stroke-width": 2.2, "stroke-dasharray": ceDash, "stroke-linecap": "round" }));
     addText(group, panel.x + 234, legendY + 4, "ordinary CE fit", { size: 13 });
     statusNode.textContent = status || "Ready";

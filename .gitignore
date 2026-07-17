@@ -1,2 +1,4 @@
 # Local-only helpers (do not publish)
 demos/oed/scripts/
+
+.DS_Store

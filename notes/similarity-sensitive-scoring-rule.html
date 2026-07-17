@@ -13,10 +13,10 @@
   <meta charset="UTF-8">
   <title>Similarity-sensitive scoring rules · Joseph S. Miller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="How similarity-sensitive entropy generates a proper scoring rule, cross-entropy, divergence, and information-gain objective for task-aligned experiment design.">
+  <meta name="description" content="How concave similarity-sensitive entropy generates a proper scoring rule, cross-entropy, divergence, and information-gain objective for task-aligned experiment design.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <script>
     window.MathJax = {
       tex: {
@@ -29,604 +29,22 @@
     };
   </script>
   <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-  <style>
-    :root {
-      color-scheme: light;
-      font-family: "Crimson Pro", "Times New Roman", serif;
-      --ink: #1f2a37;
-      --muted: #5b6673;
-      --bg: #eef1f5;
-      --panel: #ffffff;
-      --accent: #8b3a3a;
-      --accent-strong: #6d2b2b;
-      --accent-soft: rgba(139, 58, 58, 0.14);
-      --line: rgba(31, 42, 55, 0.12);
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        linear-gradient(140deg, rgba(139, 58, 58, 0.05) 0%, transparent 55%),
-        repeating-linear-gradient(0deg, rgba(139, 58, 58, 0.02), rgba(139, 58, 58, 0.02) 1px, transparent 1px, transparent 6px),
-        var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2.5rem 1.5rem;
-      color: var(--ink);
-    }
-
-    .shell {
-      width: min(880px, 100%);
-      background: #ffffff;
-      border-radius: 26px;
-      padding: 3rem;
-      border: 1px solid rgba(31, 42, 55, 0.08);
-      box-shadow: 0 22px 50px rgba(31, 42, 55, 0.12);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .top-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      padding-bottom: 1.25rem;
-      margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(31, 42, 55, 0.08);
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .hero {
-      display: grid;
-      gap: 1.25rem;
-    }
-
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: 0.28em;
-      font-size: 0.7rem;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2.25rem, 4.2vw, 3.3rem);
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    p {
-      margin: 0;
-      line-height: 1.7;
-    }
-
-    .lede {
-      color: var(--muted);
-      font-size: 1.1rem;
-      max-width: 78ch;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      margin-top: 0.25rem;
-    }
-
-    .button {
-      background: var(--accent);
-      color: #fff;
-      padding: 0.65rem 1.3rem;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      box-shadow: 0 10px 18px rgba(31, 42, 55, 0.16);
-    }
-
-    .button:hover,
-    .button:focus-visible {
-      background: var(--accent-strong);
-      box-shadow: 0 14px 24px rgba(31, 42, 55, 0.2);
-    }
-
-    a {
-      color: var(--accent-strong);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    a:hover,
-    a:focus-visible {
-      color: var(--accent);
-    }
-
-    .text-link {
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .text-link:hover,
-    .text-link:focus-visible {
-      color: var(--accent-strong);
-    }
-
-    .stack {
-      margin-top: 2.75rem;
-      display: grid;
-      gap: 1.5rem;
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 1.75rem;
-      box-shadow: 0 12px 24px rgba(31, 42, 55, 0.08);
-      position: relative;
-      min-width: 0;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      left: 1.75rem;
-      top: 0.85rem;
-      width: 42px;
-      height: 2px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
-
-    .panel h2 {
-      margin: 0 0 1rem;
-      font-size: 0.92rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .panel h3 {
-      margin: 1.85rem 0 0.85rem;
-      font-size: 1.35rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .panel h3:first-of-type {
-      margin-top: 0.5rem;
-    }
-
-    .panel h4 {
-      margin: 1.55rem 0 0.65rem;
-      font-size: 1.08rem;
-      font-weight: 500;
-      letter-spacing: 0.01em;
-    }
-
-    .panel h4:first-of-type {
-      margin-top: 0.5rem;
-    }
-
-    .panel p + p {
-      margin-top: 0.9rem;
-    }
-
-    .panel p + .bullets {
-      margin-top: 0.9rem;
-    }
-
-    .panel .bullets + p {
-      margin-top: 0.9rem;
-    }
-
-    code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.95em;
-    }
-
-    .bullets {
-      margin: 0;
-      padding-left: 1.25rem;
-      line-height: 1.7;
-    }
-
-    .bullets li {
-      margin: 0.35rem 0;
-    }
-
-    .math-block {
-      margin: 0.5rem 0 0;
-      overflow-x: auto;
-      max-width: 100%;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    mjx-container[jax="SVG"][display="true"] {
-      max-width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    figure {
-      margin: 0;
-      display: grid;
-      gap: 0.85rem;
-    }
-
-    figure img {
-      width: 100%;
-      height: auto;
-    }
-
-    .panel p + figure,
-    .panel figure + p,
-    .panel figure + figure {
-      margin-top: 1rem;
-    }
-
-    figcaption {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 1rem;
-    }
-
-    figcaption strong {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    .table-wrap {
-      margin-top: 1rem;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .score-table {
-      width: 100%;
-      min-width: 620px;
-      border-collapse: collapse;
-      font-size: 0.98rem;
-      line-height: 1.45;
-    }
-
-    .score-table th,
-    .score-table td {
-      padding: 0.55rem 0.5rem;
-      border-bottom: 1px solid rgba(31, 42, 55, 0.1);
-      text-align: left;
-      vertical-align: top;
-    }
-
-    .score-table th {
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .score-table .num {
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .score-table strong {
-      color: var(--accent-strong);
-      font-weight: 600;
-    }
-
-    .table-wrap + p {
-      margin-top: 0.85rem;
-    }
-
-    .fit-lab {
-      margin-top: 1.15rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(31, 42, 55, 0.08);
-      display: grid;
-      gap: 0.75rem;
-    }
-
-    .fit-lab-controls {
-      display: grid;
-      grid-template-columns: minmax(72px, 0.62fr) minmax(112px, 0.85fr) minmax(82px, 0.62fr) auto;
-      gap: 0.6rem;
-      align-items: end;
-    }
-
-    .fit-note {
-      color: var(--muted);
-      font-size: 0.98rem;
-      line-height: 1.45;
-      margin: 0;
-    }
-
-    .fit-control {
-      display: grid;
-      gap: 0.25rem;
-      min-width: 0;
-    }
-
-    .fit-control span,
-    .fit-actions-label {
-      color: var(--accent-strong);
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .fit-control select,
-    .fit-control input {
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid rgba(31, 42, 55, 0.16);
-      border-radius: 7px;
-      background: #fff;
-      color: var(--ink);
-      font: inherit;
-      padding: 0.42rem 0.5rem;
-      min-height: 2.2rem;
-    }
-
-    .fit-control input[type="range"] {
-      padding-inline: 0;
-    }
-
-    .fit-actions {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 0.35rem;
-      align-items: center;
-    }
-
-    .fit-actions-wrap {
-      display: grid;
-      gap: 0.25rem;
-    }
-
-    .fit-actions button {
-      border: 1px solid rgba(31, 42, 55, 0.14);
-      border-radius: 7px;
-      background: #fff;
-      color: var(--ink);
-      cursor: pointer;
-      font: inherit;
-      font-weight: 600;
-      padding: 0.42rem 0.62rem;
-      min-height: 2.2rem;
-      white-space: nowrap;
-    }
-
-    .fit-actions button.primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .fit-actions button:hover,
-    .fit-actions button:focus-visible {
-      border-color: var(--accent);
-      color: var(--accent-strong);
-    }
-
-    .fit-actions button.primary:hover,
-    .fit-actions button.primary:focus-visible {
-      background: var(--accent-strong);
-      color: #fff;
-    }
-
-    .fit-lab-stage {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(180px, 0.26fr);
-      gap: 0.85rem;
-      align-items: start;
-    }
-
-    .fit-plot {
-      width: 100%;
-      aspect-ratio: 1.95;
-      min-height: 255px;
-      border: 1px solid rgba(31, 42, 55, 0.08);
-      background: #fff;
-      cursor: crosshair;
-      touch-action: manipulation;
-    }
-
-    .component-gain {
-      border: 1px solid rgba(31, 42, 55, 0.08);
-      background: #fff;
-      padding: 0.85rem;
-    }
-
-    .gain-title {
-      color: var(--ink);
-      font-weight: 700;
-      font-size: 1.05rem;
-      margin-bottom: 0.2rem;
-    }
-
-    .gain-subtitle {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 0.8rem;
-    }
-
-    .gain-grid {
-      display: grid;
-      grid-template-columns: minmax(5.5rem, 0.55fr) repeat(2, minmax(7.5rem, 1fr));
-      gap: 0.5rem 0.75rem;
-      align-items: start;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .gain-header {
-      color: var(--accent-strong);
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .gain-row {
-      display: contents;
-    }
-
-    .gain-rule,
-    .gain-score-main {
-      color: var(--ink);
-      font-weight: 700;
-    }
-
-    .gain-score-sub {
-      color: var(--muted);
-      font-size: 0.78rem;
-      margin-top: 0.1rem;
-    }
-
-    .gain-empty {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .fit-metrics {
-      display: grid;
-      gap: 0.65rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.35;
-    }
-
-    .fit-status {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    .fit-metric {
-      border-top: 1px solid rgba(31, 42, 55, 0.08);
-      padding-top: 0.55rem;
-    }
-
-    .fit-metric:first-child {
-      border-top: none;
-      padding-top: 0;
-    }
-
-    .fit-metric strong {
-      color: var(--ink);
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .fit-summary {
-      color: var(--muted);
-      display: grid;
-      gap: 0.18rem;
-      font-size: 0.86rem;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .fit-risk {
-      color: var(--ink);
-      font-weight: 500;
-    }
-
-    .fit-component {
-      display: grid;
-      grid-template-columns: 3.1em 4.1em 4.4em;
-      gap: 0.35rem;
-      align-items: baseline;
-    }
-
-    .fit-component span {
-      white-space: nowrap;
-    }
-
-    details {
-      padding-top: 0.9rem;
-      border-top: 1px solid rgba(31, 42, 55, 0.08);
-    }
-
-    details:first-of-type {
-      padding-top: 0;
-      border-top: none;
-    }
-
-    summary {
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--ink);
-      list-style: none;
-    }
-
-    summary::-webkit-details-marker {
-      display: none;
-    }
-
-    details p {
-      margin-top: 0.65rem;
-      color: var(--muted);
-    }
-
-    .callout {
-      background: rgba(139, 58, 58, 0.04);
-      border-color: rgba(139, 58, 58, 0.18);
-    }
-
-    .callout::before {
-      background: var(--accent-strong);
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    @media (max-width: 700px) {
-      .shell {
-        padding: 2.25rem 1.75rem;
-      }
-
-      .fit-lab-controls,
-      .fit-lab-stage {
-        grid-template-columns: 1fr;
-      }
-
-      .fit-plot {
-        min-height: 240px;
-      }
-    }
-  </style>
   <link rel="stylesheet" href="minimal.css">
 </head>
-<body>
+<body class="blog-scoring">
   <div class="shell">
     <nav class="top-nav">
       <a class="text-link" href="../index.html">&larr; Home</a>
       <div class="nav-right">
-        <a class="text-link" href="index.html">Explanations</a>
-        <a class="text-link" href="mailto:joe@josephsmiller.com">Email me</a>
+        <a class="text-link" href="index.html">Blog</a>
       </div>
     </nav>
 
     <header class="hero">
-      <div class="eyebrow">Scoring rules</div>
+      <div class="eyebrow">Blog · Scoring rules</div>
       <h1>Similarity-sensitive scoring rules</h1>
       <p class="lede">
-        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a categorical space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the nonlocal proper scoring rule derived from it. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
+        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a categorical space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the corresponding nonlocal tangent scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
       </p>
     </header>
 
@@ -681,6 +99,9 @@
         <div class="math-block">
           $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|^2}{2\ell^2}\right).$$
         </div>
+        <p>
+          I use this Gaussian RBF here because it is a familiar way to illustrate local similarity. It is not, however, a general-purpose propriety guarantee: the tangent score derived below is proper only when $H_K$ is concave, and Gaussian RBF kernels do not ensure that condition for every configuration.
+        </p>
         <p>
           A loss that accounts for similarity should have a way to say that these two reports are different, but a loss that looks only at the density at each observed point cannot measure this difference.
         </p>
@@ -833,7 +254,7 @@
         </p>
         <h4>Where the rule comes from</h4>
         <p>
-          On Kernel classes where this entropy is concave, the corrected score is the tangent loss rule generated by similarity-sensitive entropy:
+          On kernel classes where this entropy is concave, the corrected score is the tangent loss rule generated by similarity-sensitive entropy:
         </p>
         <div class="math-block">
           $$H_K(q)=-\sum_i q_i\log (Kq)_i.$$
@@ -848,12 +269,15 @@
         <p>
           Concavity gives $\mathbb E_{X\sim p}S_H(q,X)\ge H(p)$, with equality at $q=p$. That ensures "properness": if I believe $p$, I should report $p$.
         </p>
+        <p>
+          The concavity condition is essential, not technical decoration. One useful guaranteed family is the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>, including $K_\ell(x,y)=\exp(-|x-y|/\ell)$. For a kernel without a concavity result, including a general Gaussian RBF, the same formula defines a tangent score but it need not be proper.
+        </p>
       </section>
 
       <section class="panel">
         <h2>Examples again</h2>
         <p>
-          Using the proper score, we can check the examples above to see if this works. The entries below are risks under the true distribution used in each example.
+          Using the tangent score, we can check the examples above to see how it behaves. The entries below are risks under the true distribution used in each example. Calling any row proper additionally requires concavity for its chosen kernel.
         </p>
         <div class="table-wrap">
           <table class="score-table">
@@ -942,20 +366,20 @@
           Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can get infinite reward placing a mixture component on one point and using the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to select among fits. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
         </p>
         <p>
-          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance minimum, and under proper $K$-CE with a Gaussian kernel using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance components as a spike on that one observation; the $K$-CE optimum is interior and instead fits two natural groups.
+          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance minimum, and under the tangent $K$-CE objective with a Gaussian RBF using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance component as a spike on one observation; the $K$-CE optimum is interior and instead fits two natural groups. This is an illustration of the similarity-aware objective, not a claim that Gaussian RBF $K$-CE is globally proper.
         </p>
         <figure>
           <img
             src="assets/k_score_gmm_singularity.svg"
-            alt="A two-component Gaussian mixture example comparing an optimized ordinary cross-entropy fit with a variance floor against an optimized proper K cross-entropy fit."
+            alt="A two-component Gaussian mixture example comparing an optimized ordinary cross-entropy fit with a variance floor against a Gaussian-RBF tangent K cross-entropy fit."
           >
           <figcaption>
-            <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and proper $K$-CE along the corresponding one-dimensional second-component variance.
+            <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and Gaussian-RBF tangent $K$-CE along the corresponding one-dimensional second-component variance.
           </figcaption>
         </figure>
         <div class="fit-lab" id="gmm-fit-lab">
           <p class="fit-note">
-            To show how favored this degenerate fit is by MLE, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from a synthetic distribution with the selected number of components. The -infinite loss in ordinary CE leads to fits strongly favoring individual points; proper $K$-CE always keeps a finite score and encourages more balanced allocation. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
+            To show how favored this degenerate fit is by MLE, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from a synthetic distribution with the selected number of components. The -infinite loss in ordinary CE leads to fits strongly favoring individual points; Gaussian-RBF $K$-CE keeps a finite objective and encourages more balanced allocation here. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
           </p>
           <div class="fit-lab-controls">
             <label class="fit-control">
@@ -987,7 +411,7 @@
             <div class="fit-lab-stage">
             <svg class="fit-plot" data-role="plot" viewBox="0 0 840 430" role="img" aria-labelledby="fit-lab-title fit-lab-desc">
               <title id="fit-lab-title">Interactive Gaussian mixture fitting comparison</title>
-              <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and proper K-cross-entropy Gaussian mixture fits.</desc>
+              <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and Gaussian-RBF tangent K-cross-entropy mixture fits.</desc>
             </svg>
             <div class="fit-metrics">
               <div class="fit-status" data-role="status">Ready</div>
@@ -996,7 +420,7 @@
                 <div class="fit-summary" data-role="ce-summary">-</div>
               </div>
               <div class="fit-metric">
-                <strong>Proper K-CE</strong>
+                <strong>Gaussian K-CE</strong>
                 <div class="fit-summary" data-role="k-summary">-</div>
               </div>
             </div>
@@ -1014,14 +438,14 @@
           Returning to experiment design. Suppose the future quantity we care about is $Y$. Before performing experiment $a$, the predictive law is $p_Y$. After observing data $Z$ from that experiment, the predictive law becomes $p_{Y\mid Z,a}$.
         </p>
         <p>
-          If future reports will be evaluated by the proper $K$-score and a calibrated model, then the value of action $a$ is
+          Suppose $H_K$ is concave, future reports will be evaluated by the resulting proper $K$-score, and the model is calibrated. Then the value of action $a$ is
         </p>
         <div class="math-block">
           $$\operatorname{IG}_K(a;Y)=H_K(p_Y)
           -\mathbb E_{Z\mid a}H_K(p_{Y\mid Z,a}).$$
         </div>
         <p>
-          This is the expected reduction in future $K$-proper cross-entropy risk. Before seeing $Z$, the best
+          This is the expected reduction in future proper $K$-cross-entropy risk. Before seeing $Z$, the best
           report is $p_Y$ and the risk is $H_K(p_Y)$. After seeing $Z$, the best report is
           $p_{Y\mid Z,a}$, and the expected risk is the second term.
         </p>
@@ -1034,7 +458,7 @@
         <h2>Takeaway</h2>
         <p>
           Shannon entropy generates the logarithmic scoring rule, which gives ordinary cross-entropy, KL divergence,
-          mutual information, and maximum likelihood. Similarity-sensitive entropy gives the parallel quantities:
+          mutual information, and maximum likelihood. When similarity-sensitive entropy is concave, it gives the parallel quantities:
           a similarity-sensitive scoring rule, $K$-cross-entropy, $K$-divergence, $K$-information gain, and corresponding model fitting.
         </p>
         <p>

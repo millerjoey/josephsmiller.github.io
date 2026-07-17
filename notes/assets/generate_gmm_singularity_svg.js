@@ -288,7 +288,7 @@ function addSvgHeader(svg, width, height) {
 
 function addDensityAxes(svg, panel) {
   svg.push(`  <text class="label" x="${fmt(panel.x)}" y="${fmt(panel.y - 30)}">Optimized mixture fits</text>`);
-  svg.push(`  <text class="small" x="${fmt(panel.x)}" y="${fmt(panel.y - 12)}">CE with a variance floor versus proper K-CE</text>`);
+  svg.push(`  <text class="small" x="${fmt(panel.x)}" y="${fmt(panel.y - 12)}">CE with a variance floor versus Gaussian K-CE</text>`);
   svg.push(`  <rect x="${fmt(panel.x)}" y="${fmt(panel.y)}" width="${fmt(panel.w)}" height="${fmt(panel.h)}" fill="none" stroke="#000000" stroke-opacity="0.05" />`);
   svg.push(`  <line class="axis" x1="${fmt(panel.x)}" y1="${fmt(panel.y + panel.h)}" x2="${fmt(panel.x + panel.w)}" y2="${fmt(panel.y + panel.h)}" />`);
   svg.push(`  <line class="axis" x1="${fmt(panel.x)}" y1="${fmt(panel.y)}" x2="${fmt(panel.x)}" y2="${fmt(panel.y + panel.h)}" />`);
@@ -388,7 +388,7 @@ svg.push(`  <path class="ce" d="${logCurvePath(riskPanel, ceScorePath, minLog, m
 
 legendY = riskPanel.y + riskPanel.h + 70;
 svg.push(`  <line class="kline" x1="${fmt(riskPanel.x)}" y1="${fmt(legendY - 7)}" x2="${fmt(riskPanel.x + 30)}" y2="${fmt(legendY - 7)}" />`);
-svg.push(`  <text class="small" x="${fmt(riskPanel.x + 38)}" y="${fmt(legendY - 3)}">proper K-CE</text>`);
+svg.push(`  <text class="small" x="${fmt(riskPanel.x + 38)}" y="${fmt(legendY - 3)}">Gaussian K-CE</text>`);
 svg.push(`  <line class="ce" x1="${fmt(riskPanel.x + 140)}" y1="${fmt(legendY - 7)}" x2="${fmt(riskPanel.x + 170)}" y2="${fmt(legendY - 7)}" />`);
 svg.push(`  <text class="small" x="${fmt(riskPanel.x + 178)}" y="${fmt(legendY - 3)}">ordinary CE</text>`);
 svg.push(`  <text class="small" x="${fmt(riskPanel.x)}" y="${fmt(legendY + 18)}">each curve is shown as excess over its own displayed minimum</text>`);
