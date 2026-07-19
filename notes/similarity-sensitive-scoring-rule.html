@@ -42,7 +42,10 @@
 
     <header class="hero">
       <div class="eyebrow">Blog · Scoring rules</div>
-      <h1>Similarity-sensitive scoring rules</h1>
+      <div class="post-heading">
+        <h1>Similarity-sensitive scoring rules</h1>
+        <p class="post-date"><time datetime="2026-06-14">June 14, 2026</time></p>
+      </div>
       <p class="lede">
         The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a categorical space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the corresponding nonlocal tangent scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
       </p>
