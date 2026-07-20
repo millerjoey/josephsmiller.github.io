@@ -63,7 +63,7 @@
 
     <main class="stack">
       <section class="panel">
-        <h2>Motivation</h2>
+        <h3>Motivation</h3>
         <p>
             A common applied workflow is: collect data, train a model, then deploy it once it is accurate enough. In Bayesian
             inference, the model encodes your current state of knowledge (and therefore, uncertainty) given what you have observed so far.
@@ -132,7 +132,7 @@
         </ul>      </section>
 
       <section class="panel">
-        <h2>Best-first adaptive partitioning</h2>
+        <h3>Best-first adaptive partitioning</h3>
         <p>
           Best-first adaptive partitioning is an adaptive quadrature over a discrete (or discretized) outcome space.
           It performs Bayesian updating inside the MI computation, so candidate batches can be scored without maintaining
@@ -183,7 +183,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
       </section>
 
       <section class="panel" id="results">
-        <h2>Results</h2>
+        <h3>Results</h3>
         <p class="muted">
           These figures compare multiple estimators of mutual information (MI) used for Bayesian experimental design,
           across two representative model families (linear regression with unknown observation variance and a
@@ -263,7 +263,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
 
       <div class="grid">
         <section class="panel">
-          <h2>Evaluation</h2>
+          <h3>Evaluation</h3>
           <ul class="bullets">
             <li>
               For each model, we estimate MI for batches of experiments of size $k$, averaged over many randomly chosen
@@ -302,7 +302,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
         </section>
 
         <section class="panel">
-          <h2>Key takeaways</h2>
+          <h3>Key takeaways</h3>
           <ul class="bullets">
             <li><strong>Predictable compute:</strong> fixed refinement budgets keep per-query runtime approximately flat as batch size $k$ grows.</li>
             <li><strong>Anytime:</strong> early scores can be refined by spending more budget.</li>
@@ -315,7 +315,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
       </div>
 
       <section class="panel">
-        <h2>MI Algorithms</h2>
+        <h3>MI Algorithms</h3>
         <details open>
           <summary>Best-first adaptive partitioning</summary>
           <p>

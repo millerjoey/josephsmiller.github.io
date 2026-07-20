@@ -47,50 +47,18 @@
         <p class="post-date"><time datetime="2026-01-10">January 10, 2026</time></p>
       </div>
       <p class="lede">
-        We can motivate similarity-sensitive entropy with the following idea: keep a latent uniform seed
-        $U \sim \mathrm{Unif}[0,1]$, and represent what you can/can’t distinguish using a kernel rather than only a
-        pushed-forward variable.
+        Any probability distribution can be generated from a uniform seed $U\sim\mathrm{Unif}[0,1]$ and a map $X=\psi(U)$.
+        If $\psi$ is invertible, then observing $X$ is equivalent to observing $U$ exactly. It is natural to conceive of $\psi$
+        as a relabeling of each event of $U$, but in contrast to Shannon entropy, differential entropy doesn't behave in this way.
+        In many other cases, what we observe or model is often a "coarsening"—some information is lost and the exact value of $U$ can't be recovered.
+        Using $Z = f(U)$ to denote this coarsening-measurement, $f$ encodes which distinctions you can make about $U$ when observing $Z$.
+        If we encode that loss of distinguishability explicitly, we can motivate the entirety of the similarity-sensitive entropy framework,
+        see Shannon and differential entropy as special cases and interpolate between them, while improving our notion of statistical information.
       </p>
-      <ul class="bullets muted">
-        <li>Represent a law as $X=\psi(U)$ with $U\sim\mathrm{Unif}[0,1]$.</li>
-        <li>A many-to-one map $f$ induces $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$.</li>
-        <li><strong>Entropy as expected log-typicality:</strong> $H=\mathbb E[-\log \tau(U)]$ with $\tau(u)=\int K(u,u')\,d\lambda(u')$.</li>
-      </ul>
     </header>
 
     <main class="stack">
-      <section class="panel callout">
-        <h2>Takeaway</h2>
-        <p>
-          Any probability distribution can be generated from a uniform seed $U\sim\mathrm{Unif}[0,1]$ and a map $X=\psi(U)$. 
-          If $\psi$ is invertible, then observing $X$ is equivalent to observing $U$ exactly. It is natural to conceive of $\psi$ 
-          as a relabeling of each event of $U$, but in contrast to Shannon entropy, differential entropy doesn't behave in this way.
-            In many other cases, what we observe or model is often a "coarsening"—some information is lost and the exact value of $U$ can't be recovered. 
-          Using $Z = f(U)$ to denote this coarsening-measurement, $f$ encodes which distinctions you can make about $U$ when observing $Z$. 
-          If we encode that loss of distinguishability explicitly, we can motivate the entirety of the similarity-sensitive entropy framework, 
-          see Shannon and differential entropy as special cases and interpolate between them, while improving our notion of statistical information.
-        </p>
-        <p>
-          The key step is to replace the many-to-one map by a similarity kernel encoding how distinguishable points are.
-          $K_f(u,u')=\mathbf 1\{f(u)=f(u')\}$. Its mass
-          $\tau_f(u)=\int_0^1 K_f(u,u')\,du'$ is the size of the fiber containing $u$ (the preimage of $f(u)$), and Shannon entropy becomes an
-          expected logarithm of $\tau_f(U)$:
-        </p>
-        <div class="math-block">
-          $$H(f(U))=\int_0^1 -\log \tau_f(u)\,du.$$
-        </div>
-        <p>
-          Similarity-sensitive entropy keeps the same functional but allows graded kernels $K(x,x')\in[0,1]$, letting you interpolate between continuous and "sharp" distinguishability.
-        </p>
-        <p class="muted">
-          For more: <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
-          Induced Kernels and Data-Processing Inequalities (arXiv:2601.03064)</a>.
-        </p>
-      </section>
-
       <section class="panel">
-        <h2>In more detail</h2>
-
         <h3>Randomness from a universal noise source</h3>
         <p>
           The starting point is the “uniform representation” idea: distributions can be generated
@@ -249,6 +217,10 @@
         <p class="muted">
           SS-entropy keeps the kernel explicit (and lets you then move it to other spaces); differential entropy is the part
           you get by renormalizing away that baseline as $\varepsilon\to 0$. By the pullback identity above, you can compute the same small-scale behavior either on $(\mathbb R,\mu)$ or on $([0,1],\lambda)$ with the pulled-back kernel.
+        </p>
+        <p class="muted">
+          For more: <a href="https://arxiv.org/abs/2601.03064" target="_blank" rel="noreferrer">Similarity-Sensitive Entropy:
+          Induced Kernels and Data-Processing Inequalities (arXiv:2601.03064)</a>.
         </p>
       </section>
     </main>

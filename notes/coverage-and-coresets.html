@@ -53,7 +53,7 @@
 
     <main class="stack">
       <section class="panel">
-        <h2>Coverage</h2>
+        <h3>Coverage</h3>
         <p>
           Let $\mathcal X_M=\{x_1,\ldots,x_M\}$ be the candidate points. Sampling $N$ points without repeats gives a set $S\subseteq\mathcal X_M$ with $|S|=N$ and the uniform distribution
         </p>
@@ -76,7 +76,7 @@
         <p>
           Unfortunately, Shannon entropy only sees the weights and the number of atoms. The entropy cannot distinguish a diverse selection from a cluster of near-duplicates. Clearly, there is some aspect of "information" that Shannon entropy has trouble identifying.
         </p>
-        <h2>Similarity-sensitive coverage</h2>
+        <h3>Similarity-sensitive coverage</h3>
         <p>
           I previously described <a href="kerneled-coarse-graining.html">similarity-sensitive entropy</a> and derived its associated <a href="similarity-sensitive-scoring-rule.html">tangent scoring rule</a>. For a <a href="https://arxiv.org/html/2601.03064v2#S2.SS1" target="_blank" rel="noreferrer">similarity kernel</a> $K$, the entropy is
         </p>
@@ -101,7 +101,7 @@
         <p>
           The budget $N$ is fixed and the weights remain uniform. Intuitively, we want to pick the set with the most "information", and it is self-evidently better to select points that are mutually dissimilar than to select near-duplicates. Is this achieved?
         </p>
-        <h2>Redundancy</h2>
+        <h3>Redundancy</h3>
         <p>
           As may be expected, this objective has a simple interpretation. For each selected point, define its soft neighborhood count
         </p>
@@ -129,7 +129,7 @@
           The kernel entropy objective therefore selects a set of points that are as mutually dissimilar as possible. The scale $\ell$ tells which differences are small enough to count as similar. The effective count depends only on the probability weights and pairwise kernel values, so it requires no coordinates and works for any objects for which a similarity kernel is available. It is unchanged under a reparameterization when the kernel is transported with the objects.
         </p>
 
-        <h2>Compression</h2>
+        <h3>Compression</h3>
         <p>
           Coverage asks how much distinctiveness a selected distribution contains. I use compression to refer to how well a sparse distribution can stand in for a specified target distribution, so the population frequencies now matter. The empirical distribution is
         </p>
@@ -147,7 +147,7 @@
         <p>
           Both weights and sample locations are optimization variables, and $q_{S,w}$ is the probability model we try to approximate the empirical distribution $p_M$ with.
         </p>
-        <h2>Ordinary cross-entropy</h2>
+        <h3>Ordinary cross-entropy</h3>
         <p>
           The averaged tangent score induced by Shannon entropy is ordinary cross-entropy, $C(p,q)$. Its regret is the Kullback&ndash;Leibler divergence $D(p,q)$:
         </p>
@@ -159,7 +159,7 @@
         <p>
           Interpreted directly as a distribution, a coreset assigns zero mass to observations outside its support. When the $M$ observed atoms are distinct, $p_M$ assigns positive mass to every one of them, so $C(p_M,q_{S,w})$ and $D(p_M,q_{S,w})$ are infinite whenever $N&lt;M$. Ordinary cross-entropy therefore supplies no ranking over these sparse models. Coreset weights are consequently not fit by treating the coreset as a probabilistic report for $p_M$, which seems unsatisfying. Conventionally, it is typical to re-express the coreset objective using some downstream loss that relates to the task at hand, or to abandon the discrete coreset model itself.
         </p>
-        <h2>Smoothing</h2>
+        <h3>Smoothing</h3>
         <p>
           The obvious way to obtain finite ordinary cross-entropy is indeed to replace each retained atom with a continuous density. With Gaussian components, the reported distribution becomes
         </p>
@@ -180,7 +180,7 @@
         <p>
           The model can therefore be made to fit the empirical distribution arbitrarily well, necessitating a further layer of regularization.
         </p>
-        <h2>Separating the model and the task</h2>
+        <h3>Separating the model and the task</h3>
         <p>
           This all suggests to me that we need a more principled approach. Instead, the framework I'm developing tries to explicitly separate the probabilistic model from the task by allowing the objective to account for the task and the probabilistic model separately. We can define the task and model once, transport them back or forward to any representation, and then use the same objective to select a coreset or evaluate its performance.
         </p>
@@ -198,7 +198,7 @@
         <p>
           Gaussian bumps can therefore provide a similarity for the score without requiring the coreset itself to be interpreted as a Gaussian mixture. The differential entropy of the mixture and $H_K(q)$ remain different objectives.
         </p>
-        <h2>Kernel scoring</h2>
+        <h3>Kernel scoring</h3>
         <p>
           Let $p$ denote the target distribution and $q$ the reported distribution. For either distribution $r\in\{p,q\}$, define its typicality by
         </p>
@@ -255,7 +255,7 @@
         <p>
           The distribution and task kernel move together, so the result depends on probability mass and pairwise utility rather than on the labels or coordinates used to represent the objects. Writing a fresh Laplace kernel after an arbitrary nonlinear change of coordinates would define a different similarity and therefore a different task.
         </p>
-        <h2>Coverage and compression on the same sample</h2>
+        <h3>Coverage and compression on the same sample</h3>
         <p>
           Place 20 observations on the line, keep four atoms and set $\ell=0.30$. Coverage fixes all four weights at $0.25$. The coreset weights are optimized against $p_M$.
         </p>
@@ -271,7 +271,7 @@
         <p>
           The coverage support is determined entirely by separation among the selected points. The coreset also responds to empirical frequency. It retains representatives from all three groups while assigning weights close to their population masses.
         </p>
-        <h2>Bandwidth</h2>
+        <h3>Bandwidth</h3>
         <p>
           Repeating the calculation at three bandwidths gives the following supports and weights. The effective count is $\exp(H_K(u_S))$ for the selected coverage distribution.
         </p>
@@ -317,7 +317,7 @@
         <p>
           The coreset support happens to be stable across these three kernel widths, with modest changes in its optimized weights.
         </p>
-        <h2>Discussion</h2>
+        <h3>Discussion</h3>
         <p>
           Coverage and coreset construction use the same similarity structure for different optimization problems:
         </p>

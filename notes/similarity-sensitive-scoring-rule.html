@@ -53,8 +53,7 @@
 
     <main class="stack">
       <section class="panel">
-        <h2>Examples</h2>
-        <h3>Weather forecast</h3>
+        <h3>Weather forecast example</h3>
         <p>
           Suppose the outcome we want to predict is rain, cloudy, or sunny. If the consumer of the forecast treats confusing rain with cloudy as a smaller mistake than confusing either with sunny, we can encode that with a similarity kernel such as
         </p>
@@ -158,7 +157,7 @@
       </section>
 
       <section class="panel">
-        <h2>The Scoring Rule</h2>
+        <h3>The scoring rule</h3>
         <h4>Probability versus similarity</h4>
         <p>
           Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let
@@ -278,7 +277,7 @@
       </section>
 
       <section class="panel">
-        <h2>Examples again</h2>
+        <h3>Results for the examples</h3>
         <p>
           Using the tangent score, we can check the examples above to see how it behaves. The entries below are risks under the true distribution used in each example. Calling any row proper additionally requires concavity for its chosen kernel.
         </p>
@@ -343,7 +342,7 @@
       </section>
 
       <section class="panel">
-        <h2>Fitting models</h2>
+        <h3>Fitting models</h3>
         <p>
           Maximum likelihood minimizes ordinary cross-entropy:
         </p>
@@ -436,7 +435,7 @@
       </section>
 
       <section class="panel">
-        <h2>Information gain is risk reduction</h2>
+        <h3>Information gain is risk reduction</h3>
         <p>
           Returning to experiment design. Suppose the future quantity we care about is $Y$. Before performing experiment $a$, the predictive law is $p_Y$. After observing data $Z$ from that experiment, the predictive law becomes $p_{Y\mid Z,a}$.
         </p>
@@ -458,7 +457,7 @@
       </section>
 
       <section class="panel callout">
-        <h2>Takeaway</h2>
+        <h3>Takeaway</h3>
         <p>
           Shannon entropy generates the logarithmic scoring rule, which gives ordinary cross-entropy, KL divergence,
           mutual information, and maximum likelihood. When similarity-sensitive entropy is concave, it gives the parallel quantities:
