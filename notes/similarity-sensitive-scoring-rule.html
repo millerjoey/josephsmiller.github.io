@@ -96,10 +96,10 @@
           is the same for every $\mu$. The centered Gaussian and an off-center Gaussian would tie under MLE (in the theoretical limit).
         </p>
         <p>
-          Now imagine that we care about the geometry of the interval: values close to each other are more similar. A reasonable task kernel for this geometry is a Gaussian kernel that uses ordinary distance:
+          Now imagine that we care about the geometry of the interval: values close to each other are more similar. A reasonable task kernel for this geometry is a Laplace kernel that uses ordinary distance:
         </p>
         <div class="math-block">
-          $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|^2}{2\ell^2}\right).$$
+          $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|}{\ell}\right).$$
         </div>
         <p>
           I use this Gaussian RBF here because it is a familiar way to illustrate local similarity. It is not, however, a general-purpose propriety guarantee: the tangent score derived below is proper only when $H_K$ is concave, and Gaussian RBF kernels do not ensure that condition for every configuration.
@@ -307,34 +307,34 @@
                 <td rowspan="2">Wrapped Gaussian</td>
                 <td>Off-center</td>
                 <td class="num">2.767</td>
-                <td class="num">3.731</td>
+                <td class="num">3.461</td>
               </tr>
               <tr>
                 <td>Centered</td>
                 <td class="num">2.767</td>
-                <td class="num"><strong>3.500</strong></td>
+                <td class="num"><strong>3.130</strong></td>
               </tr>
               <tr>
                 <td rowspan="2">Shuffled pieces</td>
                 <td>Contiguous bump</td>
                 <td class="num">1.692</td>
-                <td class="num">3.959</td>
+                <td class="num">4.044</td>
               </tr>
               <tr>
                 <td>Shuffled pieces</td>
                 <td class="num">1.692</td>
-                <td class="num"><strong>2.461</strong></td>
+                <td class="num"><strong>2.737</strong></td>
               </tr>
               <tr>
                 <td rowspan="2">Finite atoms</td>
                 <td>11 atoms</td>
                 <td class="num">$\infty$</td>
-                <td class="num">2.474</td>
+                <td class="num">2.971</td>
               </tr>
               <tr>
                 <td>31 atoms</td>
                 <td class="num">$\infty$</td>
-                <td class="num"><strong>2.345</strong></td>
+                <td class="num"><strong>2.638</strong></td>
               </tr>
             </tbody>
           </table>

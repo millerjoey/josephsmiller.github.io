@@ -36,7 +36,7 @@ function qProb(mu) {
 
 function kernel(x, y) {
   const d = Math.abs(x - y);
-  return Math.exp(-(d * d) / (2 * ell * ell));
+  return Math.exp(-d / ell);
 }
 
 const K = xs.map((xi) => xs.map((xj) => kernel(xi, xj)));
