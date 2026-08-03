@@ -112,13 +112,38 @@
   }
 
   function kernel(x, y, ell) {
-    const z = (x - y) / ell;
-    return Math.exp(-0.5 * z * z);
+    return Math.exp(-Math.abs(x - y) / ell);
+  }
+
+  function logErfcPositive(x) {
+    const t = 1 / (1 + 0.5 * x);
+    const polynomial = t * (1.00002368 + t * (0.37409196 + t * (0.09678418
+      + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398
+        + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))));
+    return Math.log(t) - x * x - 1.26551223 + polynomial;
+  }
+
+  function logNormalCdf(z) {
+    if (z === 0) return -Math.log(2);
+    const logHalfErfc = -Math.log(2) + logErfcPositive(Math.abs(z) / Math.SQRT2);
+    return z < 0 ? logHalfErfc : Math.log1p(-Math.exp(logHalfErfc));
+  }
+
+  function logAddExp(a, b) {
+    const hi = Math.max(a, b);
+    const lo = Math.min(a, b);
+    return hi + Math.log1p(Math.exp(lo - hi));
   }
 
   function componentKq(x, component, ell) {
-    const variance = ell * ell + component.sigma * component.sigma;
-    return ell / Math.sqrt(variance) * Math.exp(-0.5 * ((x - component.mu) ** 2) / variance);
+    const scaledSigma = component.sigma / ell;
+    const standardizedOffset = (x - component.mu) / component.sigma;
+    const common = 0.5 * scaledSigma * scaledSigma;
+    const logLeft = common + (component.mu - x) / ell
+      + logNormalCdf(standardizedOffset - scaledSigma);
+    const logRight = common + (x - component.mu) / ell
+      + logNormalCdf(-standardizedOffset - scaledSigma);
+    return Math.min(1, Math.exp(logAddExp(logLeft, logRight)));
   }
 
   function softmax(logits) {
@@ -684,7 +709,7 @@
 
     const grid = document.createElement("div");
     grid.className = "gain-grid";
-    ["Components", "Gaussian K-CE", "Ordinary CE"].forEach((text) => {
+    ["Components", "Laplace K-CE", "Ordinary CE"].forEach((text) => {
       const cell = document.createElement("div");
       cell.className = "gain-header";
       cell.textContent = text;
@@ -809,7 +834,7 @@
 
     const legendY = 410;
     group.appendChild(svgEl("line", { x1: panel.x, y1: legendY, x2: panel.x + 34, y2: legendY, stroke: accent, "stroke-width": 2.4 }));
-    addText(group, panel.x + 44, legendY + 4, "Gaussian K-CE fit", { size: 13 });
+    addText(group, panel.x + 44, legendY + 4, "Laplace K-CE fit", { size: 13 });
     group.appendChild(svgEl("line", { x1: panel.x + 190, y1: legendY, x2: panel.x + 224, y2: legendY, stroke: muted, "stroke-width": 2.2, "stroke-dasharray": ceDash, "stroke-linecap": "round" }));
     addText(group, panel.x + 234, legendY + 4, "ordinary CE fit", { size: 13 });
     statusNode.textContent = status || "Ready";

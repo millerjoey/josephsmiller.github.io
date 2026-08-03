@@ -41,12 +41,38 @@ function normalPdf(x, mu, sigma) {
 }
 
 function kernel(x, y) {
-  return Math.exp(-0.5 * ((x - y) / ell) ** 2);
+  return Math.exp(-Math.abs(x - y) / ell);
+}
+
+function logErfcPositive(x) {
+  const t = 1 / (1 + 0.5 * x);
+  const polynomial = t * (1.00002368 + t * (0.37409196 + t * (0.09678418
+    + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398
+      + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))));
+  return Math.log(t) - x * x - 1.26551223 + polynomial;
+}
+
+function logNormalCdf(z) {
+  if (z === 0) return -Math.log(2);
+  const logHalfErfc = -Math.log(2) + logErfcPositive(Math.abs(z) / Math.SQRT2);
+  return z < 0 ? logHalfErfc : Math.log1p(-Math.exp(logHalfErfc));
+}
+
+function logAddExp(a, b) {
+  const hi = Math.max(a, b);
+  const lo = Math.min(a, b);
+  return hi + Math.log1p(Math.exp(lo - hi));
 }
 
 function componentKq(x, mu, sigma) {
-  return ell / Math.sqrt(ell * ell + sigma * sigma)
-    * Math.exp(-0.5 * ((x - mu) ** 2) / (ell * ell + sigma * sigma));
+  const scaledSigma = sigma / ell;
+  const standardizedOffset = (x - mu) / sigma;
+  const common = 0.5 * scaledSigma * scaledSigma;
+  const logLeft = common + (mu - x) / ell
+    + logNormalCdf(standardizedOffset - scaledSigma);
+  const logRight = common + (x - mu) / ell
+    + logNormalCdf(-standardizedOffset - scaledSigma);
+  return Math.min(1, Math.exp(logAddExp(logLeft, logRight)));
 }
 
 function mixtureDensity(x, components) {
@@ -280,7 +306,6 @@ function addSvgHeader(svg, width, height) {
   svg.push(`    .density-fill { fill: ${accent}; fill-opacity: 0.2; stroke: none; }`);
   svg.push(`    .spike-marker { stroke: ${muted}; stroke-opacity: 0.55; stroke-width: 1.3; stroke-dasharray: 3 4; }`);
   svg.push(`    .marker { stroke: ${accent}; stroke-opacity: 0.32; stroke-width: 1.2; stroke-dasharray: 4 4; }`);
-  svg.push(`    .floor-marker { stroke: ${muted}; stroke-opacity: 0.36; stroke-width: 1.2; stroke-dasharray: 4 4; }`);
   svg.push(`    .dot { fill: ${accent}; fill-opacity: 0.88; stroke: ${accent}; stroke-opacity: 0.95; stroke-width: 1; }`);
   svg.push("  </style>");
   svg.push(`  <rect x="0" y="0" width="${fmt(width)}" height="${fmt(height)}" fill="#ffffff" />`);
@@ -288,7 +313,7 @@ function addSvgHeader(svg, width, height) {
 
 function addDensityAxes(svg, panel) {
   svg.push(`  <text class="label" x="${fmt(panel.x)}" y="${fmt(panel.y - 30)}">Optimized mixture fits</text>`);
-  svg.push(`  <text class="small" x="${fmt(panel.x)}" y="${fmt(panel.y - 12)}">CE with a variance floor versus Gaussian K-CE</text>`);
+  svg.push(`  <text class="small" x="${fmt(panel.x)}" y="${fmt(panel.y - 12)}">CE with a variance floor versus Laplace K-CE</text>`);
   svg.push(`  <rect x="${fmt(panel.x)}" y="${fmt(panel.y)}" width="${fmt(panel.w)}" height="${fmt(panel.h)}" fill="none" stroke="#000000" stroke-opacity="0.05" />`);
   svg.push(`  <line class="axis" x1="${fmt(panel.x)}" y1="${fmt(panel.y + panel.h)}" x2="${fmt(panel.x + panel.w)}" y2="${fmt(panel.y + panel.h)}" />`);
   svg.push(`  <line class="axis" x1="${fmt(panel.x)}" y1="${fmt(panel.y)}" x2="${fmt(panel.x)}" y2="${fmt(panel.y + panel.h)}" />`);
@@ -333,8 +358,6 @@ function addRiskAxes(svg, panel, minLog, maxLog) {
   const optimumX = slog(panel, bestKWidth.sigma, minLog, maxLog);
   svg.push(`  <line class="marker" x1="${fmt(optimumX)}" y1="${fmt(panel.y)}" x2="${fmt(optimumX)}" y2="${fmt(panel.y + panel.h)}" />`);
   svg.push(`  <text class="small" x="${fmt(optimumX - 10)}" y="${fmt(panel.y + 18)}" text-anchor="end">K-CE best σ ≈ ${fmt(bestKWidth.sigma)}</text>`);
-  svg.push(`  <line class="floor-marker" x1="${fmt(panel.x)}" y1="${fmt(panel.y)}" x2="${fmt(panel.x)}" y2="${fmt(panel.y + panel.h)}" />`);
-  svg.push(`  <text class="small" x="${fmt(panel.x + 6)}" y="${fmt(panel.y + 18)}">σ floor</text>`);
   const labelX = panel.x - 46;
   const labelY = panel.y + panel.h / 2;
   svg.push(`  <text class="small" x="${fmt(labelX)}" y="${fmt(labelY)}" text-anchor="middle" transform="rotate(-90 ${fmt(labelX)} ${fmt(labelY)})">relative excess empirical risk</text>`);
@@ -380,7 +403,7 @@ svg.push(`  <line class="kline" x1="${fmt(densityPanel.x)}" y1="${fmt(legendY - 
 svg.push(`  <text class="small" x="${fmt(densityPanel.x + 38)}" y="${fmt(legendY - 3)}">K-CE fit</text>`);
 svg.push(`  <line class="ce" x1="${fmt(densityPanel.x + 150)}" y1="${fmt(legendY - 7)}" x2="${fmt(densityPanel.x + 180)}" y2="${fmt(legendY - 7)}" />`);
 svg.push(`  <text class="small" x="${fmt(densityPanel.x + 188)}" y="${fmt(legendY - 3)}">CE fit with σ ≥ ${fmt3(ceSigmaFloor)}</text>`);
-svg.push(`  <text class="small" x="${fmt(densityPanel.x)}" y="${fmt(legendY + 18)}">Gaussian similarity scale ℓ = ${fmt(ell)}</text>`);
+svg.push(`  <text class="small" x="${fmt(densityPanel.x)}" y="${fmt(legendY + 18)}">Laplace similarity scale ℓ = ${fmt(ell)}</text>`);
 
 addRiskAxes(svg, riskPanel, minLog, maxLog);
 svg.push(`  <path class="kline" d="${logCurvePath(riskPanel, kScorePath, minLog, maxLog, 0, 1.05, (d) => (d.kRisk - bestKWidth.kRisk) / kExcessMax)}" />`);
@@ -388,7 +411,7 @@ svg.push(`  <path class="ce" d="${logCurvePath(riskPanel, ceScorePath, minLog, m
 
 legendY = riskPanel.y + riskPanel.h + 70;
 svg.push(`  <line class="kline" x1="${fmt(riskPanel.x)}" y1="${fmt(legendY - 7)}" x2="${fmt(riskPanel.x + 30)}" y2="${fmt(legendY - 7)}" />`);
-svg.push(`  <text class="small" x="${fmt(riskPanel.x + 38)}" y="${fmt(legendY - 3)}">Gaussian K-CE</text>`);
+svg.push(`  <text class="small" x="${fmt(riskPanel.x + 38)}" y="${fmt(legendY - 3)}">Laplace K-CE</text>`);
 svg.push(`  <line class="ce" x1="${fmt(riskPanel.x + 140)}" y1="${fmt(legendY - 7)}" x2="${fmt(riskPanel.x + 170)}" y2="${fmt(legendY - 7)}" />`);
 svg.push(`  <text class="small" x="${fmt(riskPanel.x + 178)}" y="${fmt(legendY - 3)}">ordinary CE</text>`);
 svg.push(`  <text class="small" x="${fmt(riskPanel.x)}" y="${fmt(legendY + 18)}">each curve is shown as excess over its own displayed minimum</text>`);

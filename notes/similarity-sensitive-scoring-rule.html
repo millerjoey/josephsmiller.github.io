@@ -47,13 +47,13 @@
         <p class="post-date"><time datetime="2026-06-14">June 14, 2026</time></p>
       </div>
       <p class="lede">
-        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$. That is fine when only exact identity matters, such as in many predictions over a categorical space, but it isn't the right property if you want to reward near-misses. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page shows the corresponding nonlocal tangent scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule. I'll begin with examples to motivate it.
+        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$, not $x$ itself. That is fine when only exact identity matters, such as in some predictions over a categorical space, but locality isn't the right property if you want to reward near-misses. Furthermore, continuous spaces naturally exhibit similarity structure particularly when they have geometric structure. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page derives and illustrates the corresponding nonlocal scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule (in discrete space; continuous spaces have the analogous $\log dx$ offset). I'll begin with examples to motivate it.
       </p>
     </header>
 
     <main class="stack">
       <section class="panel">
-        <h3>Weather forecast example</h3>
+        <h3>Weather forecasting</h3>
         <p>
           Suppose the outcome we want to predict is rain, cloudy, or sunny. If the consumer of the forecast treats confusing rain with cloudy as a smaller mistake than confusing either with sunny, we can encode that with a similarity kernel such as
         </p>
@@ -69,22 +69,21 @@
         </p>
         <p>
           For example, take the truth to be $p=(0.8,0.1,0.1)$ over rain, cloudy, and sunny, and compare
-          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives them the same risk/reward because the reports assign the same probability to rain and only swap the equal-mass cloudy and sunny terms. But rain-or-cloudy has $90\%$ probability under the truth, so a similarity-sensitive cross-entropy should prefer the report that confuses between those two.
+          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives them the same average score because the reports assign the same probability to rain and only swap the equal-mass cloudy and sunny terms. But rain-or-cloudy has $90\%$ probability under the truth, so a similarity-sensitive cross-entropy should prefer the report that confuses between those two.
         </p>
         <p>
-           You may note that in practice, you can coarsen by merging rain and cloudy into a single "not sunny" category. This is true, but it throws away information that the forecaster might have, and leads to biasing the model in a way that is not transparent. We can do this more transparently (and equivalently) by setting the 0.3 similarity to 1. The next examples show that the problem of rewarding near-misses is not just a discrete issue, so coarsening by merging labels is never a complete answer.
+           In practice, people coarsen by merging rain and cloudy into a single "not sunny" category. This is convenient, but it throws away information that the forecaster might have, and leads to biasing the model in a way that is not transparent. We can do this more transparently (and equivalently) by setting the 0.3 similarity to 1. The next examples show that the attractiveness of rewarding near-misses is not just in the discrete case, so coarsening by merging labels is not a complete solution.
         </p>
         <h3>Wrapped likelihood</h3>
         <p>
-          Consider a simple misspecified model-fitting problem. Let the true distribution be uniform on $[0,1]$, and fit only
-          the location $\mu$ of a fixed-variance Gaussian that is wrapped around the interval:
+          Consider a simple misspecified model-fitting scenario. Let the true distribution be uniform on $[0,1]$, and fit only the location $\mu$ of a fixed-variance Gaussian that is wrapped around the interval:
         </p>
         <div class="math-block">
           $$P=\mathrm{Unif}[0,1],\qquad
           q_\mu(x)=\sum_{m\in\mathbb Z}\phi_\sigma(x+m-\mu),\qquad x\in[0,1].$$
         </div>
         <p>
-          Here $\phi_\sigma$ is the centered Gaussian density with standard deviation $\sigma$. The sum turns it into a wrapped Gaussian density: it is the law of $\mu+\sigma Z \pmod 1$, written as a density on $[0,1]$.
+          Here $\phi_\sigma$ is the centered Gaussian density with standard deviation $\sigma$.
         </p>
         <p>
           Because $q_\mu$ is just a circular translation of the same density, ordinary cross-entropy cannot choose between them:
@@ -93,7 +92,7 @@
           $$\operatorname{CE}(P,q_\mu)=-\int_0^1 \log q_\mu(x)\,dx$$
         </div>
         <p>
-          is the same for every $\mu$. The centered Gaussian and an off-center Gaussian would tie under MLE (in the theoretical limit).
+          is the same for every $\mu$. The centered Gaussian and an off-center Gaussian have the same CE.
         </p>
         <p>
           Now imagine that we care about the geometry of the interval: values close to each other are more similar. A reasonable task kernel for this geometry is a Laplace kernel that uses ordinary distance:
@@ -101,9 +100,6 @@
         <div class="math-block">
           $$K_\ell(x,y)=\exp\!\left(-\frac{|x-y|}{\ell}\right).$$
         </div>
-        <p>
-          I use this Gaussian RBF here because it is a familiar way to illustrate local similarity. It is not, however, a general-purpose propriety guarantee: the tangent score derived below is proper only when $H_K$ is concave, and Gaussian RBF kernels do not ensure that condition for every configuration.
-        </p>
         <p>
           A loss that accounts for similarity should have a way to say that these two reports are different, but a loss that looks only at the density at each observed point cannot measure this difference.
         </p>
@@ -120,16 +116,15 @@
         <h3>Shuffled likelihoods</h3>
         <p>
           A difference begins to appear when we incorporate neighborhood information via $K$ directly. For a reported probability law $q$, the typicality of $x$ is
+          <div class="math-block">
+            $$(Kq)(x)=\int K(x,y)\,q(dy)$$
+          </div>
+          which is the total "similar mass" at each point $x$.
         </p>
-        <div class="math-block">
-          $$(Kq)(x)=\int K(x,y)\,q(dy).$$
-        </div>
         <p>
           The plot below compares normalized typicality for
-          a Gaussian-shaped density and for a version of the same density cut into equal-width pieces and shuffled across
-          the interval. Ordinary cross-entropy is the same for both, but the shuffled version has more uniform typicality
-          because it spreads out the high-density pieces and the similarity kernel smooths over them. The plotted $Kq$
-          curves below use $\ell=0.04$ on the unit interval.
+          a Gaussian-shaped density and for a version of the same density cut into equal-width pieces and shuffled across the interval. Ordinary cross-entropy is the same for both, but the shuffled version has more uniform typicality
+          because it spreads out the high-density pieces and the similarity kernel smooths over them. The plotted $Kq$ curves below use $\ell=0.04$ on the unit interval.
         </p>
         <figure>
           <img
@@ -137,13 +132,12 @@
             alt="A contiguous Gaussian and a version cut into equal-width chunks and shuffled across the interval, with ordinary cross-entropy and normalized Kq typicality."
           >
           <figcaption>
-            <strong>Piecewise shuffling.</strong> Cutting a density into equal-width pieces and permuting the pieces is
-            irrelevant to ordinary cross-entropy under a uniform true distribution. It is however important for a local task kernel. Once high-density pieces are spread across the interval, the smoothed typicality $Kq$ is much closer to flat.
+            <strong>Piecewise shuffling.</strong> Cutting a density into equal-width pieces and permuting the pieces is invisible to cross-entropy under a uniform true distribution. It is however seen by a local task kernel. Once high-density pieces are spread across the interval, the smoothed typicality $Kq$ is much closer to flat.
           </figcaption>
         </figure>
         <h3>Finite atoms</h3>
         <p>
-          Now, we approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is annoyingly infinite for any finite-atom approximation, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
+          Taking a different direction, we now approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is annoyingly infinite for any finite-atom approximation, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
         </p>
         <figure>
           <img
@@ -151,7 +145,7 @@
             alt="Finite-atom approximations to a uniform distribution. Ordinary cross-entropy is infinite because the model has zero density between atoms, while normalized Kq remains finite."
           >
           <figcaption>
-            <strong>Finite atoms.</strong> An empirical or particle approximation is singular with respect to a uniform true distribution, so ordinary log loss gives infinite risk. But the local typicality $(Kq)(x)$ is positive between atoms, and agrees with intuition that a higher density of atoms is a better approximation.
+            <strong>Finite atoms.</strong> An empirical or point-mass approximation is an infinitely bad approximation to a uniform true distribution under ordinary log loss. But the local typicality $(Kq)(x)$ is positive between atoms, and agrees with intuition that a higher density of atoms is a better approximation.
           </figcaption>
         </figure>
       </section>
@@ -160,9 +154,7 @@
         <h3>The scoring rule</h3>
         <h4>Probability versus similarity</h4>
         <p>
-          Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let
-          $K:\mathcal X\times\mathcal X\to(0,1]$ be a similarity kernel. We have two separate concepts:
-          $p$ says what the reporter believes will happen, while $K$ says how interchangeable the outcomes are.
+          Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let $K:\mathcal X\times\mathcal X\to(0,1]$ be a similarity kernel. We have two separate concepts: $p$ says what the reporter believes will happen, while $K$ relates to the utility: it says how interchangeable the outcomes are.
         </p>
         <p>
           For a law $p$, the typicality function again is
@@ -188,9 +180,7 @@
           $$S_{\mathrm{typ}}(q,x)=-\log (Kq)(x).$$
         </div>
         <p>
-          This is somewhat meaningful, but it is not enough. A report can make $x$
-          typical by putting mass on states near $x$, without paying attention to how much probability is assigned to
-          $x$ by itself. In that sense, log-typicality blurs identity as well as distance.
+          This is meaningful, but it only sees the typicality of the observed state, not the state itself. We'll need a modification that can directly see the states $x$, not just their typicality.
         </p>
         <p>
           The issue shows up even with two states. Let
@@ -218,8 +208,7 @@
         </p>
         <h4>The corrected log-typicality rule</h4>
         <p>
-          We can correct this by keeping the log-typicality term and adding a reward (negative risk) for observations that represent a large
-          share of the similarity mass under the reporting distribution:
+          We can correct this by keeping the log-typicality term and adding a reward (subtracting risk) for observations that represent a large share of the similarity mass under the reporting distribution:
         </p>
         <div class="math-block">
           $$S_K(q,x)=-\log (Kq)(x)
@@ -231,7 +220,7 @@
           In the second term, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
         </p>
         <p>
-          This reward cancels out under the report itself:
+          This reward cancels out when we average over the report itself:
         </p>
         <div class="math-block">
           $$\mathbb E_{X\sim q}\left[
@@ -269,17 +258,17 @@
           $$S_H(q,j)=H(q)+\nabla H(q)\cdot(e_j-q).$$
         </div>
         <p>
-          Concavity gives $\mathbb E_{X\sim p}S_H(q,X)\ge H(p)$, with equality at $q=p$. That ensures "properness": if I believe $p$, I should report $p$.
+          Concavity gives $\mathbb E_{X\sim p}S_H(q,X)\ge H(p)$, with equality at $q=p$. That ensures "propriety": if the truth is $p$, I should report $p$.
         </p>
         <p>
-          The concavity condition is essential, not technical decoration. One useful guaranteed family is the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>, including $K_\ell(x,y)=\exp(-|x-y|/\ell)$. For a kernel without a concavity result, including a general Gaussian RBF, the same formula defines a tangent score but it need not be proper.
+          One useful concave family is the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>, including $K_\ell(x,y)=\exp(-|x-y|/\ell)$.
         </p>
       </section>
 
       <section class="panel">
         <h3>Results for the examples</h3>
         <p>
-          Using the tangent score, we can check the examples above to see how it behaves. The entries below are risks under the true distribution used in each example. Calling any row proper additionally requires concavity for its chosen kernel.
+          Using the proper tangent score for the similarity kernel $K$ (abbreviated as $K$-CE), we can check the examples above to see how it behaves. The entries below are risks under the true distribution used in each example. The $K$-CE behaves as desired:
         </p>
         <div class="table-wrap">
           <table class="score-table">
@@ -344,7 +333,7 @@
       <section class="panel">
         <h3>Fitting models</h3>
         <p>
-          Maximum likelihood minimizes ordinary cross-entropy:
+          Maximum likelihood estimation minimizes ordinary cross-entropy:
         </p>
         <div class="math-block">
           $$\theta_{\mathrm{MLE}}=\arg\min_\theta
@@ -354,34 +343,33 @@
           Under misspecification this chooses the KL projection of $P$ onto the model class.
         </p>
         <p>
-          If the task kernel is known, the aligned estimator is instead
+          If the task kernel is known, the corresponding estimator is instead
         </p>
         <div class="math-block">
           $$\theta_K=\arg\min_\theta \mathbb E_{X\sim P}S_K(q_\theta,X).$$
         </div>
         <p>
-          With a correctly specified model and infinite data, strictly proper scores target the same true law.
-          Under misspecification, finite data, regularization, approximate inference, or model selection, the scoring rule changes the projection because it changes the shape of the tradeoff for being wrong.
+          With a correctly specified model and infinite data, strictly proper scores target the same true law. Under misspecification, finite data, regularization, approximate inference, or model selection, the scoring rule changes the projection because it changes the shape of the tradeoff for being wrong.
         </p>
         <h3>Fitting a mixture model</h3>
         <p>
-          Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can get infinite reward placing a mixture component on one point and using the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to select among fits. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
+          Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can get infinite reward placing a mixture component on one point and using the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to select among model fits. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
         </p>
         <p>
-          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE with a small variance minimum, and under the tangent $K$-CE objective with a Gaussian RBF using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance component as a spike on one observation; the $K$-CE optimum is interior and instead fits two natural groups. This is an illustration of the similarity-aware objective, not a claim that Gaussian RBF $K$-CE is globally proper.
+          In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE and under the tangent $K$-CE objective with a Laplace kernel using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance component as a spike on one observation; the $K$-CE optimum is interior and instead fits two natural groups.
         </p>
         <figure>
           <img
             src="assets/k_score_gmm_singularity.svg"
-            alt="A two-component Gaussian mixture example comparing an optimized ordinary cross-entropy fit with a variance floor against a Gaussian-RBF tangent K cross-entropy fit."
+            alt="A two-component Gaussian mixture example comparing an optimized ordinary cross-entropy fit with a variance floor against a Laplace-kernel tangent K cross-entropy fit."
           >
           <figcaption>
-            <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and Gaussian-RBF tangent $K$-CE along the corresponding one-dimensional second-component variance.
+            <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and Laplace-kernel tangent $K$-CE along the corresponding one-dimensional second-component variance.
           </figcaption>
         </figure>
         <div class="fit-lab" id="gmm-fit-lab">
           <p class="fit-note">
-            To show how favored this degenerate fit is by MLE, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from a synthetic distribution with the selected number of components. The -infinite loss in ordinary CE leads to fits strongly favoring individual points; Gaussian-RBF $K$-CE keeps a finite objective and encourages more balanced allocation here. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
+            To show how favored this degenerate fit is by MLE, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from a synthetic distribution with the selected number of components. The -infinite loss in ordinary CE leads to fits strongly favoring individual points; Laplace-kernel $K$-CE keeps a finite objective and encourages more balanced allocation here. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
           </p>
           <div class="fit-lab-controls">
             <label class="fit-control">
@@ -413,7 +401,7 @@
             <div class="fit-lab-stage">
             <svg class="fit-plot" data-role="plot" viewBox="0 0 840 430" role="img" aria-labelledby="fit-lab-title fit-lab-desc">
               <title id="fit-lab-title">Interactive Gaussian mixture fitting comparison</title>
-              <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and Gaussian-RBF tangent K-cross-entropy mixture fits.</desc>
+              <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and Laplace-kernel tangent K-cross-entropy mixture fits.</desc>
             </svg>
             <div class="fit-metrics">
               <div class="fit-status" data-role="status">Ready</div>
@@ -422,7 +410,7 @@
                 <div class="fit-summary" data-role="ce-summary">-</div>
               </div>
               <div class="fit-metric">
-                <strong>Gaussian K-CE</strong>
+                <strong>Laplace K-CE</strong>
                 <div class="fit-summary" data-role="k-summary">-</div>
               </div>
             </div>
