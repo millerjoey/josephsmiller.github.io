@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y06DGSC9SW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Y06DGSC9SW');
+  </script>
+  <meta charset="UTF-8">
+  <title>Feature engineering by preserving task similarity · Joseph S. Miller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Use task similarity to identify low-dimensional task coordinates, discard nuisance directions, and measure retained task information.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+      svg: {
+        fontCache: 'global',
+      },
+    };
+  </script>
+  <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <link rel="stylesheet" href="minimal.css">
+</head>
+<body class="blog-scoring blog-state blog-continuous">
+  <div class="shell">
+    <nav class="top-nav">
+      <a class="text-link" href="../index.html">&larr; Home</a>
+      <div class="nav-right">
+        <a class="text-link" href="index.html">Essays</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="eyebrow">Essay · Task-sensitive modeling</div>
+      <div class="post-heading">
+        <h1>Feature engineering by preserving task similarity</h1>
+        <p class="post-date"><time datetime="2026-07-30">July 30, 2026</time></p>
+      </div>
+      <p class="lede">
+        Feature engineering is the process of transforming data to improve its modelability. The transformed representation ought to make a model easier or faster to fit by aligning its coordinates with a pre-specified model class and thereby improve its performance. Once models are fit, their optimal CEs, even after a 1-1 transformation, are generally different in scale and are optimized by different models (as compared when predictions are pushed into a common space). From the perspective of task-oriented modeling, this is a strange situation in which we are optimizing multiple models by CE each with different implicit geometries (and possibly radically different entropy scales) and then evaluating them in a third (predictive) geometry that we actually care about. Our naively transformed data might make the model fit perfectly well in a subspace of the data, but lose all predictive ability for what we care about, or our model might spend its capacity fitting irrelevant noise. Below, I develop the idea that when we have a task geometry we care about, we can transport it to the raw data space and then search for transformations that best retain the task distinctions we care about, measuring similarity-sensitive entropy in the transformed spaces. We will end up with cross entropies that can theoretically be compared, and ideally, task-oriented feature engineering.
+      </p>
+    </header>
+
+    <main class="stack">
+      <section class="panel">
+        <h3>Scaling and PCA choose a geometry</h3>
+        <p>
+          First, an orientation from the perspective of SS-entropy. Take an ordinary data matrix with coordinates $x_1,\ldots,x_d$. If I scale coordinate $j$ by a positive number $s_j$, Euclidean distance in the transformed coordinates becomes
+        </p>
+        <div class="math-block">
+          $$d_s^2(x,x')=\sum_{j=1}^d\frac{(x_j-x_j')^2}{s_j^2}.$$
+        </div>
+        <p>
+          A change of one unit in a coordinate with small $s_j$ now counts more than the same change in a coordinate with large $s_j$, so the scaling influences closeness whenever the downstream model uses this Euclidean geometry. Standardization is the choice to treat a standard-deviation change in each measured coordinate as comparable. If we imagine the SS-entropy with an isotropic radial similarity kernel, its pullback to the raw coordinates has this diagonal geometry.
+        </p>
+        <p>
+          Because full PCA is an orthogonal rotation it leaves Euclidean distances, and any kernel that depends only on those distances, unchanged. A non-orthogonal transformation is different: it preserves a specified kernel if we transport the kernel with it. Truncated PCA makes the lossy choice to remove directions with low variance, independent of what the kernel can detect. I would rather specify the relevant distinctions first, express them through $K$, and then ask whether a simpler representation preserves them.
+        </p>
+
+        <h3>A task-preserving representation</h3>
+        <p>
+          Let $K^\star(x,x')$ be the similarity kernel I want to preserve. I'll start with a feature map $T:\mathcal X\to\mathcal Z$ and an output kernel (which we desire to be "simple"). Together they induce the pullback kernel
+        </p>
+        <div class="math-block">
+          $$K_T(x,x'):=K_Z(Tx,Tx').$$
+        </div>
+        <p>
+          The (strong, distribution-free) condition is
+        </p>
+        <div class="math-block">
+          $$K_T(x,x')=K^\star(x,x')\qquad\text{for every }x,x'.$$
+        </div>
+        <p>
+          Note that this gives $H_{K^\star}(P_X)=H_{K_Z}(T_\#P_X)$ for every $P_X$.
+        </p>
+        <p>
+          ChatGPT suggests I call this "kernel sufficiency" so that's what I'll do for now. The map $T$ may be many-to-one: it is allowed to discard raw distinctions as long as they do not change the target similarity (no ambiguity in the pullback). For a law $Q$, write its typicality as
+        </p>
+        <div class="math-block">
+          $$\tau_{K,Q}(x):=(KQ)(x)
+          :=\mathbb E_{X'\sim Q}K(x,X').$$
+        </div>
+        <p>
+          When $H_K$ is concave, the proper tangent loss derived in the <a href="similarity-sensitive-scoring-rule.html">scoring-rule essay</a> is
+        </p>
+        <div class="math-block">
+          $$S_K(Q,x)=-\log\tau_{K,Q}(x)
+          -\left[
+          \mathbb E_{Y\sim Q}
+          \frac{K(Y,x)}{\tau_{K,Q}(Y)}-1
+          \right].$$
+        </div>
+        <p>
+          I will use $K$-cross-entropy, or $K$-CE, for its expected risk:
+        </p>
+        <div class="math-block">
+          $$\mathcal C_K(P,Q):=\mathbb E_{X\sim P}S_K(Q,X).$$
+        </div>
+        <p>
+          I report numerical cross-entropies and entropies below in bits, dividing these natural-log quantities by $\ln 2$.
+        </p>
+        <p>
+          If $P_Z=T_\#P_X$ and $Q_Z=T_\#Q_X$, kernel sufficiency gives
+        </p>
+        <div class="math-block">
+          $$\boxed{
+          \mathcal C_{K^\star}(P_X,Q_X)
+          =\mathcal C_{K_Z}(P_Z,Q_Z)}.
+          $$
+        </div>
+        <p>
+          That is the $K$-cross-entropy invariance that I propose is valuable: $\mathcal C_K$ has the same value before and after an exact task-respecting transformation. Ordinary cross-entropy does not have this invariance in general; even for a bijection, it changes by the Jacobian determinant. I'll note that $\mathcal C_K$, being nonlocal, is more expensive to compute than CE. If we can push most of the complexity into the map $T$, fitting a model in $Z$ with CE and evaluating or fine tuning with $\mathcal C_K$ at the end is reasonable. This would give us a common scale on which to compare representations, and a principled distribution-free goal for finding $T$. What follows are two examples, the first being the simplest.
+        </p>
+        <p>
+          But first, I want to separate the two cases specifically where the above general equality appears useful. If a task kernel is naturally specified on an outcome space $Y$ that we want to predict, we ought to straightforwardly model $Y$ (from observed $X$, if available) and fit with $K$-CE. If $K$-CE is too expensive, we may want to transform $Y$ so that the output kernel is more "diagonal" and plausibly better approximated with CE. I hope to develop this further in a later essay. The other interesting case is when we can attain a $K^\star$ on a future or downstream outcome while $X$ is available at deployment. Perhaps we can choose a kernel over a rich object—such as a paragraph or molecule—for which similarity is easy to specify, and we intend to model directly from its embedding $X$. Then the aim is to find the above $T(X)$ that retains the task-relevant distinctions in the kernel while ignoring nuisance variations in $X$. In these cases we expect an independently specified task signal and want to compress $X$ to retain it for later modeling.
+        </p>
+
+        <h3>Simple finite coarsening example</h3>
+        <p>
+          I'll demonstrate a transformation in the simplest setting. Starting with seven raw states
+        </p>
+        <div class="math-block">
+          $$A_1,A_2,\quad B_1,B_2,\quad C_1,C_2,C_3$$
+        </div>
+        <p>
+          and a similarity kernel pulled back to this same space: the two $A$ states have identical similarity profiles, as do the two $B$ states. The task cannot distinguish the members of either pair. The three $C$ states remain distinguishable, although they're almost identical.
+        </p>
+        <figure class="task-coarsening-figure">
+          <div class="task-coarsening-layout">
+            <div class="task-coarsening" role="img" aria-label="Seven raw states and their similarity matrix coarsen exactly to five task states and their matrix, then approximately to three simplified states with an identity matrix.">
+              <div class="coarsening-stage">
+                <h4>Raw states, $K_7$</h4>
+                <div class="state-cluster state-cluster-exact">
+                  <span class="state-node">$A_1$</span>
+                  <span class="state-node">$A_2$</span>
+                </div>
+                <div class="state-cluster state-cluster-exact">
+                  <span class="state-node">$B_1$</span>
+                  <span class="state-node">$B_2$</span>
+                </div>
+                <div class="state-cluster state-cluster-near">
+                  <span class="state-node">$C_1$</span>
+                  <span class="state-node">$C_2$</span>
+                  <span class="state-node">$C_3$</span>
+                  <small>pairwise $K=0.95$</small>
+                </div>
+                <p class="coarsening-count">7 raw labels</p>
+                <div class="coarsening-stage-matrix">
+                  $$\begin{pmatrix}
+                  1&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0\\
+                  1&amp;1&amp;0&amp;0&amp;0&amp;0&amp;0\\
+                  0&amp;0&amp;1&amp;1&amp;0&amp;0&amp;0\\
+                  0&amp;0&amp;1&amp;1&amp;0&amp;0&amp;0\\
+                  0&amp;0&amp;0&amp;0&amp;1&amp;.95&amp;.95\\
+                  0&amp;0&amp;0&amp;0&amp;.95&amp;1&amp;.95\\
+                  0&amp;0&amp;0&amp;0&amp;.95&amp;.95&amp;1
+                  \end{pmatrix}$$
+                </div>
+              </div>
+
+              <div class="coarsening-arrow" aria-hidden="true">
+                <span>exact</span>
+                <strong>&rarr;</strong>
+              </div>
+
+              <div class="coarsening-stage">
+                <h4>Task states, $K_5$</h4>
+                <div class="state-cluster">
+                  <span class="state-node state-node-strong">$A$</span>
+                </div>
+                <div class="state-cluster">
+                  <span class="state-node state-node-strong">$B$</span>
+                </div>
+                <div class="state-cluster state-cluster-near">
+                  <span class="state-node">$C_1$</span>
+                  <span class="state-node">$C_2$</span>
+                  <span class="state-node">$C_3$</span>
+                  <small>pairwise $K=0.95$</small>
+                </div>
+                <p class="coarsening-count">5 task classes</p>
+                <div class="coarsening-stage-matrix">
+                  $$\begin{pmatrix}
+                  1&amp;0&amp;0&amp;0&amp;0\\
+                  0&amp;1&amp;0&amp;0&amp;0\\
+                  0&amp;0&amp;1&amp;.95&amp;.95\\
+                  0&amp;0&amp;.95&amp;1&amp;.95\\
+                  0&amp;0&amp;.95&amp;.95&amp;1
+                  \end{pmatrix}$$
+                </div>
+              </div>
+
+              <div class="coarsening-arrow" aria-hidden="true">
+                <span>approximate</span>
+                <strong>&rarr;</strong>
+              </div>
+
+              <div class="coarsening-stage">
+                <h4>Simplified states, $K_3$</h4>
+                <div class="state-cluster">
+                  <span class="state-node state-node-strong">$A$</span>
+                </div>
+                <div class="state-cluster">
+                  <span class="state-node state-node-strong">$B$</span>
+                </div>
+                <div class="state-cluster">
+                  <span class="state-node state-node-strong">$C$</span>
+                </div>
+                <p class="coarsening-count">3 lossy states</p>
+                <div class="coarsening-stage-matrix">
+                  $$\begin{pmatrix}
+                  1&amp;0&amp;0\\
+                  0&amp;1&amp;0\\
+                  0&amp;0&amp;1
+                  \end{pmatrix}$$
+                </div>
+              </div>
+            </div>
+          </div>
+          <figcaption>
+            <strong>Both kinds of coarsening.</strong> Identical states coarsen losslessly. Nearly repeated profiles are merged but with loss.
+          </figcaption>
+        </figure>
+        <p>
+          The original seven-state kernel factors exactly through the five-state coarsening, so any score that depends on the states through this kernel is unchanged.
+        </p>
+        <p>
+          By approximating, we can choose the transformation that merges $C_1,C_2,C_3$ into one state $C$ and pick the identity kernel on $(A,B,C)$. The pullback of this approximation changes only the off-diagonal similarities within the $C$ block, from $0.95$ to $1$ losing a small amount of information once a distribution is assigned.
+        </p>
+        <p>
+          For example, under a uniform distribution on the seven raw states, the exact five-state pushforward has probabilities $(2,2,1,1,1)/7$ and
+        </p>
+        <div class="math-block">
+          $$H_{K_5}(P_5)=1.5776\ \text{bits}.$$
+        </div>
+        <p>
+          The approximate three-state pushforward has probabilities $(2,2,3)/7$, so with the identity kernel
+        </p>
+        <div class="math-block">
+          $$H_I(P_3)=1.5567\ \text{bits}.$$
+        </div>
+        <p>
+          In return for this loss, the output kernel is the identity, so the tangent loss reduces to categorical log loss and $K$-CE reduces to ordinary categorical cross-entropy. In the end, we've traded a little task resolution for a simpler representation and simpler scoring problem, with the change measured by entropy over the empirical distribution.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>Learning Gaussian task coordinates</h3>
+        <p>
+          I now want a continuous example where we can reduce the dimensionality of the representation. We'll do this one by assuming we have a similarity oracle we can query and fit to learn the kernel over the raw space. Let $X\in\mathbb R^{50}$ contain four task-relevant coordinates $U$ and 46 high-variance nuisance coordinates, mixed by a random orthogonal rotation. There is an unknown matrix $B$ such that $U=BX$, and the task similarity is
+        </p>
+        <div class="math-block">
+          $$K^\star(x,x')
+          =\exp\!\left[-\frac{\lVert B(x-x')\rVert^2}{2}\right].$$
+        </div>
+        <p>
+          We observe either 1,000 or 4,000 noisy similarity ratings and use 80% of the ratings to estimate a rank-twelve linear map while reserving 20%, drawn from different samples, to guard against overfitting. From this map we construct a nested family
+        </p>
+        <div class="math-block">
+          $$T_r(x):=A_rx,\qquad
+          K_r(x,x')
+          :=\exp\!\left[-\frac{\lVert A_r(x-x')\rVert^2}{2}\right],
+          \quad r=1,\ldots,12.$$
+        </div>
+        <p>
+          Each $A_r$ is a rank-$r$ task-spectrum truncation of the estimated map, so $K_r$ keeps the first $r$ directions of the learned task geometry. I then evaluate the whole frontier on independent held-out samples:
+        </p>
+        <div class="math-block">
+          $$\widehat H_{K_r}
+          =-\frac{1}{m}\sum_{i=1}^{m}
+          \log_2\!\left[
+          \frac{1}{n}\sum_{j=1}^{n}K_r(X_i,X_j')
+          \right].$$
+        </div>
+        <figure class="figure-wide">
+          <div class="figure-scroll">
+            <img
+              src="assets/gaussian-task-entropy-frontier.svg"
+              alt="Cross-fitted similarity-sensitive entropy by retained dimension for the full task kernel, oracle task truncations, and task coordinates learned from one thousand or four thousand noisy pair ratings."
+            >
+          </div>
+          <figcaption>
+            <strong>Task-entropy frontier.</strong> The oracle curve reaches the full task entropy at four coordinates. The learned curves approach and can cross the hidden task entropy, which is why entropy alone does not choose the rank.
+          </figcaption>
+        </figure>
+        <p>
+          The full task entropy is $2.296$ bits. At rank four, the representation learned from 1,000 ratings has held-out entropy $2.169$; with 4,000 ratings it reaches $2.244$. The key thing is that $X$ alone does not identify which directions are nuisance, but the pairwise queries do. PCA has no access to those ratings and the task coordinates will be overwhelmed by the 46 nuisance dimensions. Furthermore and most interestingly to me, this procedure respects the truth that the task has 2.296 bits of entropy and that our procedure can estimate that. But matching that entropy is not enough to show that the learned kernel has recovered the same distinctions, and shouldn't be used alone to reduce dimension snice we can't decide what rank model to use from only this plot.
+        </p>
+
+        <h4>Choosing a rank from the frontier</h4>
+        <p>
+          Entropy is a scalar, so an approximate kernel may separate some observations the task regarded as substitutes and merge others the task distinguished, with the two errors canceling. One way to check the curve is to define
+        </p>
+        <div class="math-block">
+          $$K_\cap(x,x'):=\min\{K^\star(x,x'),K_r(x,x')\}.$$
+        </div>
+        <p>
+          (Analogously, we can use the max with the corresponding reversal.) This gives two nonnegative quantities:
+        </p>
+        <div class="math-block">
+          $$\begin{aligned}
+          D_{\mathrm{added}}^H
+          &amp;:=H_{K_\cap}(P)-H_{K^\star}(P),\\
+          D_{\mathrm{removed}}^H
+          &amp;:=H_{K_\cap}(P)-H_{K_r}(P).
+          \end{aligned}$$
+        </div>
+        <p>
+          Reduced similarity creates distinctions that didn't exist in $K^\star$ and adds entropy; increased similarity erases distinctions and removes entropy. Their difference is the signed change in entropy and these errors might cancel, while their sum gives a summed error:
+        </p>
+        <div class="math-block">
+          $$\begin{aligned}
+          H_{K_r}(P)-H_{K^\star}(P)
+          &amp;=D_{\mathrm{added}}^H-D_{\mathrm{removed}}^H,\\
+          D_{\mathrm{total}}^H
+          &amp;:=D_{\mathrm{added}}^H+D_{\mathrm{removed}}^H.
+          \end{aligned}$$
+        </div>
+        <figure class="figure-wide">
+          <div class="figure-scroll">
+            <img
+              src="assets/gaussian-task-entropy-audit.svg"
+              alt="Summed error by retained dimension for representations learned from one thousand and four thousand similarity ratings."
+            >
+          </div>
+          <figcaption>
+            <strong>Summed error.</strong> With 1,000 ratings the minimum is at rank four or five. With 4,000 ratings the curve has a lower minimum across roughly ranks four through six and then rises. Error bars show one standard error across 20 independently generated trials.
+          </figcaption>
+        </figure>
+        <p>
+          This criterion allows us to see the true task dimension well. With 1,000 ratings, ranks four and five differ by only $0.0004$ bits. Higher rank models worsen things without enouh oracle data. With 4,000 ratings the plateau is clear and we see that 4 coordinates is ideal.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>A proposed workflow</h3>
+        <p>
+          The workflow I would consider is to first define or elicit a target similarity $K^\star$. Then, fit a transformation and simple output kernel on one set of pairwise task signals, compare the retained task entropy across dimensions on held-out objects, choose a dimension via the summed added and removed entropy quantities, then fit a model to the resulting task coordinates. Evaluate models with $K$-CE if the kernel is known to lead to a concave entropy.
+        </p>
+        <p>
+          Dimension reduction is not the only possible benefit. Among representations with similar fidelity, we may prefer coordinates that are interpretable, statistically stable, easy to model, or cheap to score. But low task dimension is a useful place to begin and shows how a high-dimensional observation can contain a much smaller task without equating task information with raw-data variation.
+        </p>
+        <p>
+          There is a separate question once the task-visible state has been chosen: should one fit its complete density by ordinary cross-entropy, or is the finite resolution of the task important in changing the fit? I will discuss that in a later essay.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
