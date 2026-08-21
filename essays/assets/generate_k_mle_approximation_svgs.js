@@ -251,7 +251,7 @@ function renderChunkShuffle() {
   });
 
   svg.push("</svg>");
-  fs.writeFileSync("notes/assets/k_mle_shuffled_chunks.svg", `${svg.join("\n")}\n`);
+  fs.writeFileSync("essays/assets/k_mle_shuffled_chunks.svg", `${svg.join("\n")}\n`);
 }
 
 function kqAtomsAt(x, atoms, weights) {
@@ -344,7 +344,7 @@ function renderAtomApproximation() {
   });
 
   svg.push("</svg>");
-  fs.writeFileSync("notes/assets/k_mle_discrete_atoms.svg", `${svg.join("\n")}\n`);
+  fs.writeFileSync("essays/assets/k_mle_discrete_atoms.svg", `${svg.join("\n")}\n`);
 }
 
 renderChunkShuffle();

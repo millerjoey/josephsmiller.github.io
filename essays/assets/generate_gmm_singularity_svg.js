@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const out = "notes/assets/k_score_gmm_singularity.svg";
+const out = "essays/assets/k_score_gmm_singularity.svg";
 const data = [-0.32, -0.10, 0.12, 1.05, 1.30];
 const clusterData = data.slice(0, 3);
 const outliers = data.slice(3);

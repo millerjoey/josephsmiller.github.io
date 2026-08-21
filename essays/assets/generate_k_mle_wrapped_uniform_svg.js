@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const out = "notes/assets/k_mle_wrapped_uniform.svg";
+const out = "essays/assets/k_mle_wrapped_uniform.svg";
 const n = 360;
 const xs = Array.from({ length: n }, (_, i) => (i + 0.5) / n);
 const xPlot = Array.from({ length: 361 }, (_, i) => i / 360);

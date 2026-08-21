@@ -45,7 +45,7 @@ def main() -> int:
     parser.add_argument(
         "--out",
         default=str(Path(__file__).with_name("partition_kernel_pullback.svg")),
-        help="Output SVG path (default: notes/assets/partition_kernel_pullback.svg).",
+        help="Output SVG path (default: essays/assets/partition_kernel_pullback.svg).",
     )
     args = parser.parse_args()
 

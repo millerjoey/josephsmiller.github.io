@@ -46,7 +46,7 @@
         <h1>Feature Engineering by Preserving Task Similarity</h1>
         <p class="post-date"><time datetime="2026-07-30">July 30, 2026</time></p>
       </div>
-      <p class="lede">
+      <p class="summary">
         Feature engineering is the process of transforming data to improve its modelability. The transformed representation ought to make a model easier or faster to fit by aligning its coordinates with a pre-specified model class and thereby improve its performance. Once models are fit, their optimal CEs, even after a 1-1 transformation, are generally different in scale and are optimized by different models (as compared when predictions are pushed into a common space). From the perspective of task-oriented modeling, this is a strange situation in which we are optimizing multiple models by CE each with different implicit geometries (and possibly radically different entropy scales) and then evaluating them in a third (predictive) geometry that we actually care about. Our naively transformed data might make the model fit perfectly well in a subspace of the data, but lose all predictive ability for what we care about, or our model might spend its capacity fitting irrelevant noise. Below, I develop the idea that when we have a task geometry we care about, we can transport it to the raw data space and then search for transformations that best retain the task distinctions we care about, measuring similarity-sensitive entropy in the transformed spaces. We will end up with cross entropies that can theoretically be compared, and ideally, task-oriented feature engineering.
       </p>
     </header>

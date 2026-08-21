@@ -46,7 +46,7 @@
         <h1>Similarity-Sensitive Scoring Rules</h1>
         <p class="post-date"><time datetime="2026-06-14">June 14, 2026</time></p>
       </div>
-      <p class="lede">
+      <p class="summary">
         The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$, not $x$ itself. That is fine when only exact identity matters, such as in some predictions over a categorical space, but locality isn't the right property if you want to reward near-misses. Furthermore, continuous spaces naturally exhibit similarity structure particularly when they have geometric structure. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page derives and illustrates the corresponding nonlocal scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule (in discrete space; continuous spaces have the analogous $\log dx$ offset). I'll begin with examples to motivate it.
       </p>
     </header>
@@ -242,6 +242,16 @@
         <p>
           If $K=I$, then $(Kq)_j=q_j$ and $\sum_i q_iK_{ij}/(Kq)_i=1$, so the expression collapses to
           $-\log q_j$. Log loss is the identity-kernel special case.
+        </p>
+        <p>
+          A point-mass report makes the resolution tradeoff especially clear. For $q=\delta_\mu$ and $K(\mu,\mu)=1$, the corrected score becomes
+        </p>
+        <div class="math-block">
+          $$S_K(\delta_\mu,x)
+          =-\log K(x,\mu)-K(x,\mu)+1.$$
+        </div>
+        <p>
+          This score is finite whenever $K(x,\mu)&gt;0$. A Laplace or Gaussian kernel therefore assigns a finite score to an atomic report at every fixed positive bandwidth, however narrow the kernel may be. Narrowing the kernel makes distant errors increasingly expensive, while the infinite penalty for missed outcomes returns only in the zero-bandwidth limit that approaches the identity kernel. The bandwidth acts as a floor on task-relevant resolution: concentration below that scale receives no unlimited reward. Consequently, the variance-collapse path in the mixture example below ends at a finite objective instead of running to $-\infty$.
         </p>
         <p>
           I will call the expected risk of this score $K$-cross-entropy, abbreviated as $K$-CE:
