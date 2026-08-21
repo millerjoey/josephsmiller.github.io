@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y06DGSC9SW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Y06DGSC9SW');
+  </script>
+  <meta charset="UTF-8">
+  <title>CE vs. K-CE · Joseph S. Miller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A fixed-capacity probability model can spend its degrees of freedom on distinctions finer than a downstream task values. Comparing CE and K-CE shows when task similarity should influence the fit.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+      svg: {
+        fontCache: 'global',
+      },
+    };
+  </script>
+  <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <link rel="stylesheet" href="minimal.css">
+</head>
+<body class="blog-scoring blog-state blog-continuous">
+  <div class="shell">
+    <nav class="top-nav">
+      <a class="text-link" href="../index.html">&larr; Home</a>
+      <div class="nav-right">
+        <a class="text-link" href="index.html">Essays</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="eyebrow">Essay · Task-sensitive modeling</div>
+      <div class="post-heading">
+        <h1>CE vs. $K$-CE</h1>
+        <p class="post-date"><time datetime="2026-08-20">August 20, 2026</time></p>
+      </div>
+      <p class="summary">
+        Ordinary cross-entropy tries to fit every distinction in a probability law with infinite resolution. That is sometimes what is wanted, but when a model has only a few degrees of freedom, CE can spend them resolving distinctions that a downstream task doesn't actually value instead of fitting more useful things. A finite-resolution similarity kernel changes the relative cost of those errors.
+      </p>
+    </header>
+
+    <main class="stack">
+      <section class="panel">
+        <h3>Setting</h3>
+        <p>
+          The previous <a href="feature-engineering-task-similarity.html">feature-engineering essay</a> is about transformations that preserve the distinctions in a task kernel. Here I will instead discuss fitting a model given a task kernel (e.g. in the output coordinates).
+        </p>
+        <p>
+          For a report $Q$, the kernel-smoothed mass around $z$ is its typicality
+        </p>
+        <div class="math-block">
+          $$(KQ)(z):=\int K(z,z')\,Q(dz').$$
+        </div>
+        <p>
+          Ordinary cross-entropy fits the complete law with an implicit infinitely narrow identity kernel. When the corresponding entropy is concave, the <a href="similarity-sensitive-scoring-rule.html">scoring-rule essay</a> derives the proper tangent score $S_K$ that also uses the kernel. Averaging over the true distribution, I will write its expected risk as
+        </p>
+        <div class="math-block">
+          $$\mathcal C_K(P,Q):=\mathbb E_{Z\sim P}S_K(Q,Z),$$
+        </div>
+        <p>
+          and call it $K$-cross-entropy, or $K$-CE. The score combines negative log typicality $-\log(KQ)(Z)$ with the tangent correction that makes it proper. With an identity kernel on a discrete space, $K$-CE is ordinary cross-entropy. On a continuous space, the fitted models approach the ordinary CE fit as an isotropic kernel bandwidth shrinks.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>Where CE and K-CE disagree</h3>
+        <p>
+          If the model family $\mathcal Q$ contains $P$, both objectives agree. Ordinary CE is minimized at $P$, and proper $K$-CE is also minimized at $P$. The objectives can disagree when the model is restricted: perhaps the report has a fixed number of components, the model is regularized, or the data only support a small model. Then it has to choose which errors to make. CE will trade between those errors at exact local density resolution; $K$-CE discounts errors between similar outcomes.
+        </p>
+        <p>
+          Write ordinary cross-entropy as $\mathcal C_{\log}$. The two population projections of the same family are
+        </p>
+        <div class="math-block">
+          $$\begin{aligned}
+          Q_{\mathrm{CE}}
+          &amp;\in\arg\min_{Q\in\mathcal Q}\mathcal C_{\log}(P,Q),\\
+          Q_K
+          &amp;\in\arg\min_{Q\in\mathcal Q}\mathcal C_K(P,Q).
+          \end{aligned}$$
+        </div>
+        <p>
+          I will compare their optimal models with both evaluations:
+        </p>
+        <div class="math-block">
+          $$\begin{aligned}
+          \Delta_K
+          &amp;:=\mathcal C_K(P,Q_{\mathrm{CE}})-\mathcal C_K(P,Q_K),\\
+          \Delta_{\log}
+          &amp;:=\mathcal C_{\log}(P,Q_K)-\mathcal C_{\log}(P,Q_{\mathrm{CE}}).
+          \end{aligned}$$
+        </div>
+        <p>
+          A positive $\Delta_K$ is the task-resolution gain from changing the fit. A positive $\Delta_{\log}$ is the full-density gain from fitting to regular CE. I report both in bits below.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>Gaussian Mixture Examples</h3>
+        <p>
+          In contrast to the finite-sample Gaussian-mixture singularity in the <a href="similarity-sensitive-scoring-rule.html">scoring-rule essay</a> which demonstrates the pathologies of infinite costs and rewards when fitting to sample data, the focus here is on the shape of the tradeoffs between different models to population distributions. Consider again a one-dimensional population with four narrow Gaussian modes:
+        </p>
+        <div class="math-block">
+          $$P=0.38\,\mathcal N(-1,0.08^2)
+          +0.32\,\mathcal N(-0.3,0.08^2)
+          +0.18\,\mathcal N(1,0.08^2)
+          +0.12\,\mathcal N(2.3,0.08^2).$$
+        </div>
+        <p>
+          The first two modes contain $70\%$ of the population and are relatively close. The two modes to their right are farther apart at the task scale. I express that scale with the one-dimensional Laplace kernel, one of the concave cases covered by the scoring rule,
+        </p>
+        <div class="math-block">
+          $$K_\ell(z,z')=\exp\!\left(-\frac{|z-z'|}{\ell}\right),
+          \qquad \ell=0.6.$$
+        </div>
+        <p>
+          I now fit $Q$ directly to the true density $P$ with only three Gaussian components, where each can have its own weight, mean, and width.
+        </p>
+        <p>
+          CE uses two components to reproduce the large nearby modes almost exactly, then spends its last component covering both modes on the right with one wide Gaussian centered near $1.50$. Broad-kernel $K$-CE makes the opposite tradeoff, using one wide component centered near $-0.68$ for the nearby pair.
+        </p>
+        <figure class="figure-wide">
+          <div class="figure-scroll">
+            <img
+              src="assets/kce-capacity-allocation.svg"
+              alt="A four-mode true density and two three-component fits. CE resolves the two large nearby modes and merges the two modes on the right. K-CE merges the nearby pair and resolves the two modes on the right. A second panel shows their task typicality fields."
+            >
+          </div>
+          <figcaption>
+            <strong>CE vs. $K$-CE with the same parameter budget.</strong> CE spends two components resolving the large pair on the left. $K$-CE treats errors within that pair as cheaper and spends two components on the more distinct regions to the right. The typicality panel displays $(KQ)(z)$ to make the task geometry apparent.
+          </figcaption>
+        </figure>
+        <p>
+          Smoothing at the task scale reduces the importance of the valley within the left pair, so $K$-CE prioritizes fitting the more distinct regions to the right.
+        </p>
+        <div class="table-wrap">
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>Kernel and report family</th>
+                <th>Fit</th>
+                <th class="num">$\Delta_K$ (bits)</th>
+                <th class="num">$\Delta_{\log}$ (bits)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Narrow ($\ell=0.08$), 3 components</td>
+                <td>Almost identical models</td>
+                <td class="num">$&lt;0.001$</td>
+                <td class="num">$&lt;0.001$</td>
+              </tr>
+              <tr>
+                <td>Broad ($\ell=0.6$), 3 components</td>
+                <td><strong>Different allocation</strong></td>
+                <td class="num"><strong>$0.021$</strong></td>
+                <td class="num"><strong>$0.231$</strong></td>
+              </tr>
+              <tr>
+                <td>Broad ($\ell=0.6$), 4 components</td>
+                <td>Both recover $P$</td>
+                <td class="num">$0.000$</td>
+                <td class="num">$0.000$</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          With a narrow kernel, $K$-CE and CE spend the three components in essentially the same way, indicating that the more computationally simple CE is sufficient. With four components, the truth is in the model family and both objectives recover it exactly, so fitting with local CE is also preferred. The disagreement appears only when the kernel gives meaningful partial credit and the report is too small to fit everything.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h3>CE vs. $K$-CE</h3>
+        <p>
+          For models that are expensive to fit, it seems reasonable to fit candidate models or model families by ordinary CE and compare their predictions with held-out $K$-CE when transported appropriately. This is because $\mathcal C_K$ supplies a common task-sensitive scale across models even when their native coordinates and ordinary cross-entropies differ. Evaluating the kernel score may still be expensive, but it avoids optimizing every model through the nonlocal objective.
+        </p>
+        <p>
+          The CE fit can also be a good starting point for direct $K$-CE fitting. If a promising model still has some task regret, one could initialize at the CE minimizer (equivalently, the likelihood maximizer) and fine-tune with $K$-CE. This concentrates the expensive part of the fitting procedure on models that already work reasonably well and lets us measure whether the task-aware adjustment is worth any extra computational cost.
+        </p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
