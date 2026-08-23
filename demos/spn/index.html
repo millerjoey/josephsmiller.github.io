@@ -30,7 +30,7 @@
           <p class="eyebrow">Sum-Product Network Demo</p>
           <h1>Probabilistic Database</h1>
           <p class="intro-copy">
-            Explore a probabilistic model trained on incomplete data and queried like a database. Filter on exact, missing, interval/censored, or set-valued evidence, then inspect updated distributions, relationships, and plausible sample rows entirely computed in the browser.
+            This browser-based demo contains an SPN trained on incomplete data. Queries may include exact, missing, interval-censored, or set-valued evidence. The page displays the resulting marginal distributions, relationships, and sampled rows.
           </p>
         </div>
       </header>
@@ -39,10 +39,10 @@
         <div>
           <h2>What This Is</h2>
           <p>
-            This page is a demo of what you can do when your data is too complex for simple filters, but too sparse to answer every question by slicing the raw table directly. The trained SPN acts like a probabilistic data table: you can condition on partial row values, leave fields unknown, query ranges, and ask for distributions or plausible rows. That means you can ask many follow-up questions interactively without building a new model or custom analysis each time.
+            The demo addresses conditional-probability queries on incomplete data that table filters alone cannot answer. The trained SPN defines a joint distribution that can be conditioned on partial row values, unknown fields, ranges, or sets. A single fitted model supports repeated conditional-distribution and sampling queries as the evidence changes.
           </p>
           <p>
-            This approach sits somewhere between a very fast database and a hand-designed statistical model. It is intended for situations where you have hypotheses, incomplete observations, and follow-up questions that evolve as you explore the data. In this example, each model is trained once offline, then exported and computed in the browser, so many follow-up probability and sampling queries can be answered locally and almost instantly, without a backend or network I/O.
+            The model is trained offline and exported to the browser. Its database-like queries are evaluated from the fitted joint distribution and do not call a backend.
           </p>
         </div>
       </section>

@@ -51,14 +51,14 @@
         from the posterior and another from the likelihood. That can be noisy and expensive when a batch contains many
         experiments. You can use optimization-heavy approximations or importance sampling instead, but the bias and
         variance can be hard to audit. The algorithm highlighted below performs Bayesian updating and
-        mutual-information approximation together. With a fixed refinement budget it gives stable, low-variance scores
-        for low-parameter differentiable models and degrades gradually as batch size grows.
+        mutual-information approximation together. For a fixed refinement budget it is deterministic. The benchmarks below
+        evaluate its correlation with reference scores and per-query runtime for two low-parameter differentiable models as
+        batch size grows.
       </p>
-      <ul class="bullets muted">
-        <li><strong>Predictable compute:</strong> with a fixed computation budget, per-query runtime stays approximately flat for a range of batch sizes.</li>
-        <li><strong>Simpler integration:</strong> no posterior samples or separate inference/scoring service required.</li>
-        <li><strong>Low variance:</strong> deterministic given a fixed budget, with no sampling noise.</li>
-      </ul>
+      <p class="muted">
+        In those benchmarks, the implementation does not use stored posterior samples, and its per-query runtime remains
+        approximately flat over the batch sizes shown below.
+      </p>
     </header>
 
     <main class="stack">
@@ -68,19 +68,19 @@
             A common applied workflow is: collect data, train a model, then deploy it once it is accurate enough. In Bayesian
             inference, the model encodes your current state of knowledge (and therefore, uncertainty) given what you have observed so far.
             During data collection, optimal experiment design (OED) uses that current state to decide which experiment or
-            observation to run next so that uncertainty shrinks quickly. Done well, this can reduce the amount
-            of data you need to reach a useful level of performance, shorten the time needed to make a decision, and avoid spending resources
-            (or opportunity cost) on uninformative measurements.
+            observation to run next. The practical comparison is how many observations an adaptive design requires to reach
+            a prespecified posterior- or decision-uncertainty threshold relative to a non-adaptive design.
         </p>
         <p class="muted">
-          OED is useful when the pool of possible observations is much larger than what will ever be used
-          for training (clinical trials, A/B testing, ad experiments, surveys). In those settings, spending some compute to choose data can be a good trade since collecting uninformative data is expensive.
+          These methods apply when the pool of possible observations is much larger than the collection budget, as in
+          clinical trials, A/B testing, ad experiments, or surveys. In those settings, the computation used to select
+          observations can be much less costly than collecting wasteful observations that do not affect the target quantity much.
         </p>
         <p>
           In typical variants of optimal experiment design, this idea is formalized by scoring candidate designs by <em>expected
-          information gain</em>. A common choice is mutual information (MI): the “best” experiment is the one expected to
-          reduce uncertainty the most about whatever you care about (parameters, predictions, or another derived random
-          variable).
+          information gain</em>. A common choice is mutual information (MI): the highest-scoring experiment is the one expected
+          to reduce uncertainty the most about a chosen target, such as parameters, predictions, or another derived random
+          variable.
         </p>
         <p class="muted">
           Mutual information can be written as an expected reduction in entropy. For a proposed batch design
@@ -154,30 +154,30 @@
           <strong>Where I would not start with it:</strong> settings where you already have high-quality posterior draws on hand,
           have highly complex models without tractable likelihood evaluations, or are not bottlenecked by latency.
         </p>
-        <p class="muted"><strong>Integration view:</strong> before (two-service pipeline) vs after (single scoring call).</p>
+        <p class="muted"><strong>Interface comparison:</strong> a posterior-sample pipeline and an integrated scorer.</p>
         <div class="code-grid">
           <div>
-            <div class="code-title">Before · Inference Service</div>
+            <div class="code-title">Posterior-sample pipeline · Inference</div>
             <pre><code>observed_data += new_observations
 posterior_samples = run_inference(model_spec, observed_data)   # e.g., HMC/MCMC
 artifact_uri = write_to_storage(posterior_samples)             # serialize + publish state</code></pre>
           </div>
           <div>
-            <div class="code-title">Before · MI Scoring Service</div>
+            <div class="code-title">Posterior-sample pipeline · MI scoring</div>
             <pre><code>posterior_samples = read_from_storage(artifact_uri)
 score = mi_estimate(posterior_samples, candidate_batch)        # repeated many times during batch search</code></pre>
           </div>
         </div>
         <div class="code-grid single">
           <div>
-            <div class="code-title">After · Single Scoring Call</div>
+            <div class="code-title">Integrated scorer</div>
             <pre><code>observed_data += new_observations
 score = information_gain(model_spec, observed_data, candidate_batch) # repeated many times during batch search</code></pre>
           </div>
         </div>
         <p class="muted">
-          Observed data and a candidate batch go in, an
-          information-gain score comes out. Dependencies can be minimal: standard numerical linear algebra plus your
+          The integrated scorer accepts a model specification, observed data, and a candidate batch and returns an estimated
+          information-gain value. The benchmark implementation uses standard numerical linear algebra plus the supplied
           model likelihood.
         </p>
       </section>
@@ -212,7 +212,7 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
             </figcaption>
           </figure>
 
-          <p class="muted"><strong>Takeaway:</strong> the per-query budget can stay fixed as $k$ grows, while the ranking remains close enough to be useful in these benchmarks.</p>
+          <p class="muted"><strong>Benchmark result:</strong> the per-query budget can stay fixed as $k$ grows, while the ranking remains close enough to be useful in these benchmarks.</p>
 
           <figure>
             <img
@@ -302,15 +302,13 @@ score = information_gain(model_spec, observed_data, candidate_batch) # repeated 
         </section>
 
         <section class="panel">
-          <h3>Key takeaways</h3>
-          <ul class="bullets">
-            <li><strong>Predictable compute:</strong> fixed refinement budgets keep per-query runtime approximately flat as batch size $k$ grows.</li>
-            <li><strong>Anytime:</strong> early scores can be refined by spending more budget.</li>
-            <li><strong>Global refinement:</strong> spends compute on high-impact outcome regions.</li>
-            <li><strong>No posterior sampling:</strong> Bayesian updating happens inside the MI estimator.</li>
-            <li><strong>Unified objectives:</strong> the same machinery supports posterior and predictive MI.</li>
-            <li><strong>Single scorer:</strong> raw data + candidate batch in, information-gain score out.</li>
-          </ul>
+          <h3>Method summary</h3>
+          <p>
+            With a fixed refinement budget, per-query runtime was approximately flat over the tested batch sizes. Increasing
+            the budget refines the same deterministic score. The estimator concentrates refinement on outcome regions with
+            high estimated impact, updates posterior state during score evaluation, and supports both posterior and
+            predictive mutual information.
+          </p>
         </section>
       </div>
 

@@ -36,7 +36,7 @@
           <div class="eyebrow">Optimal experiment design</div>
           <h1>Optimal Experiment Design Demos</h1>
           <p class="lede">
-            Adaptive data collection that picks the next most-informative sample so product, ML, and research teams can learn with fewer measurements.
+            These demos use expected information gain to select observations during sequential data collection.
           </p>
           <div class="actions">
             <a class="button" href="#demos">View demos</a>
@@ -70,15 +70,15 @@
           <a class="card" href="data-linkage.html">
             <div class="card-title">Record linkage + deduplication</div>
             <p class="muted">
-              Learn accurate clusters with far fewer labeled pairs by targeting the comparisons that matter most.
-              Runs against a hosted backend API.
+              The record-linkage demo selects pairs for labeling by expected information gain and fits match probabilities from those labels.
+              It runs against a hosted backend API.
             </p>
           </a>
           <a class="card" href="ab-oed.html">
             <div class="card-title">Adaptive A/B testing with customer features</div>
             <p class="muted">
-              Focus experimentation where the A vs B decision is uncertain, not where data are easiest to collect.
-              Browse a 41-step run of decision regions, decision uncertainty, and expected information gain.
+              The A/B demo tends to allocate observations to regions of covariate space where the preferred treatment is uncertain and the outcome covaries with the decision of interest.
+              The page contains a 41-step run of decision regions, decision uncertainty, and expected information gain.
             </p>
           </a>
         </div>
@@ -100,10 +100,10 @@
           and iterating until the remaining decision uncertainty is below a chosen tolerance.
         </p>
         <p class="muted" style="margin-top: 0.75rem">
-          Unlike standard A/B testing, bandits, or generic active learning, the objective here can be explicitly tied to the
-          decision-relevant quantity of interest, and is approximately Bayesian. We don't reward uncertainty reduction in parts of the model that do not
-          change the recommended action. We can also fit more complex models--likely ones you already use. We evaluate the
-          acquisition function in about the time it takes to fit the model itself.
+          The acquisition objective can target a treatment rule or another decision-relevant quantity rather than total
+          parameter uncertainty. Uncertainty that cannot change the recommended action is naturally excluded from
+          the objective. The method requires a fitted probabilistic model under which the acquisition objective can be
+          evaluated. In my implementation, one such evaluation has roughly the same order of runtime as one model fit.
         </p>
       </section>
 

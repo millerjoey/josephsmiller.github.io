@@ -34,8 +34,8 @@
         <div class="eyebrow">Record linkage demo</div>
         <h1>Record linkage with active learning</h1>
         <p class="lede">
-          Deduplicate a file or link two files with far fewer labels. Instead of labeling random pairs, the system actively
-          asks for the next pair that will teach the matcher the most—so you reach high-quality match probabilities quickly.
+          The demo selects record pairs for labeling by expected information gain. The resulting labels are used to fit a
+          calibrated model that matches record pairs for deduplication or record linkage.
         </p>
         <p class="muted small" style="margin-top: 0.35rem">
           Early on you’ll see <strong>sim</strong> (raw schema-aware similarity). After a few labels, you’ll see <strong>prob</strong> (calibrated
@@ -56,7 +56,7 @@
           <li>Screen candidate pairs with a schema-aware similarity score before fitting the active learner.</li>
           <li>Compress the resulting features with PCA into a small embedding (principal components).</li>
           <li>Fit ridge logistic regression on PCs to predict match probability.</li>
-          <li>Actively choose the next pairs to label to reduce uncertainty fastest (often near <code>p≈0.5</code>).</li>
+          <li>Select the next pairs by expected reduction in model uncertainty.</li>
           <li>Query strategy: start with diverse pairs, then pick batches that maximize expected information gain.</li>
         </ul>
         <p class="muted small" style="margin-top: 0.75rem">
@@ -72,11 +72,7 @@
           intended to be retained as a dataset.
         </p>
         <p class="muted small" style="margin-top: 0.6rem">
-          The backend is efficient and designed to run in a tiny compute footprint (CPU-only).
-        </p>
-        <p class="muted small" style="margin-top: 0.6rem">
-          If you need a private deployment or a higher-throughput environment, email
-          <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
+          The public backend runs on CPU only and may be rate-limited. For private-access or higher-throughput, request <a class="text-link" href="mailto:joe@josephsmiller.com">joe@josephsmiller.com</a>.
         </p>
       </section>
 
@@ -91,11 +87,7 @@
           <button id="apiTokenReset" class="button secondary small" type="button">Clear</button>
         </div>
         <p id="tokenHint" class="muted small" style="margin-top: 0.6rem; display: none">
-          If the public demo is slow or rate-limited, email me for private access:
-          <a class="text-link" href="mailto:joe@josephsmiller.com?subject=Record%20linkage%20private%20access">email me</a>.
-        </p>
-        <p class="muted small" style="margin-top: 0.6rem">
-          The public demo may be rate-limited. If it is slow, email me and I can give you private access:
+          This request was rate-limited. Private access is available by email:
           <a class="text-link" href="mailto:joe@josephsmiller.com?subject=Record%20linkage%20private%20access">email me</a>.
         </p>
 
@@ -272,10 +264,6 @@
         </div>
         <p class="muted small" style="margin-top: 0.8rem">
           Metrics update as you label batches. Use “Run full scoring” to generate downloadable outputs.
-        </p>
-        <p class="muted small">
-          Questions, or want a private deployment / higher-throughput environment?
-          <a class="text-link" href="mailto:joe@josephsmiller.com">Email me</a>.
         </p>
       </section>
     </main>
