@@ -75,9 +75,9 @@
       </section>
 
       <section class="panel">
-        <h3>Where CE and K-CE disagree</h3>
+        <h3>How CE and K-CE differ</h3>
         <p>
-          If the model family $\mathcal Q$ contains $P$, both objectives agree. Ordinary CE is minimized at $P$, and proper $K$-CE is also minimized at $P$. The objectives can disagree when the model is restricted: perhaps the report has a fixed number of components, the model is regularized, or the data only support a small model. Then it has to choose which errors to make. CE will trade between those errors at exact local density resolution; $K$-CE discounts errors between similar outcomes.
+          If the model family $\mathcal Q$ contains $P$, both objectives agree. Ordinary CE is minimized at $P$, and proper $K$-CE is also minimized at $P$. The objectives can disagree when the model is restricted: perhaps the report has a fixed number of components, the model is regularized, or the data only support a small model. In that case it has to choose which errors to make. CE will trade between those errors at the exact local density resolution; $K$-CE discounts errors between similar outcomes.
         </p>
         <p>
           Write ordinary cross-entropy as $\mathcal C_{\log}$. The two population projections of the same family are
@@ -109,7 +109,7 @@
       <section class="panel">
         <h3>Gaussian Mixture Examples</h3>
         <p>
-          In contrast to the finite-sample Gaussian-mixture singularity in the <a href="similarity-sensitive-scoring-rule.html">scoring-rule essay</a> which demonstrates the pathologies of infinite costs and rewards when fitting to sample data, the focus here is on the shape of the tradeoffs between different models to population distributions. Consider again a one-dimensional population with four narrow Gaussian modes:
+          In contrast to the finite-sample Gaussian-mixture singularity in the <a href="similarity-sensitive-scoring-rule.html">scoring-rule essay</a> which demonstrates the problems of infinite costs and rewards when fitting to sample data, the focus here is on the shape of the tradeoffs between different models to population distributions. Consider again a one-dimensional population with four narrow Gaussian modes:
         </p>
         <div class="math-block">
           $$P=0.38\,\mathcal N(-1,0.08^2)
