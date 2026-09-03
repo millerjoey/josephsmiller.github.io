@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 480" role="img" aria-labelledby="title desc">
-  <title id="title">Coverage and coreset selections on the same one-dimensional sample</title>
-  <desc id="desc">Twenty observations form a dense left group, a medium-sized middle group, and a small right group. Four coverage atoms with weight 0.25 span the range. Four weighted coreset atoms preserve the uneven empirical mass.</desc>
+  <title id="title">Diversity and coreset selections on the same one-dimensional sample</title>
+  <desc id="desc">Twenty observations form a dense left group, a medium-sized middle group, and a small right group. Four diversity atoms with weight 0.25 span their range. Four weighted coreset atoms preserve the uneven empirical mass.</desc>
   <style>
     text { font-family: 'Crimson Pro', 'Times New Roman', serif; fill: #5b6673; }
     .heading { fill: #1f2a37; font-size: 18px; font-weight: 600; }
@@ -36,10 +36,10 @@
   <text class="label" x="627" y="122" text-anchor="middle">5</text>
   <text class="label" x="880" y="122" text-anchor="middle">2</text>
 
-  <text class="heading" x="84" y="177">Coverage: four equal allocations</text>
+  <text class="heading" x="84" y="177">Diversity: four equal allocations</text>
   <text class="small" x="84" y="198">maximize H<tspan baseline-shift="sub">K</tspan>(u<tspan baseline-shift="sub">S</tspan>)</text>
   <line class="axis" x1="84" y1="235" x2="916" y2="235"/>
-  <g aria-label="Coverage candidates">
+  <g aria-label="Diversity candidates">
     <circle class="candidate" cx="108.1" cy="235" r="3"/><circle class="candidate" cx="132.2" cy="235" r="3"/>
     <circle class="candidate" cx="156.3" cy="235" r="3"/><circle class="candidate" cx="180.5" cy="235" r="3"/>
     <circle class="candidate" cx="204.6" cy="235" r="3"/><circle class="candidate" cx="228.7" cy="235" r="3"/>

@@ -406,7 +406,7 @@ details p {
   line-height: 1;
 }
 
-:where(.blog-coverage) .sensitivity-table {
+:where(.blog-diversity) .sensitivity-table {
   min-width: 760px;
 }
 

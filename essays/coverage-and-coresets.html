@@ -11,9 +11,9 @@
     gtag('config', 'G-Y06DGSC9SW');
   </script>
   <meta charset="UTF-8">
-  <title>Coverage and Coresets with Similarity-Sensitive Entropy · Joseph S. Miller</title>
+  <title>Diversity and Coresets with Similarity-Sensitive Entropy · Joseph S. Miller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Using similarity-sensitive entropy for nonredundant coverage and sparse distributional approximation.">
+  <meta name="description" content="Using similarity-sensitive entropy for nonredundant diversity and sparse distributional approximation.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -31,7 +31,7 @@
   <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <link rel="stylesheet" href="minimal.css">
 </head>
-<body class="blog-scoring blog-coverage blog-continuous">
+<body class="blog-scoring blog-diversity blog-continuous">
   <div class="shell">
     <nav class="top-nav">
       <a class="text-link" href="../index.html">&larr; Home</a>
@@ -41,19 +41,19 @@
     </nav>
 
     <header class="hero">
-      <div class="eyebrow">Coverage · Coresets</div>
+      <div class="eyebrow">Diversity · Coresets</div>
       <div class="post-heading">
-        <h1>Coverage and Coresets with Similarity-Sensitive Entropy</h1>
+        <h1>Diversity and Coresets with Similarity-Sensitive Entropy</h1>
         <p class="post-date"><time datetime="2026-07-17">July 17, 2026</time></p>
       </div>
       <p class="summary">
-        Suppose I observe $M$ samples and want to retain $N$ representative members. We can define two objectives: for "coverage", I want an equally weighted set whose members are as nonredundant as possible. For "compression", I want a small set of objects and weights that approximates the empirical distribution. Ordinary entropy-derived quantities provide no selection rule for either problem because both objectives rely on exact equality between values. A similarity kernel (such as one that defines the resolution of the data) allows one sample value to receive partial credit for another so the selected distribution remains discrete over the samples. We can use similarity-sensitive entropy and its derived quantities to place discrete and continuous distributions on the same footing, and frame subset selection as probabilistic modeling of a continuous distribution with a discrete/atomic model.
+        Suppose I observe $M$ samples and want to retain $N$ representative members. We can define two objectives: for "diversity", I want an equally weighted set whose members are as nonredundant as possible. For "compression", I want a small set of objects and weights that approximates the empirical distribution. Ordinary entropy-derived quantities provide no selection rule for either problem because both objectives rely on exact equality between values. A similarity kernel (such as one that defines the resolution of the data) allows one sample value to receive partial credit for another so the selected distribution remains discrete over the samples. We can use similarity-sensitive entropy and its derived quantities to place discrete and continuous distributions on the same footing, and frame subset selection as probabilistic modeling of a continuous distribution with a discrete/atomic model.
       </p>
     </header>
 
     <main class="stack">
       <section class="panel">
-        <h3>Coverage</h3>
+        <h3>Diversity</h3>
         <p>
           Let $\mathcal X_M=\{x_1,\ldots,x_M\}$ be the candidate points. Sampling $N$ points without repeats gives a set $S\subseteq\mathcal X_M$ with $|S|=N$ and the uniform distribution
         </p>
@@ -76,7 +76,7 @@
         <p>
           Unfortunately, Shannon entropy only sees the weights and the number of atoms. The entropy cannot distinguish a diverse selection from a cluster of near-duplicates. Clearly, there is some aspect of "information" that Shannon entropy has trouble identifying.
         </p>
-        <h3>Similarity-sensitive coverage</h3>
+        <h3>Similarity-sensitive diversity</h3>
         <p>
           I previously described <a href="kerneled-coarse-graining.html">similarity-sensitive entropy</a> and derived its associated <a href="similarity-sensitive-scoring-rule.html">tangent scoring rule</a>. For a <a href="https://arxiv.org/html/2601.03064v2#S2.SS1" target="_blank" rel="noreferrer">similarity kernel</a> $K$, the entropy is
         </p>
@@ -131,13 +131,13 @@
 
         <h3>Compression</h3>
         <p>
-          Coverage asks how much distinctiveness a selected distribution contains. I use compression to refer to how well a sparse distribution can stand in for a specified target distribution, so the population frequencies now matter. The empirical distribution is
+          Diversity asks how much distinctiveness a selected distribution contains. I use compression to refer to how well a sparse distribution can stand in for a specified target distribution, so the population frequencies now matter. The empirical distribution is
         </p>
         <div class="math-block">
           $$p_M=\frac1M\sum_{i=1}^M\delta_{x_i}.$$
         </div>
         <p>
-          In this setting, a size-$N$ coreset is a distribution supported on observed points,
+          I use “coreset” here in the broad sense of a small weighted subset intended to stand in for the empirical distribution. In this setting, a size-$N$ coreset is a distribution supported on observed points,
         </p>
         <div class="math-block">
           $$q_{S,w}=\sum_{a=1}^N w_a\delta_{z_a},
@@ -215,7 +215,7 @@
           \end{aligned}$$
         </div>
         <p>
-          Coverage uses the entropy side of this construction, with no external target. Compression instead takes $p=p_M$ as the target and $q=q_{S,w}$ as the report. Its typicality is $\tau_q(x)=\sum_j w_jK(x,z_j)$, so probability assigned to several similar prototypes can jointly cover an observation.
+          Diversity uses the entropy side of this construction, with no external target. Compression instead takes $p=p_M$ as the target and $q=q_{S,w}$ as the report. Its typicality is $\tau_q(x)=\sum_j w_jK(x,z_j)$, so probability assigned to several similar prototypes can jointly cover an observation.
         </p>
         <p>
           For a symmetric kernel, the cross-entropy can also be written
@@ -255,32 +255,32 @@
         <p>
           The distribution and task kernel move together, so the result depends on probability mass and pairwise utility rather than on the labels or coordinates used to represent the objects. Writing a fresh Laplace kernel after an arbitrary nonlinear change of coordinates would define a different similarity and therefore a different task.
         </p>
-        <h3>Coverage and compression on the same sample</h3>
+        <h3>Diversity and compression on the same sample</h3>
         <p>
-          Place 20 observations on the line, keep four atoms and set $\ell=0.30$. Coverage fixes all four weights at $0.25$. The coreset weights are optimized against $p_M$.
+          Place 20 observations on the line, keep four atoms (using $\ell=0.30$). Diversity fixes all four weights at $0.25$. The coreset weights are optimized against $p_M$.
         </p>
         <figure>
           <img
             src="assets/coverage-versus-coreset.svg"
-            alt="A one-dimensional empirical sample, followed by four equally weighted coverage points spread across its range and four weighted coreset points that preserve its uneven population mass."
+            alt="A one-dimensional empirical sample, followed by four equally weighted diversity points spread across its range and four weighted coreset points that preserve its uneven population mass."
           >
           <figcaption>
-            Exact solutions at $\ell=0.30$ and $N=4$. Coverage spreads four equal allocations across the available distinctions. The coreset places about $65\%$ of its mass on two representatives of the larger group on the left.
+            Exact solutions at $\ell=0.30$ and $N=4$. Diversity spreads four equal allocations across the available distinctions. The coreset places about $65\%$ of its mass on two representatives of the larger group on the left.
           </figcaption>
         </figure>
         <p>
-          The coverage support is determined entirely by separation among the selected points. The coreset also responds to empirical frequency. It retains representatives from all three groups while assigning weights close to their population masses.
+          The diversity support is determined entirely by separation among the selected points. The coreset also responds to empirical frequency. It retains representatives from all three groups while assigning weights close to their population masses.
         </p>
         <h3>Bandwidth</h3>
         <p>
-          Repeating the calculation at three bandwidths gives the following supports and weights. The effective count is $\exp(H_K(u_S))$ for the selected coverage distribution.
+          Repeating the calculation at three bandwidths gives the following supports and weights. The effective count is $\exp(H_K(u_S))$ for the selected diversity distribution.
         </p>
         <div class="table-wrap">
           <table class="score-table sensitivity-table">
             <thead>
               <tr>
                 <th>$\ell$</th>
-                <th>Coverage support</th>
+                <th>Diversity support</th>
                 <th>$H_K(u_S)$</th>
                 <th>Effective count</th>
                 <th>Coreset point (weight)</th>
@@ -312,14 +312,14 @@
           </table>
         </div>
         <p>
-          At $\ell=0.15$, almost every distinct observation looks unique and the coverage entropy is nearly $\log4$. The objective is again close to indifferent among separated subsets. At $\ell=1.50$, longer-range similarity moves the interior coverage points outward and reduces their effective count to about two. In the limit $\ell\to\infty$, all entries of $K$ approach one and both the entropy and scoring regret lose their distinctions.
+          At $\ell=0.15$, almost every distinct observation looks unique and the diversity entropy is nearly $\log4$. The objective is again close to indifferent among separated subsets. At $\ell=1.50$, longer-range similarity moves the interior diversity points outward and reduces their effective count to about two. In the limit $\ell\to\infty$, all entries of $K$ approach one and both the entropy and scoring regret lose their distinctions.
         </p>
         <p>
           The coreset support happens to be stable across these three kernel widths, with modest changes in its optimized weights.
         </p>
         <h3>Discussion</h3>
         <p>
-          Coverage and coreset construction use the same similarity structure for different optimization problems:
+          Diversity and coreset construction use the same similarity structure for different optimization problems:
         </p>
         <div class="math-block">
           $$\begin{aligned}
@@ -330,10 +330,10 @@
           \end{aligned}$$
         </div>
         <p>
-          The coverage problem has no external target and intentionally ignores population prevalence. The coreset is evaluated against $p_M$, so its support and weights respond to the empirical distribution. In the identity-kernel limit, ordinary entropy cannot rank the uniform subsets and ordinary cross-entropy assigns infinite loss to every strict sparse approximation. The kernel describes which substitutions preserve the distinctions relevant to the task.
+          The diversity problem has no external target and intentionally ignores population prevalence. The coreset is evaluated against $p_M$, so its support and weights respond to the empirical distribution. In the identity-kernel limit, ordinary entropy cannot rank the uniform subsets and ordinary cross-entropy assigns infinite loss to every strict sparse approximation. The kernel describes which substitutions preserve the distinctions relevant to the task.
         </p>
         <p>
-          The conceptual advantage here is that the selected objects and weights retain their usual meaning as a discrete probability distribution, while task utility enters through $K$. Since $H_K$ determines both the entropy and its proper scoring regret, the same geometry governs target-free coverage and target-facing compression. The notion of acceptable substitution is entirely in $K$ instead of being split between a modified density model and a separately chosen discrepancy. It also remains invariant under reparameterization, so the same framework can be used to select a coreset in any coordinate system.
+          The conceptual advantage here is that the selected objects and weights retain their usual meaning as a discrete probability distribution, while task utility enters through $K$. Since $H_K$ determines both the entropy and its proper scoring regret, the same geometry governs target-free diversity and target-facing compression. The notion of acceptable substitution is entirely in $K$ instead of being split between a modified density model and a separately chosen discrepancy. It also remains invariant under reparameterization, so the same framework can be used to select a coreset in any coordinate system.
         </p>
       </section>
     </main>
