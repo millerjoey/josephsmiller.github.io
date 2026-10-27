@@ -1,5 +1,7 @@
 # Local-only helpers (do not publish)
 demos/oed/scripts/
+demos/spn/
+demos/rspn/
 essays/oed-mutual-information.html
 
 .DS_Store
