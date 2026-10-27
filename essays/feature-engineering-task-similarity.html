@@ -47,7 +47,7 @@
         <p class="post-date"><time datetime="2026-07-30">July 30, 2026</time></p>
       </div>
       <p class="summary">
-        Feature engineering is the process of transforming data to improve its modelability. The transformed representation ought to make a model easier or faster to fit by aligning its coordinates with a pre-specified model class and thereby improve its performance. Once models are fit, their optimal CEs, even after a 1-1 transformation, are generally different in scale and are optimized by different models (as compared when predictions are pushed into a common space). From the perspective of task-oriented modeling, this is a strange situation in which we are optimizing multiple models by CE each with different implicit geometries (and possibly radically different entropy scales) and then evaluating them in a third (predictive) geometry that we actually care about. Our naively transformed data might make the model fit perfectly well in a subspace of the data, but lose all predictive ability for what we care about, or our model might spend its capacity fitting irrelevant noise. Below, I develop the idea that when we have a task geometry we care about, we can transport it to the raw data space and then search for transformations that best retain the task distinctions we care about, measuring similarity-sensitive entropy in the transformed spaces. We will end up with cross entropies that can theoretically be compared, and ideally, task-oriented feature engineering.
+        Feature engineering is the process of transforming data to improve its modelability. The transformed representation ought to make a model easier or faster to fit by aligning its coordinates with a pre-specified model class and thereby improve its performance. Once models are fit, their optimal CEs, even after a 1-1 transformation, are generally different in scale and are optimized by different models (as compared when predictions are pushed into a common space). From the perspective of task-oriented modeling, this is a strange situation in which we are optimizing multiple models by CE each with different implicit geometries, and possibly radically different entropy scales, and then evaluating them in a third geometry, often the predictive one, which we actually care about. Our naively transformed data might make the model fit perfectly well in a subspace of the data, but lose all predictive ability for what we care about, or our model might spend its capacity fitting irrelevant noise. Below, I develop the idea that when we have a task geometry we care about, we can transport it to the raw data space and then search for transformations that best retain the task distinctions we care about, measuring similarity-sensitive entropy in the transformed spaces. We will end up with cross entropies that can theoretically be compared, and ideally, a task-oriented feature engineering.
       </p>
     </header>
 
@@ -61,10 +61,10 @@
           $$d_s^2(x,x')=\sum_{j=1}^d\frac{(x_j-x_j')^2}{s_j^2}.$$
         </div>
         <p>
-          A change of one unit in a coordinate with small $s_j$ now counts more than the same change in a coordinate with large $s_j$, so the scaling influences closeness whenever the downstream model uses this Euclidean geometry. Standardization is the choice to treat a standard-deviation change in each measured coordinate as comparable. If we imagine the SS-entropy with an isotropic radial similarity kernel, its pullback to the raw coordinates has this diagonal geometry.
+          A change of one unit in a coordinate with small $s_j$ now counts more than the same change in a coordinate with large $s_j$, so the scaling influences closeness whenever the downstream model uses this Euclidean geometry. Standardization will lead us to considering a standard-deviation change in each measured coordinate as comparable. If we imagine the SS-entropy with an isotropic radial similarity kernel, its pullback to the raw coordinates has this geometry.
         </p>
         <p>
-          Because full PCA is an orthogonal rotation it leaves Euclidean distances, and any kernel that depends only on those distances, unchanged. A non-orthogonal transformation is different: it preserves a specified kernel if we transport the kernel with it. Truncated PCA makes the lossy choice to remove directions with low variance, independent of what the kernel can detect. I would rather specify the relevant distinctions first, express them through $K$, and then ask whether a simpler representation preserves them.
+          Because full PCA is an orthogonal rotation it leaves Euclidean distances, and any kernel that depends only on those distances, unchanged. A non-orthogonal transformation  preserves a specified kernel if we transport the kernel with it. When we keep only some PCA components, we discard low-variance directions even if they matter to the task. I would rather specify the relevant distinctions first, express them through $K$, and then consider simpler representations that preserve them.
         </p>
 
         <h3>A task-preserving representation</h3>
@@ -84,7 +84,7 @@
           Note that this gives $H_{K^\star}(P_X)=H_{K_Z}(T_\#P_X)$ for every $P_X$.
         </p>
         <p>
-          ChatGPT suggests I call this "kernel sufficiency" so that's what I'll do for now. The map $T$ may be many-to-one: it is allowed to discard raw distinctions as long as they do not change the target similarity (no ambiguity in the pullback). For a law $Q$, write its typicality as
+          I'll call this "kernel sufficiency" for now. The map $T$ may be many-to-one: it is allowed to discard raw distinctions as long as they do not change the target similarity (no ambiguity in the pullback). For a law $Q$, write its typicality as
         </p>
         <div class="math-block">
           $$\tau_{K,Q}(x):=(KQ)(x)
@@ -107,9 +107,6 @@
           $$\mathcal C_K(P,Q):=\mathbb E_{X\sim P}S_K(Q,X).$$
         </div>
         <p>
-          I report numerical cross-entropies and entropies below in bits, dividing these natural-log quantities by $\ln 2$.
-        </p>
-        <p>
           If $P_Z=T_\#P_X$ and $Q_Z=T_\#Q_X$, kernel sufficiency gives
         </p>
         <div class="math-block">
@@ -119,10 +116,10 @@
           $$
         </div>
         <p>
-          That is the $K$-cross-entropy invariance that I propose is valuable: $\mathcal C_K$ has the same value before and after an exact task-respecting transformation. Ordinary cross-entropy does not have this invariance in general; even for a bijection, it changes by the Jacobian determinant. I'll note that $\mathcal C_K$, being nonlocal, is more expensive to compute than CE. If we can push most of the complexity into the map $T$, fitting a model in $Z$ with CE and evaluating or fine tuning with $\mathcal C_K$ at the end is reasonable. This would give us a common scale on which to compare representations, and a principled distribution-free goal for finding $T$. What follows are two examples, the first being the simplest.
+          That is the $K$-cross-entropy invariance that I propose is valuable: $\mathcal C_K$ has the same value before and after an exact task-respecting transformation. Ordinary cross-entropy does not have this invariance. I'll note that $\mathcal C_K$, being nonlocal, is more expensive to compute than CE. If we can push most of the complexity into the map $T$, fitting a model in $Z$ with CE and evaluating or fine tuning with $\mathcal C_K$ at the end is reasonable. This would give us a common scale on which to compare representations, and a principled distribution-free goal for finding $T$. What follows are two examples, the first being the simplest.
         </p>
         <p>
-          But first, I want to separate the two cases specifically where the above general equality appears useful. If a task kernel is naturally specified on an outcome space $Y$ that we want to predict, we ought to straightforwardly model $Y$ (from observed $X$, if available) and fit with $K$-CE. If $K$-CE is too expensive, we may want to transform $Y$ so that the output kernel is more "diagonal" and plausibly better approximated with CE. I hope to develop this further in a later essay. The other interesting case is when we can attain a $K^\star$ on a future or downstream outcome while $X$ is available at deployment. Perhaps we can choose a kernel over a rich object—such as a paragraph or molecule—for which similarity is easy to specify, and we intend to model directly from its embedding $X$. Then the aim is to find the above $T(X)$ that retains the task-relevant distinctions in the kernel while ignoring nuisance variations in $X$. In these cases we expect an independently specified task signal and want to compress $X$ to retain it for later modeling.
+          But before that, I want to separate the two cases specifically where the above general equality appears useful. If a task kernel is naturally specified on an outcome space $Y$ that we want to predict, we ought to straightforwardly model $Y$ (from observed $X$, if available) and fit with $K$-CE. If $K$-CE is too expensive, we may want to transform $Y$ so that the output kernel is more "diagonal" and plausibly better approximated with CE. I hope to develop this further in a later essay. The other interesting case is when we can attain a $K^\star$ on a future or downstream outcome while $X$ is available at deployment. Perhaps we can choose a kernel over a rich object—such as a paragraph or molecule—for which similarity is easy to specify, and we intend to model directly from its embedding $X$. Then the aim is to find the above $T(X)$ that retains the task-relevant distinctions in the kernel while ignoring nuisance variations in $X$. In these cases we expect an independently specified task signal and want to compress $X$ to retain it for later modeling.
         </p>
 
         <h3>Simple finite coarsening example</h3>
@@ -226,15 +223,12 @@
               </div>
             </div>
           </div>
-          <figcaption>
-            <strong>Both kinds of coarsening.</strong> Identical states coarsen losslessly. Nearly repeated profiles are merged but with loss.
-          </figcaption>
         </figure>
         <p>
           The original seven-state kernel factors exactly through the five-state coarsening, so any score that depends on the states through this kernel is unchanged.
         </p>
         <p>
-          By approximating, we can choose the transformation that merges $C_1,C_2,C_3$ into one state $C$ and pick the identity kernel on $(A,B,C)$. The pullback of this approximation changes only the off-diagonal similarities within the $C$ block, from $0.95$ to $1$ losing a small amount of information once a distribution is assigned.
+          By approximating, we can choose the transformation that merges $C_1,C_2,C_3$ into one state $C$ and pick the identity kernel on $(A,B,C)$. The pullback of this approximation changes only the off-diagonal similarities within the $C$ block, from $0.95$ to $1$ losing a small amount of information for many distributions.
         </p>
         <p>
           For example, under a uniform distribution on the seven raw states, the exact five-state pushforward has probabilities $(2,2,1,1,1)/7$ and
@@ -256,7 +250,7 @@
       <section class="panel">
         <h3>Learning Gaussian task coordinates</h3>
         <p>
-          I now want a continuous example where we can reduce the dimensionality of the representation. We'll do this one by assuming we have a similarity oracle we can query and fit to learn the kernel over the raw space. Let $X\in\mathbb R^{50}$ contain four task-relevant coordinates $U$ and 46 high-variance nuisance coordinates, mixed by a random orthogonal rotation. There is an unknown matrix $B$ such that $U=BX$, and the task similarity is
+          I now want a continuous example where we can reduce the dimensionality of the representation. We'll do this one by assuming we have a similarity oracle we can query and fit to learn the kernel over the raw space. Let $X\in\mathbb R^{50}$ contain four task-relevant coordinates $U$ and 46 high-variance nuisance coordinates, mixed up by a random orthogonal rotation. There is an unknown matrix $B$ such that $U=BX$, and the task similarity is
         </p>
         <div class="math-block">
           $$K^\star(x,x')
@@ -272,7 +266,7 @@
           \quad r=1,\ldots,12.$$
         </div>
         <p>
-          Each $A_r$ is a rank-$r$ task-spectrum truncation of the estimated map, so $K_r$ keeps the first $r$ directions of the learned task geometry. I then evaluate the whole frontier on independent held-out samples:
+          Each $A_r$ keeps the first $r$ directions from the estimated map, and $K_r$ measures similarity using those directions. I then evaluate each kernel on independent held-out samples:
         </p>
         <div class="math-block">
           $$\widehat H_{K_r}
@@ -285,18 +279,15 @@
           <div class="figure-scroll">
             <img
               src="assets/gaussian-task-entropy-frontier.svg"
-              alt="Cross-fitted similarity-sensitive entropy by retained dimension for the full task kernel, oracle task truncations, and task coordinates learned from one thousand or four thousand noisy pair ratings."
+              alt="Similarity-sensitive entropy on held-out samples by retained dimension for the full task kernel, known task directions, and task coordinates learned from one thousand or four thousand noisy pair ratings."
             >
           </div>
-          <figcaption>
-            <strong>Task-entropy frontier.</strong> The oracle curve reaches the full task entropy at four coordinates. The learned curves approach and can cross the hidden task entropy, which is why entropy alone does not choose the rank.
-          </figcaption>
         </figure>
         <p>
-          The full task entropy is $2.296$ bits. At rank four, the representation learned from 1,000 ratings has held-out entropy $2.169$; with 4,000 ratings it reaches $2.244$. The key thing is that $X$ alone does not identify which directions are nuisance, but the pairwise queries do. PCA has no access to those ratings and the task coordinates will be overwhelmed by the 46 nuisance dimensions. Furthermore and most interestingly to me, this procedure respects the truth that the task has 2.296 bits of entropy and that our procedure can estimate that. But matching that entropy is not enough to show that the learned kernel has recovered the same distinctions, and shouldn't be used alone to reduce dimension snice we can't decide what rank model to use from only this plot.
+          The full task entropy is $2.296$ bits. At rank four, the representation learned from 1,000 ratings has held-out entropy $2.169$; with 4,000 ratings it reaches $2.244$. The key thing is that $X$ alone does not identify which directions are nuisance, but the pairwise queries do. PCA has no access to those ratings and the task coordinates will be overwhelmed by the 46 nuisance dimensions. Most importantly, this procedure respects the truth that the task has 2.296 bits of entropy and our procedure can estimate that. But matching that entropy is not enough to show that the learned kernel has recovered the same distinctions, and shouldn't be used alone to reduce dimension snice we can't decide what rank model to use from only this plot.
         </p>
 
-        <h4>Choosing a rank from the frontier</h4>
+        <h4>Choosing the number of coordinates</h4>
         <p>
           Entropy is a scalar, so an approximate kernel may separate some observations the task regarded as substitutes and merge others the task distinguished, with the two errors canceling. One way to check the curve is to define
         </p>
@@ -304,7 +295,7 @@
           $$K_\cap(x,x'):=\min\{K^\star(x,x'),K_r(x,x')\}.$$
         </div>
         <p>
-          (Analogously, we can use the max with the corresponding reversal.) This gives two nonnegative quantities:
+          (Analogously, we can use the max with the corresponding changes to the definition.) This gives two nonnegative quantities:
         </p>
         <div class="math-block">
           $$\begin{aligned}
@@ -332,9 +323,6 @@
               alt="Summed error by retained dimension for representations learned from one thousand and four thousand similarity ratings."
             >
           </div>
-          <figcaption>
-            <strong>Summed error.</strong> With 1,000 ratings the minimum is at rank four or five. With 4,000 ratings the curve has a lower minimum across roughly ranks four through six and then rises. Error bars show one standard error across 20 independently generated trials.
-          </figcaption>
         </figure>
         <p>
           This criterion allows us to see the true task dimension well. With 1,000 ratings, ranks four and five differ by only $0.0004$ bits. Higher rank models worsen things without enouh oracle data. With 4,000 ratings the plateau is clear and we see that 4 coordinates is ideal.
@@ -344,13 +332,13 @@
       <section class="panel">
         <h3>A proposed workflow</h3>
         <p>
-          The workflow I would consider is to first define or elicit a target similarity $K^\star$. Then, fit a transformation and simple output kernel on one set of pairwise task signals, compare the retained task entropy across dimensions on held-out objects, choose a dimension via the summed added and removed entropy quantities, then fit a model to the resulting task coordinates. Evaluate models with $K$-CE if the kernel is known to lead to a concave entropy.
+          The workflow I would consider is to first define or elicit a target similarity $K^\star$. Then, fit a transformation and simple output kernel on one set of pairwise task signals, compare the retained task entropy across dimensions on held-out objects, choose a dimension by adding up the entropy gained and lost, then fit a model to the resulting task coordinates. Evaluate models with $K$-CE if the kernel is known to lead to a concave entropy.
         </p>
         <p>
           Dimension reduction is not the only possible benefit. Among representations with similar fidelity, we may prefer coordinates that are interpretable, statistically stable, easy to model, or cheap to score. But low task dimension is a useful place to begin and shows how a high-dimensional observation can contain a much smaller task without equating task information with raw-data variation.
         </p>
         <p>
-          There is a separate question once the task-visible state has been chosen: should one fit its complete density by ordinary cross-entropy, or is the finite resolution of the task important in changing the fit? I will discuss that in a later essay.
+          Once we've chosen a representation for the task, there is a separate question: should one fit its complete density by ordinary cross-entropy, or is the finite resolution of the task important in changing the fit? I will discuss that in a later essay.
         </p>
       </section>
     </main>

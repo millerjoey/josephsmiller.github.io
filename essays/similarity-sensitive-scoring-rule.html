@@ -47,7 +47,7 @@
         <p class="post-date"><time datetime="2026-06-14">June 14, 2026</time></p>
       </div>
       <p class="summary">
-        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a report for an observation $x$, it only sees the probability assigned to $x$, not $x$ itself. That is fine when only exact identity matters, such as in some predictions over a categorical space, but locality isn't the right property if you want to reward near-misses. Furthermore, continuous spaces naturally exhibit similarity structure particularly when they have geometric structure. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, this page derives and illustrates the corresponding nonlocal scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule (in discrete space; continuous spaces have the analogous $\log dx$ offset). I'll begin with examples to motivate it.
+        The familiar logarithmic scoring rule is <a href="https://en.wikipedia.org/wiki/Scoring_rule#Locality" target="_blank" rel="noreferrer">local</a>: to score a probability report for an observation $x$, it only sees the probability assigned to $x$, not $x$ itself. That is fine when only exact identity matters, such as in some predictions over a categorical space, but locality isn't the right property if you want to reward near-misses. Furthermore, continuous spaces often naturally exhibit similarity structure, such as from their geometry. In the spirit of continuing to develop the Leinster-Cobbold similarity-sensitive entropy, we derive and illustrate the corresponding nonlocal scoring rule. When the entropy induced by the kernel is concave, this rule is proper. Just as SS-entropy with an identity kernel reduces to ordinary entropy, the SS-scoring rule with an identity kernel reduces to the logarithmic scoring rule (in discrete space; continuous spaces have the analogous $\log dx$ offset). Let's begin with examples to motivate it.
       </p>
     </header>
 
@@ -76,7 +76,7 @@
         </p>
         <h3>Wrapped likelihood</h3>
         <p>
-          Consider a simple misspecified model-fitting scenario. Let the true distribution be uniform on $[0,1]$, and fit only the location $\mu$ of a fixed-variance Gaussian that is wrapped around the interval:
+          Consider a simple misspecified model-fitting scenario. Let the true distribution be uniform on $[0,1]$, and fit only the location $\mu$ of a Gaussian that is wrapped around the interval:
         </p>
         <div class="math-block">
           $$P=\mathrm{Unif}[0,1],\qquad
@@ -108,10 +108,6 @@
             src="assets/k_mle_wrapped_uniform.svg"
             alt="An off-center candidate and centered candidate for a fixed-variance wrapped Gaussian model, each shown against a uniform truth with equal ordinary cross-entropy."
           >
-          <figcaption>
-            <strong>Wrapped model, distance kernel.</strong> Ordinary cross-entropy thinks all circular
-            translations of the fixed-width density are equivalent. If you want to reward a model for near-misses, you need a nonlocal loss that considers the geometry of the interval.
-          </figcaption>
         </figure>
         <h3>Shuffled likelihoods</h3>
         <p>
@@ -131,9 +127,6 @@
             src="assets/k_mle_shuffled_chunks.svg"
             alt="A contiguous Gaussian and a version cut into equal-width chunks and shuffled across the interval, with ordinary cross-entropy and normalized Kq typicality."
           >
-          <figcaption>
-            <strong>Piecewise shuffling.</strong> Cutting a density into equal-width pieces and permuting the pieces is invisible to cross-entropy under a uniform true distribution. It is however seen by a local task kernel. Once high-density pieces are spread across the interval, the smoothed typicality $Kq$ is much closer to flat.
-          </figcaption>
         </figure>
         <h3>Finite atoms</h3>
         <p>
@@ -144,9 +137,6 @@
             src="assets/k_mle_discrete_atoms.svg"
             alt="Finite-atom approximations to a uniform distribution. Ordinary cross-entropy is infinite because the model has zero density between atoms, while normalized Kq remains finite."
           >
-          <figcaption>
-            <strong>Finite atoms.</strong> An empirical or point-mass approximation is an infinitely bad approximation to a uniform true distribution under ordinary log loss. But the local typicality $(Kq)(x)$ is positive between atoms, and agrees with intuition that a higher density of atoms is a better approximation.
-          </figcaption>
         </figure>
       </section>
 
@@ -280,7 +270,7 @@
           Concavity gives $\mathbb E_{X\sim p}S_H(q,X)\ge H(p)$, with equality at $q=p$. That ensures "propriety": if the truth is $p$, I should report $p$.
         </p>
         <p>
-          One useful concave family is the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>, including $K_\ell(x,y)=\exp(-|x-y|/\ell)$.
+          One concave family is the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a>, including $K_\ell(x,y)=\exp(-|x-y|/\ell)$.
         </p>
       </section>
 
@@ -383,7 +373,7 @@
             alt="A two-component Gaussian mixture example comparing an optimized ordinary cross-entropy fit with a variance floor against a Laplace-kernel tangent K cross-entropy fit."
           >
           <figcaption>
-            <strong>Gaussian mixture singularity.</strong> The left panel shows the fully optimized fits. The right panel compares ordinary CE and Laplace-kernel tangent $K$-CE along the corresponding one-dimensional second-component variance.
+            <strong>Gaussian mixture singularity.</strong> The left panel shows the fitted models. The right panel shows how CE and $K$-CE change as the variance of the second component changes.
           </figcaption>
         </figure>
         <div class="fit-lab" id="gmm-fit-lab">

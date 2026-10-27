@@ -47,7 +47,7 @@
         <p class="post-date"><time datetime="2026-07-17">July 17, 2026</time></p>
       </div>
       <p class="summary">
-        Suppose I observe $M$ samples and want to retain $N$ representative members. We can define two objectives: for "diversity", I want an equally weighted set whose members are as nonredundant as possible. For "compression", I want a small set of objects and weights that approximates the empirical distribution. Ordinary entropy-derived quantities provide no selection rule for either problem because both objectives rely on exact equality between values. A similarity kernel (such as one that defines the resolution of the data) allows one sample value to receive partial credit for another so the selected distribution remains discrete over the samples. We can use similarity-sensitive entropy and its derived quantities to place discrete and continuous distributions on the same footing, and frame subset selection as probabilistic modeling of a continuous distribution with a discrete/atomic model.
+        Suppose I observe $M$ samples and want to retain $N$ representative members. We can define two objectives: for "diversity", I want an equally weighted subset whose members are as nonredundant as possible. For "compression", I want a small subset of objects and weights that approximates the empirical distribution. Ordinary entropy-derived quantities provide no selection rule for either problem because both objectives rely on exact equality between values. A similarity kernel (such as one that defines the resolution of the data) allows one sample value to receive partial credit for approximating another. We can use similarity-sensitive entropy and its derived quantities to place discrete and continuous distributions on the same footing, and frame subset selection as probabilistic modeling of a continuous distribution with a discrete/atomic model.
       </p>
     </header>
 
@@ -137,7 +137,7 @@
           $$p_M=\frac1M\sum_{i=1}^M\delta_{x_i}.$$
         </div>
         <p>
-          I use “coreset” here in the broad sense of a small weighted subset intended to stand in for the empirical distribution. In this setting, a size-$N$ coreset is a distribution supported on observed points,
+          I'll also use “coreset” here to convey a small weighted subset intended to stand in for the empirical distribution. In this setting, a size-$N$ coreset is a distribution supported on observed points,
         </p>
         <div class="math-block">
           $$q_{S,w}=\sum_{a=1}^N w_a\delta_{z_a},
@@ -157,7 +157,7 @@
           D(p,q):=C(p,q)-H(p)=\operatorname{KL}(p\Vert q).$$
         </div>
         <p>
-          Interpreted directly as a distribution, a coreset assigns zero mass to observations outside its support. When the $M$ observed atoms are distinct, $p_M$ assigns positive mass to every one of them, so $C(p_M,q_{S,w})$ and $D(p_M,q_{S,w})$ are infinite whenever $N&lt;M$. Ordinary cross-entropy therefore supplies no ranking over these sparse models. Coreset weights are consequently not fit by treating the coreset as a probabilistic report for $p_M$, which seems unsatisfying. Conventionally, it is typical to re-express the coreset objective using some downstream loss that relates to the task at hand, or to abandon the discrete coreset model itself.
+          Interpreted directly as a distribution, a coreset assigns zero mass to observations outside its support. When the $M$ observed atoms are distinct, $p_M$ assigns positive mass to every one of them, so $C(p_M,q_{S,w})$ and $D(p_M,q_{S,w})$ are infinite whenever $N&lt;M$. Ordinary cross-entropy therefore supplies no ranking over these sparse models. Cnventionally, coreset weights are consequently not fit by treating the coreset as a sparser probabilistic model of $p_M$, which seems unsatisfying. It is therefore typical to re-express the coreset objective using some downstream loss that relates to the task at hand, or to abandon the discrete coreset model itself.
         </p>
         <h3>Smoothing</h3>
         <p>
@@ -178,17 +178,17 @@
           \longrightarrow +\infty.$$
         </div>
         <p>
-          The model can therefore be made to fit the empirical distribution arbitrarily well, necessitating a further layer of regularization.
+          The model can therefore fit the empirical distribution arbitrarily well, so we need to regularize the fit.
         </p>
         <h3>Separating the model and the task</h3>
         <p>
-          This all suggests to me that we need a more principled approach. Instead, the framework I'm developing tries to explicitly separate the probabilistic model from the task by allowing the objective to account for the task and the probabilistic model separately. We can define the task and model once, transport them back or forward to any representation, and then use the same objective to select a coreset or evaluate its performance.
+          This all suggests to me that we need a more principled approach. Instead, the framework I'm developing separates the probabilistic model from the task. We can define the task and model once, transport them back or forward to any representation, and then use the same objective to select a coreset or evaluate its performance.
         </p>
         <p>
           That is, with similarity-sensitive scoring, $q$ remains an atomic distribution over the retained observations. The kernel now appears in the evaluation rule and states how much credit probability on $z_j$ receives when $x$ occurs. The model and scoring rule have separate jobs: $q$ states where the probability mass is, while $K$ states how that mass should be valued for the task. The same construction applies to text, graphs, molecules, or any other objects for which an appropriate pairwise similarity is available.
         </p>
         <p>
-          The two kernel-related constructions are still closely related. With gaussian similarity, the normalized overlap of two Gaussian bumps is an RBF kernel:
+          The two kernel-related constructions are still closely related. With gaussian similarity, the normalized overlap of two Gaussians is an RBF kernel:
         </p>
         <div class="math-block">
           $$\frac{\int\phi_h(z-x)\phi_h(z-y)\,dz}
@@ -196,7 +196,7 @@
           =\exp\!\left(-\frac{\|x-y\|^2}{4h^2}\right).$$
         </div>
         <p>
-          Gaussian bumps can therefore provide a similarity for the score without requiring the coreset itself to be interpreted as a Gaussian mixture. The differential entropy of the mixture and $H_K(q)$ remain different objectives.
+          Gaussians can therefore provide a similarity for the score without requiring the coreset itself to be interpreted as a Gaussian mixture. The differential entropy of the mixture and $H_K(q)$ remain different objectives.
         </p>
         <h3>Kernel scoring</h3>
         <p>
@@ -215,7 +215,7 @@
           \end{aligned}$$
         </div>
         <p>
-          Diversity uses the entropy side of this construction, with no external target. Compression instead takes $p=p_M$ as the target and $q=q_{S,w}$ as the report. Its typicality is $\tau_q(x)=\sum_j w_jK(x,z_j)$, so probability assigned to several similar prototypes can jointly cover an observation.
+          Diversity uses the entropy side of this construction, with no external target. Compression instead takes $p=p_M$ as the target and $q=q_{S,w}$ as the report. Its typicality is $\tau_q(x)=\sum_j w_jK(x,z_j)$, so probability assigned to several similar points can jointly cover an observation.
         </p>
         <p>
           For a symmetric kernel, the cross-entropy can also be written
@@ -226,7 +226,7 @@
           -\mathbb E_{Y\sim q}\frac{\tau_p(Y)}{\tau_q(Y)}.$$
         </div>
         <p>
-          The log term asks every target observation to have sufficient probability mass on similar retained objects. The second expectation is the tangent correction that accounts for the dependence of the typicality field on $q$. Together they form the proper score whenever $H_K$ is concave.
+          The log term asks every target observation to have sufficient probability mass on similar retained objects. The second expectation is the tangent correction, which accounts for the fact that typicality depends on $q$. Together they form the proper score whenever $H_K$ is concave.
         </p>
         <p>
           For the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a> used here, $H_K$ is concave, so $D_K(p,q)\ge0$. The coreset objective for compression is
@@ -237,7 +237,7 @@
           D_K(p_M,q_{S,w}).$$
         </div>
         <p>
-          In the soft kernel example, prototypes can cover overlapping neighborhoods and their weights preserve the prevalence of those neighborhoods under $p_M$.
+          In the soft kernel example, samples can cover overlapping neighborhoods and their weights preserve the prevalence of those neighborhoods under $p_M$.
         </p>
         <p>
           The scoring regret is also independent of a particular coordinate representation. For a one-to-one reparameterization $f$, transport the distributions and kernel together:
@@ -253,7 +253,7 @@
           D_{\widetilde K}(\widetilde p,\widetilde q)=D_K(p,q).$$
         </div>
         <p>
-          The distribution and task kernel move together, so the result depends on probability mass and pairwise utility rather than on the labels or coordinates used to represent the objects. Writing a fresh Laplace kernel after an arbitrary nonlinear change of coordinates would define a different similarity and therefore a different task.
+          The distribution and task kernel move together, so the result depends on probability mass and pairwise utility rather than on the labels or coordinates used to represent the objects.
         </p>
         <h3>Diversity and compression on the same sample</h3>
         <p>
@@ -264,9 +264,6 @@
             src="assets/coverage-versus-coreset.svg"
             alt="A one-dimensional empirical sample, followed by four equally weighted diversity points spread across its range and four weighted coreset points that preserve its uneven population mass."
           >
-          <figcaption>
-            Exact solutions at $\ell=0.30$ and $N=4$. Diversity spreads four equal allocations across the available distinctions. The coreset places about $65\%$ of its mass on two representatives of the larger group on the left.
-          </figcaption>
         </figure>
         <p>
           The diversity support is determined entirely by separation among the selected points. The coreset also responds to empirical frequency. It retains representatives from all three groups while assigning weights close to their population masses.
@@ -315,7 +312,7 @@
           At $\ell=0.15$, almost every distinct observation looks unique and the diversity entropy is nearly $\log4$. The objective is again close to indifferent among separated subsets. At $\ell=1.50$, longer-range similarity moves the interior diversity points outward and reduces their effective count to about two. In the limit $\ell\to\infty$, all entries of $K$ approach one and both the entropy and scoring regret lose their distinctions.
         </p>
         <p>
-          The coreset support happens to be stable across these three kernel widths, with modest changes in its optimized weights.
+          The coreset support happens to be stable across these three widths.
         </p>
         <h3>Discussion</h3>
         <p>
@@ -333,7 +330,7 @@
           The diversity problem has no external target and intentionally ignores population prevalence. The coreset is evaluated against $p_M$, so its support and weights respond to the empirical distribution. In the identity-kernel limit, ordinary entropy cannot rank the uniform subsets and ordinary cross-entropy assigns infinite loss to every strict sparse approximation. The kernel describes which substitutions preserve the distinctions relevant to the task.
         </p>
         <p>
-          The conceptual advantage here is that the selected objects and weights retain their usual meaning as a discrete probability distribution, while task utility enters through $K$. Since $H_K$ determines both the entropy and its proper scoring regret, the same geometry governs target-free diversity and target-facing compression. The notion of acceptable substitution is entirely in $K$ instead of being split between a modified density model and a separately chosen discrepancy. It also remains invariant under reparameterization, so the same framework can be used to select a coreset in any coordinate system.
+          The conceptual advantage here is that the selected objects and weights retain their usual meaning as a discrete probability distribution, while task utility enters through $K$. Since $H_K$ determines both the entropy and its proper scoring regret, the same geometry governs diversity and coreset construction. The notion of acceptable substitution is entirely in $K$ instead of being split between a modified density model and a separately chosen discrepancy. It also remains invariant under reparameterization, so the same framework can be used to select a coreset in any coordinate system.
         </p>
       </section>
     </main>

@@ -59,7 +59,7 @@
 
     <main class="stack">
       <section class="panel">
-        <h3>Uniform Representation via quantile mapping</h3>
+        <h3>Uniform Representation via quantile map</h3>
         <p>
           We can start with the “uniform representation” idea familiar from probability theory: any distribution can be generated from a single random seed (as long as it has a large enough state space). Let
         </p>
@@ -71,7 +71,7 @@
           $\psi$ as a measurable map that pushes the Lebesgue measure forward to whatever law you want, but for concreteness the below specializes to the quantile function.
         </p>
 
-        <h3>Discretized/coarse observation are a partitioning map</h3>
+        <h3>How coarse observations partition the space</h3>
         <p>
           Suppose we don’t observe $U$ precisely; we only observe which “bucket” it falls into. Let
           $f$ map the elements in $[0,1]$ to categories $\{1,\dots,m\}$ and define
@@ -182,15 +182,15 @@
           <img src="assets/partition_kernel_pullback.svg" alt="Partition kernel bins on a Gaussian pdf and their pullback under the CDF to a uniform density.">
           <figcaption>
             A fixed-width partition in $x$ (top left) maps to a nonuniform partition in $u$ (top right); near the tails the
-            mapped boundaries squeeze together. The bottom plot shows the resulting discrete distribution of $Y=g_\Delta(X)$. Let $\widetilde K_\Delta$
+            boundaries squeeze together. The bottom plot shows the resulting discrete distribution of $Y=g_\Delta(X)$. Let $\widetilde K_\Delta$
             be the pulled-back partition kernel on $[0,1]$. Then:
-            $$H_{K_\Delta}(\mu_X)=H_{\widetilde K_\Delta}(\lambda)=H(Y).$$ That is, the SS-entropy in Gaussian or uniform space equals the Shannon entropy of the coarse variable because all are representations of the same events, up to what the kernel considers indistinguishable. If we interpret this form of entropy as "information", it is now unit/coordinate-free. Discrete distributions arise from the same kinds of underlying events as continuous ones, but are interpreted through equivalent classes via partition kernels.
+            $$H_{K_\Delta}(\mu_X)=H_{\widetilde K_\Delta}(\lambda)=H(Y).$$ That is, the SS-entropy in Gaussian or uniform space equals the Shannon entropy of the coarse variable because all are representations of the same events, up to what the kernel considers indistinguishable. If we interpret this form of entropy as "information", it doesn't depend on the units or coordinates we use. Discrete distributions arise from the same kinds of underlying events as continuous ones, but are interpreted through equivalent classes via partition kernels.
           </figcaption>
         </figure>
 
         <h3>Relationship to differential entropy</h3>
         <p>
-          The “infinite distinguishability" limit corresponds to a kernel that only matches a point to itself:
+          At the extreme, we could use a kernel that only matches a point to itself:
         </p>
         <div class="math-block">
           $$K_{\mathrm{id}}(x,x') := \mathbf 1\{x=x'\}, \qquad \tau(x)=\int K_{\mathrm{id}}(x,x')\,d\mu(x')=\mu(\{x\}).$$
@@ -200,17 +200,13 @@
           $-\log \tau(x)=+\infty$. In SS-entropy terms: considering each event on a continuous space to be uniquely distinct leads to infinite surprisal. And it should. Other than for (very useful) computational convenience, there is no need for a truly infinitely-distinguishable state space. In practice, we always have a finite resolution of measurement, and the kernel can encode that resolution if desired.
         </p>
         <p>
-          Differential entropy can be understood as what remains after you subtract a kernel-dependent <em>distinguishability "baseline"</em>
-          from a finite-distinguishability family of kernels with a tiny scale $\varepsilon$. For example, take the kernel
+          As we make the kernel narrower, more values count as distinct, so the entropy grows. Differential entropy is what's left after we subtract the part that comes from the kernel itself. For example, take the kernel
           $$K_\varepsilon(x,x') := \exp\left(-\frac{|x-x'|^2}{2\varepsilon^2}\right).$$
           Loosely, typicality would behave like $\tau_\varepsilon(x)\approx \varepsilon f(x)$
         </p>
         <div class="math-block">
           $$H_{K_\varepsilon}(\mu)=\mathbb E[-\log \tau_\varepsilon(X)] \approx \log(1/\varepsilon) + \mathbb E[-\log f(X)] + \text{const}.$$
         </div>
-        <p>
-          SS-entropy makes the similarity kernel explicit letting you then move it to other spaces; differential entropy is the density-dependent part you get by removing the kernel-dependent resolution term, which makes it not invariant to change of variables.
-        </p>
       </section>
     </main>
   </div>
