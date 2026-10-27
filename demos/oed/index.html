@@ -36,7 +36,7 @@
           <div class="eyebrow">Optimal experiment design</div>
           <h1>Optimal Experiment Design Demos</h1>
           <p class="lede">
-            These demos use expected information gain to select observations during sequential data collection.
+            These demos show how to choose what data to collect next, based on what we expect to learn from it.
           </p>
           <div class="actions">
             <a class="button" href="#demos">View demos</a>
@@ -48,11 +48,10 @@
       <section class="section" id="what-is">
         <h2>What this is</h2>
         <p>
-          Optimal experiment design provides a way to fit a statistical model with less data: start with some initial data,
-          then iteratively choose the next measurement to reduce uncertainty about whatever quantity is most relevant for the decision.
+          Choosing measurements this way can help us fit a model with less data.
         </p>
         <p class="muted">
-          Example: in deduplication, instead of labeling random record pairs which are almost all non-matches, we label the pairs that are nearer to the decision boundary and correlate strongly with model parameters.
+          For example, when looking for duplicate records, most randomly chosen pairs won’t match. We can instead label pairs the model expects to learn more from, often ones it isn’t sure about.
         </p>
         <p class="muted small">
           Typical applications include A/B testing with covariates, record linkage, pricing experiments, adaptive surveys, and ML data labeling.
@@ -62,16 +61,13 @@
       <section class="section" id="demos">
         <div class="section-header">
           <h2>Demos</h2>
-          <p class="muted small">
-            Precomputed plots and demos.
-          </p>
         </div>
         <div class="grid">
           <a class="card" href="data-linkage.html">
             <div class="card-title">Record linkage + deduplication</div>
             <p class="muted">
-              The record-linkage demo selects pairs for labeling by expected information gain and fits match probabilities from those labels.
-              It runs against a hosted backend API.
+              Label pairs of records and see the model learn which ones are likely to match.
+              The demo chooses which pairs to show you next.
             </p>
           </a>
           <a class="card" href="ab-oed.html">
@@ -87,23 +83,13 @@
       <section class="section" id="method">
         <div class="section-header">
           <h2>Method</h2>
-          <p class="muted small">A high-level view of sequential design.</p>
         </div>
-        <p class="muted">
-          Sequential design makes data collection active: choose the next measurement to
-          maximize expected information about a target quantity of interest, accounting
-          for sampling uncertainty and uncertainty in the model.
+        <p class="muted" style="margin-top: 0.75rem">
+          The model estimates how much each possible measurement would teach us, then chooses the most informative one.
         </p>
         <p class="muted" style="margin-top: 0.75rem">
-          In practice, this is implemented by an approximation to Bayesian optimal experiment design, evaluating candidate measurements
-          via a data acquisition objective (e.g., expected information gain about a decision boundary or treatment choice),
-          and iterating until the remaining decision uncertainty is below a chosen tolerance.
-        </p>
-        <p class="muted" style="margin-top: 0.75rem">
-          The acquisition objective can target a treatment rule or another decision-relevant quantity rather than total
-          parameter uncertainty. Uncertainty that cannot change the recommended action is naturally excluded from
-          the objective. The method requires a fitted probabilistic model under which the acquisition objective can be
-          evaluated. In my implementation, one such evaluation has roughly the same order of runtime as one model fit.
+          We can focus on a decision, such as which treatment to choose, instead of trying to learn every detail of the model.
+          In my implementation, evaluating one possible measurement takes about as long as fitting the model.
         </p>
       </section>
 

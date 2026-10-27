@@ -35,11 +35,8 @@
         <div class="eyebrow">Adaptive A/B testing</div>
         <h1>Adaptive A/B Testing with Customer Features</h1>
 	        <p class="lede">
-	          When treatment effects vary with customer features, the sampled feature distribution affects how quickly the
-	          decision boundary can be estimated. This demo walks through a 
-	          sequential design run: at each step, choose the next customer \(x^*\) and ad assignment to learn about the A/B
-	          decision boundary. Customers who are clearly better for A or B usually do not teach the model much, so the design tends
-	          to spend tests near the boundary. On the other hand, not all boundary points are equally useful: the design focuses on points where the model is uncertain and the A/B decision is likely to change.
+	          Different customers may respond differently to the two ads. This demo chooses which customer profile to test next
+	          to learn how A and B compare. The ad shown in each test is chosen at random.
 	        </p>
       </header>
 
@@ -56,12 +53,11 @@
       </section>
 
       <section class="section">
-        <h2>Effect heterogeneity and sample allocation</h2>
+        <h2>Why customer differences matter</h2>
         <p>
-          When treatment effects vary with customer features, estimating only an average effect can obscure changes in the
-          sign of the conditional treatment effect. In this simulation, the design tends to allocate budgetto observations whose feature values
-          minimize that uncertainty. Uniform sampling tends to allocate observations to regions where the sign is already
-          well determined.
+          An average A/B result can hide that A works better for some customers and B for others. In this simulation,
+          the design tends to test customer profiles that help clarify those differences. Random sampling can spend more
+          tests where the model already has a clear answer.
         </p>
       </section>
 
@@ -628,7 +624,7 @@
 	                <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
 	                <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
 	                ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test</div>' : ""}
-	                <div class="legend-item muted">Uncertainty highlights where the sign of \(\Delta(x)=x^\top\gamma\) is unclear.</div>
+	                <div class="legend-item muted">Uncertainty highlights where the sign of \\(\\Delta(x)=x^\\top\\gamma\\) is unclear.</div>
 	              </div>
 	            `;
 	            renderMath(container);
@@ -644,7 +640,7 @@
 	              <div class="legend-item"><span class="legend-swatch circle outline"></span> ad A (z=0)</div>
 	              <div class="legend-item"><span class="legend-swatch square outline"></span> ad B (z=1)</div>
 	              ${includeStar ? '<div class="legend-item"><span class="legend-swatch star"></span> next test</div>' : ""}
-	              <div class="legend-item muted">Info gain targets learning \(\gamma\) (the feature-dependent A/B difference), not \(\beta\).</div>
+	              <div class="legend-item muted">Info gain targets learning \\(\\gamma\\) (the feature-dependent A/B difference), not \\(\\beta\\).</div>
 	            </div>
 	          `;
 	          renderMath(container);

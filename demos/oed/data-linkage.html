@@ -34,12 +34,12 @@
         <div class="eyebrow">Record linkage demo</div>
         <h1>Record linkage with active learning</h1>
         <p class="lede">
-          The demo selects record pairs for labeling by expected information gain. The resulting labels are used to fit a
-          calibrated model that matches record pairs for deduplication or record linkage.
+          Label pairs of records as matches or non-matches. The demo uses your labels to estimate which other pairs are
+          likely to match and chooses which pairs to show you next.
         </p>
         <p class="muted small" style="margin-top: 0.35rem">
-          Early on you’ll see <strong>sim</strong> (raw schema-aware similarity). After a few labels, you’ll see <strong>prob</strong> (calibrated
-          match probability) and the queried pairs concentrate near <code>p≈0.5</code>.
+          At first, <strong>sim</strong> shows how similar the records look. After a few labels, <strong>prob</strong>
+          estimates how likely they are to match. The demo tends to show pairs with probabilities near <code>0.5</code>.
         </p>
         <ol class="muted small" style="margin: 0.7rem 0 0; padding-left: 1.15rem">
           <li>Upload CSV(s)</li>
@@ -56,8 +56,7 @@
           <li>Screen candidate pairs with a schema-aware similarity score before fitting the active learner.</li>
           <li>Compress the resulting features with PCA into a small embedding (principal components).</li>
           <li>Fit ridge logistic regression on PCs to predict match probability.</li>
-          <li>Select the next pairs by expected reduction in model uncertainty.</li>
-          <li>Query strategy: start with diverse pairs, then pick batches that maximize expected information gain.</li>
+          <li>Start with a variety of pairs, then choose batches expected to reduce the model’s uncertainty most.</li>
         </ul>
         <p class="muted small" style="margin-top: 0.75rem">
           As labels accumulate, the backend can increase capacity by using more PCs.
