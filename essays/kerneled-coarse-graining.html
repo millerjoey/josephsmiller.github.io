@@ -41,20 +41,22 @@
     </nav>
 
     <header class="hero">
-      <div class="eyebrow">Essay · Information theory</div>
       <div class="post-heading">
         <h1>Coarse Graining with a Similarity Kernel</h1>
-        <p class="post-date"><time datetime="2026-01-10">January 10, 2026</time></p>
+        <p class="post-date"><span class="post-author">Joseph S. Miller</span> <span aria-hidden="true">·</span> <time datetime="2026-01-10">January 10, 2026</time></p>
       </div>
-      <p class="summary">
-        Any probability distribution can be generated from a uniform seed $U\sim\mathrm{Unif}[0,1]$ and a map $X=\psi(U)$.
-        If $\psi$ is invertible, then observing $X$ is equivalent to observing $U$ exactly. It is natural to conceive of $\psi$
-        as a relabeling of each event of $U$, which preserves Shannon entropy. In contrast, differential entropy doesn't behave in this way.
-        In many other cases, what we observe or model is often a "coarsening" where some information is lost and the exact value of $U$ can't be recovered.
-        Using $Z = f(U)$ to denote this coarsening-measurement, we no longer see fine distinctions in $U$, but rather the entire fiber $f^{-1}(z)$.
-        If we encode that loss of distinguishability explicitly, we can motivate the similarity-sensitive entropy framework,
-        see Shannon and differential entropy as special cases and interpolate between them and, I believe, improve our notion of statistical information.
-      </p>
+      <section class="abstract" aria-labelledby="abstract-heading">
+        <h2 id="abstract-heading">Abstract</h2>
+        <p class="summary">
+          Any probability distribution can be generated from a uniform seed $U\sim\mathrm{Unif}[0,1]$ and a map $X=\psi(U)$.
+          If $\psi$ is invertible, then observing $X$ is equivalent to observing $U$ exactly. It is natural to conceive of $\psi$
+          as a relabeling of each event of $U$, which preserves Shannon entropy. In contrast, differential entropy doesn't behave in this way.
+          In many other cases, what we observe or model is often a "coarsening" where some information is lost and the exact value of $U$ can't be recovered.
+          Using $Z = f(U)$ to denote this coarsening-measurement, we no longer see fine distinctions in $U$, but rather the entire fiber $f^{-1}(z)$.
+          If we encode that loss of distinguishability explicitly, we can motivate the similarity-sensitive entropy framework,
+          see Shannon and differential entropy as special cases and interpolate between them and, I believe, improve our notion of statistical information.
+        </p>
+      </section>
     </header>
 
     <main class="stack">
@@ -178,8 +180,10 @@
           In $u$-space the bin boundaries become quantiles $u_j=\psi^{-1}(m+j\Delta)=F(m+j\Delta)$, which crowd near $0$
           and $1$ because the Gaussian tails have low density.
         </p>
-        <figure>
-          <img src="assets/partition_kernel_pullback.svg" alt="Partition kernel bins on a Gaussian pdf and their pullback under the CDF to a uniform density.">
+        <figure class="figure-wide">
+          <div class="figure-scroll">
+            <img src="assets/partition_kernel_pullback.svg" alt="Partition kernel bins on a Gaussian pdf and their pullback under the CDF to a uniform density.">
+          </div>
           <figcaption>
             A fixed-width partition in $x$ (top left) maps to a nonuniform partition in $u$ (top right); near the tails the
             boundaries squeeze together. The bottom plot shows the resulting discrete distribution of $Y=g_\Delta(X)$. Let $\widetilde K_\Delta$
