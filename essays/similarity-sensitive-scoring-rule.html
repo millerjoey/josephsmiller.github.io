@@ -70,8 +70,8 @@
           Then probability assigned to cloudy should count as partial credit when rain occurs (and vice versa), while probability assigned to sunny should not. Ordinary log loss cannot express that distinction because it only cares about the probability assigned to the exact observed state.
         </p>
         <p>
-          For example, take the truth to be $p=(0.8,0.1,0.1)$ over rain, cloudy, and sunny, and compare
-          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives them the same average score because the reports assign the same probability to rain and only swap the equal-mass cloudy and sunny terms. But rain-or-cloudy has $90\%$ probability under the truth, so a similarity-sensitive cross-entropy should prefer the report that confuses between those two.
+          For example, take the true probability to be $p=(0.8,0.1,0.1)$ over rain, cloudy, and sunny, and compare
+          $q_{\mathrm{near}}=(0.6,0.3,0.1)$ with $q_{\mathrm{far}}=(0.6,0.1,0.3)$. Ordinary cross-entropy gives them the same average score because the reports assign the same probability to rain and only swap the equal-mass cloudy and sunny terms. But rain-or-cloudy has $90\%$ probability under the truth, so a similarity-sensitive cross-entropy should prefer the report that confuses those two instead.
         </p>
         <p>
            In practice, people coarsen by merging rain and cloudy into a single "not sunny" category. This is convenient, but it throws away information that the forecaster might have, and leads to biasing the model in a way that is not transparent. We can do this more transparently (and equivalently) by setting the 0.3 similarity to 1. The next examples show that the attractiveness of rewarding near-misses is not just in the discrete case, so coarsening by merging labels is not a complete solution.
@@ -88,7 +88,7 @@
           Here $\phi_\sigma$ is the centered Gaussian density with standard deviation $\sigma$.
         </p>
         <p>
-          Because $q_\mu$ is just a circular translation of the same density, ordinary cross-entropy cannot choose between them:
+          Because $q_\mu$ is just a translation of the density, ordinary cross-entropy cannot choose between them:
         </p>
         <div class="math-block">
           $$\operatorname{CE}(P,q_\mu)=-\int_0^1 \log q_\mu(x)\,dx$$
@@ -136,7 +136,7 @@
         </figure>
         <h3>Finite atoms</h3>
         <p>
-          Taking a different direction, we now approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is infinite for any discrete approximation, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
+          Taking a different direction, we now approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is infinite, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
         </p>
         <figure class="figure-wide">
           <div class="figure-scroll">
@@ -152,7 +152,7 @@
         <h3>The scoring rule</h3>
         <h4>Probability versus similarity</h4>
         <p>
-          Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let $K:\mathcal X\times\mathcal X\to[0,1]$ be a similarity kernel. We have two separate concepts: $p$ says what the reporter believes will happen, while $K$ relates to the utility: it says how interchangeable the outcomes are. As with ordinary log loss, the loss may be infinite if the report gives an observed outcome zero typicality.
+          Let $\mathcal X$ be the outcome space, let $p$ be a probability law on $\mathcal X$, and let $K:\mathcal X\times\mathcal X\to[0,1]$ be a similarity kernel. We have two separate concepts: $p$ says what the forecast believes will happen, while $K$ relates to the utility: it says how interchangeable the outcomes are. As with ordinary log loss, the loss may be infinite if the report gives an observed outcome zero typicality.
         </p>
         <p>
           For a law $p$, the typicality function again is
@@ -161,7 +161,7 @@
           $$(Kp)(x)=\int K(x,y)\,p(dy).$$
         </div>
         <p>
-          Similarity-sensitive entropy is expected surprisal of that typicality:
+          Similarity-sensitive entropy is expected log of that typicality:
         </p>
         <div class="math-block">
           $$H_K(p)=-\mathbb E_{X\sim p}\log (Kp)(X).$$
@@ -178,7 +178,7 @@
           $$S_{\mathrm{typ}}(q,x)=-\log (Kq)(x).$$
         </div>
         <p>
-          This is meaningful, but it only sees the typicality of the observed state, not the state itself. We'll need a modification that can directly see the states $x$, not just their typicality.
+          This might be meaningful as a "coarsened" score, but it only sees the typicality of the observed state, not the state itself. We'll need a modification that can directly see the states $x$, not just their typicality.
         </p>
         <p>
           The issue shows up even with two states. Let
@@ -215,7 +215,7 @@
           \right].$$
         </div>
         <p>
-          In the second term, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
+          Below, I'll show where this comes from. In the second term, for each state $Y$ drawn from the reported distribution, the ratio compares the similarity between $Y$ and the observed point $x$ to the total typicality of $Y$ under the report. If $x$ accounts for a large share of many such neighborhoods, the reward is large. This creates the desired tradeoff between rewarding reports for putting mass on the observed point and rewarding them for putting mass near the observed point.
         </p>
         <p>
           This reward cancels out when we average over the report itself:
@@ -242,14 +242,14 @@
           $-\log q_j$. Log loss is the identity-kernel special case.
         </p>
         <p>
-          A point-mass report makes the resolution tradeoff especially clear. For $q=\delta_\mu$ and $K(\mu,\mu)=1$, the corrected score becomes
+          We can see what happens for a point mass report. For $q=\delta_\mu$ and $K(\mu,\mu)=1$, the corrected score becomes
         </p>
         <div class="math-block">
           $$S_K(\delta_\mu,x)
           =-\log K(x,\mu)-K(x,\mu)+1.$$
         </div>
         <p>
-          This score is finite whenever $K(x,\mu)&gt;0$. A Laplace or Gaussian kernel therefore assigns a finite score to an atomic report at every fixed positive bandwidth, however narrow the kernel may be. Narrowing the kernel makes distant errors increasingly expensive, while the infinite penalty for missed outcomes returns only in the zero-bandwidth limit that approaches the identity kernel. The bandwidth acts as a floor on task-relevant resolution: concentration below that scale receives no unlimited reward. Consequently, the variance-collapse path in the mixture example below ends at a finite objective instead of running to $-\infty$.
+          This score is finite whenever $K(x,\mu)&gt;0$. A smooth nonzero kernel therefore assigns a finite score to an atomic report at every fixed positive bandwidth, however narrow the kernel may be. Narrowing the kernel makes distant errors increasingly expensive, while the infinite penalty for missed outcomes returns only in the limit that approaches the identity kernel. The bandwidth also acts as a floor on task-relevant resolution: concentrating a prediction below that scale receives no unlimited reward. Consequently, the infinite precision fit in the mixture example below ends at a finite objective instead of exploding to $-\infty$.
         </p>
         <p>
           I will call the expected risk of this score $K$-cross-entropy, abbreviated as $K$-CE:
@@ -370,7 +370,7 @@
         </p>
         <h3>Fitting a mixture model</h3>
         <p>
-          Another important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can get infinite reward placing a mixture component on one point and using the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to select among model fits. From the perspective presented above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
+          An important case where this matters is in fitting a Gaussian mixture to two small clusters of data. Ordinary MLE can get infinite reward placing a mixture component on one point and using the other component more broadly, requiring arbitrary minimum variance decisions to keep things finite, or priors, cross-validation, and other forms of regularization to select among model fits. From the perspective above, the problem is that we use an implicit identity kernel that rewards precision far beyond what is appropriate for the task.
         </p>
         <p>
           In the figure below, I optimize the component means, variances, and mixture weight under ordinary CE and under the tangent $K$-CE objective with a Laplace kernel using similarity scale $\ell=0.15$. The CE fit prefers that minimum variance component as a spike on one observation; the $K$-CE optimum is interior and instead fits two natural groups.
@@ -411,7 +411,7 @@
       </section>
 
       <section class="panel callout">
-        <h3>Takeaway</h3>
+        <h3>Summary</h3>
         <p>
           Shannon entropy generates the logarithmic scoring rule, which gives ordinary cross-entropy, KL divergence,
           mutual information, and maximum likelihood. When similarity-sensitive entropy is concave, it gives the parallel quantities:

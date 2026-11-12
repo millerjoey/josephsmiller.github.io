@@ -141,14 +141,13 @@
           </div>
         </figure>
         <p>
-          Smoothing at the task scale reduces the importance of the valley within the left pair, so $K$-CE prioritizes fitting the more distinct regions to the right.
+          Smoothing at the task scale reduces the importance of the low density region between the left two modes, so $K$-CE prioritizes fitting the more distinct regions to the right.
         </p>
         <div class="table-wrap">
           <table class="score-table">
             <thead>
               <tr>
                 <th>Kernel and model family</th>
-                <th>Fit</th>
                 <th class="num">$\Delta_K$ (bits)</th>
                 <th class="num">$\Delta_{\log}$ (bits)</th>
               </tr>
@@ -156,19 +155,16 @@
             <tbody>
               <tr>
                 <td>Narrow ($\ell=0.08$), 3 components</td>
-                <td>Almost identical models</td>
                 <td class="num">$&lt;0.001$</td>
                 <td class="num">$&lt;0.001$</td>
               </tr>
               <tr>
                 <td>Broad ($\ell=0.6$), 3 components</td>
-                <td>Different</td>
                 <td class="num"><strong>$0.021$</strong></td>
                 <td class="num"><strong>$0.231$</strong></td>
               </tr>
               <tr>
                 <td>Broad ($\ell=0.6$), 4 components</td>
-                <td>Both recover $P$</td>
                 <td class="num">$0.000$</td>
                 <td class="num">$0.000$</td>
               </tr>

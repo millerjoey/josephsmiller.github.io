@@ -48,7 +48,7 @@
       <section class="abstract" aria-labelledby="abstract-heading">
         <h2 id="abstract-heading">Abstract</h2>
         <p class="summary">
-          Suppose I observe $M$ samples and want to retain $N$ representative members. We can define two objectives: for "diversity", I want an equally weighted subset whose members are as nonredundant as possible. For "compression", I want a small subset of objects and weights that approximates the empirical distribution. Ordinary entropy-derived quantities provide no selection rule for either problem because both objectives rely on exact equality between values. A similarity kernel (such as one that defines the resolution of the data) allows one sample value to receive partial credit for approximating another. We can use similarity-sensitive entropy and its derived quantities to place discrete and continuous distributions on the same footing, and frame subset selection as probabilistic modeling of a continuous distribution with a discrete/atomic model.
+          Suppose I observe $M$ samples and want to retain $N$ representative ones. We can define two objectives: for "diversity", I want an equally weighted subset whose elements are as nonredundant as possible. For "compression", I want a small subset of objects and weights that approximates the empirical distribution. Ordinary entropy-derived quantities provide no selection rule for either problem because both objectives rely on exact equality between values. A similarity kernel (such as one that defines the resolution of the data) allows one sample value to receive partial credit for approximating another. We can use similarity-sensitive entropy and its derived quantities to place discrete and continuous distributions on the same footing, and frame subset selection as probabilistic modeling of a continuous distribution with a discrete/atomic model.
         </p>
       </section>
     </header>
@@ -133,13 +133,13 @@
 
         <h3>Compression</h3>
         <p>
-          Diversity asks how much distinctiveness a selected distribution contains. I use compression to refer to how well a sparse distribution can stand in for a specified target distribution, so the population frequencies now matter. The empirical distribution is
+          Diversity is about how distinct a selected sample is, but we can also consider how well a sparse distribution can model a specified target distribution, so the population frequencies now matter. The empirical distribution is
         </p>
         <div class="math-block">
           $$p_M=\frac1M\sum_{i=1}^M\delta_{x_i}.$$
         </div>
         <p>
-          I'll also use “coreset” here to convey a small weighted subset intended to stand in for the empirical distribution. In this setting, a size-$N$ coreset is a distribution supported on observed points,
+          We can also call the dataset a "coreset" here to convey a small weighted subset intended to stand in for the empirical distribution. In this setting, a size-$N$ weighted coreset is a distribution supported on observed points,
         </p>
         <div class="math-block">
           $$q_{S,w}=\sum_{a=1}^N w_a\delta_{z_a},
@@ -159,7 +159,7 @@
           D(p,q):=C(p,q)-H(p)=\operatorname{KL}(p\Vert q).$$
         </div>
         <p>
-          Interpreted directly as a distribution, a coreset assigns zero mass to observations outside its support. When the $M$ observed atoms are distinct, $p_M$ assigns positive mass to every one of them, so $C(p_M,q_{S,w})$ and $D(p_M,q_{S,w})$ are infinite whenever $N&lt;M$. Ordinary cross-entropy therefore supplies no ranking over these sparse models. Cnventionally, coreset weights are consequently not fit by treating the coreset as a sparser probabilistic model of $p_M$, which seems unsatisfying. It is therefore typical to re-express the coreset objective using some downstream loss that relates to the task at hand, or to abandon the discrete coreset model itself.
+          Interpreted directly as a distribution, a coreset assigns zero mass to observations outside its support. When the $M$ observed atoms are distinct, $p_M$ assigns positive mass to every one of them, so $C(p_M,q_{S,w})$ and $D(p_M,q_{S,w})$ are infinite when $N&lt;M$. Ordinary cross-entropy therefore won't allow us to evaluate these sparse models. Cnventionally, coreset weights are consequently not fit by treating the coreset as a sparser probabilistic model of $p_M$, which seems unsatisfying. It is therefore typical to re-express the coreset objective using some downstream loss that relates to the task at hand, or to abandon the discrete coreset model itself.
         </p>
         <h3>Smoothing</h3>
         <p>
@@ -187,18 +187,10 @@
           This all suggests to me that we need a more principled approach. Instead, the framework I'm developing separates the probabilistic model from the task. We can define the task and model once, transport them back or forward to any representation, and then use the same objective to select a coreset or evaluate its performance.
         </p>
         <p>
-          That is, with similarity-sensitive scoring, $q$ remains an atomic distribution over the retained observations. The kernel now appears in the evaluation rule and states how much credit probability on $z_j$ receives when $x$ occurs. The model and the scoring rule play different roles: $q$ states where the probability mass is, while $K$ states how that mass should be valued for the task. The same construction applies to text, graphs, molecules, or any other objects for which a pairwise similarity is available.
+          That is, with similarity-sensitive scoring, $q$ remains an atomic distribution over the retained observations. The kernel now is in the evaluation rule and states how much credit probability on $z_j$ receives when $x$ occurs. The model and the scoring rule play different roles: $q$ states where the probability mass is, while $K$ states how that mass should be valued for the task. The same construction applies to text, graphs, molecules, or any other objects for which a pairwise similarity is available.
         </p>
         <p>
-          The two kernel-related constructions are still closely related. With gaussian similarity, the normalized overlap of two Gaussians is an RBF kernel:
-        </p>
-        <div class="math-block">
-          $$\frac{\int\phi_h(z-x)\phi_h(z-y)\,dz}
-          {\int\phi_h(z-x)^2\,dz}
-          =\exp\!\left(-\frac{\|x-y\|^2}{4h^2}\right).$$
-        </div>
-        <p>
-          Gaussians can therefore provide a similarity for the score without requiring the coreset itself to be interpreted as a Gaussian mixture. The differential entropy of the mixture and $H_K(q)$ remain different objectives.
+          The two kernel-related constructions are still closely related. With gaussian similarity, the normalized overlap of two Gaussians is an RBF kernel. Gaussians can therefore provide a similarity for the score without requiring the coreset itself to be interpreted as a Gaussian mixture. The differential entropy of the mixture and $H_K(q)$ remain different objectives.
         </p>
         <h3>Kernel scoring</h3>
         <p>
@@ -217,7 +209,7 @@
           \end{aligned}$$
         </div>
         <p>
-          Diversity uses the entropy side of this construction, with no external target. Compression instead takes $p=p_M$ as the target and $q=q_{S,w}$ as the report. Its typicality is $\tau_q(x)=\sum_j w_jK(x,z_j)$, so probability assigned to several similar points can jointly cover an observation.
+          Diversity uses the entropy only with no external target. Compression instead takes $p=p_M$ as the target and $q=q_{S,w}$ as the report. Its typicality is $\tau_q(x)=\sum_j w_jK(x,z_j)$, so probability assigned to several similar points can jointly cover an observation.
         </p>
         <p>
           For a symmetric kernel, the cross-entropy can also be written
@@ -227,9 +219,6 @@
           =1-\mathbb E_{X\sim p}\log\tau_q(X)
           -\mathbb E_{Y\sim q}\frac{\tau_p(Y)}{\tau_q(Y)}.$$
         </div>
-        <p>
-          The log term asks every target observation to have sufficient probability mass on similar retained objects. The second expectation is the tangent correction, which accounts for the fact that typicality depends on $q$. Together they form the proper score whenever $H_K$ is concave.
-        </p>
         <p>
           For the <a href="https://arxiv.org/html/2601.03064v2#S6.SS3" target="_blank" rel="noreferrer">one-dimensional Laplace pullback class</a> used here, $H_K$ is concave, so $D_K(p,q)\ge0$. The coreset objective for compression is
         </p>
@@ -259,7 +248,7 @@
         </p>
         <h3>Diversity and compression on the same sample</h3>
         <p>
-          Place 20 observations on the line, keep four atoms (using $\ell=0.30$). Diversity fixes all four weights at $0.25$. The coreset weights are optimized against $p_M$.
+          Say we have 20 observations along a line and we keep four atoms (using $\ell=0.30$). Diversity fixes all four weights at $0.25$. The coreset weights are optimized against $p_M$.
         </p>
         <figure>
           <img
@@ -311,10 +300,8 @@
           </table>
         </div>
         <p>
-          At $\ell=0.15$, almost every distinct observation looks unique and the diversity entropy is nearly $\log4$. The objective is again close to indifferent among separated subsets. At $\ell=1.50$, longer-range similarity moves the interior diversity points outward and reduces their effective count to about two. In the limit $\ell\to\infty$, all entries of $K$ approach one and both the entropy and scoring regret lose their distinctions.
-        </p>
-        <p>
-          The coreset support happens to be stable across these three widths.
+          At $\ell=0.15$, almost every distinct observation looks unique and the diversity entropy is nearly $\log4$. The objective is again close to indifferent among separated subsets. At $\ell=1.50$, longer-range similarity moves the interior diversity points outward and reduces their effective count to about two. In the limit $\ell\to\infty$, all entries of $K$ approach one.
+          The coreset support happens to be stable across these three.
         </p>
         <h3>Discussion</h3>
         <p>
