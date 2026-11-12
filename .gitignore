@@ -1,5 +1,6 @@
 # Local-only helpers (do not publish)
 demos/oed/scripts/
+experiment-design/demos/scripts/
 demos/spn/
 demos/rspn/
 essays/oed-mutual-information.html

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="980" height="500" viewBox="0 0 980 500">
 <rect width="100%" height="100%" fill="#fbfaf7"/>
 <style>.axis{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#4c4c4c}.label{font:15px Georgia,serif;fill:#252525}.title{font:600 20px Georgia,serif;fill:#252525}.panel{font:600 15px Georgia,serif;fill:#252525}.legend{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#303030}</style>
-<text class="title" x="74" y="31">Three components, two fitting objectives</text>
+<text class="title" x="74" y="31">Fitting 3 components to a 4-component density: CE vs. K-CE (ℓ = 0.6)</text>
 <title>Fixed-capacity CE and K-CE projections</title>
 <desc>CE uses separate components for two nearby high-mass modes, while broad-kernel K-CE merges those modes and covers the remaining task-distinct regions. The right panel compares their task typicality fields.</desc>
 <line x1="82" y1="58" x2="116" y2="58" stroke="#777777" stroke-width="3"/>

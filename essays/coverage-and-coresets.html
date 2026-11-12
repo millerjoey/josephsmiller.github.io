@@ -76,7 +76,7 @@
           $$H(u_S)=\log N.$$
         </div>
         <p>
-          Unfortunately, Shannon entropy only sees the weights and the number of atoms. The entropy cannot distinguish a diverse selection from a cluster of near-duplicates. Clearly, there is some aspect of "information" that Shannon entropy has trouble identifying.
+          Shannon entropy depends only on the weights and the number of atoms. The entropy cannot distinguish a diverse selection from a cluster of near-duplicates. Clearly, there is some aspect of "information" that Shannon entropy has trouble identifying.
         </p>
         <h3>Similarity-sensitive diversity</h3>
         <p>
@@ -101,7 +101,7 @@
           \arg\max_{S\subseteq\mathcal X_M:\,|S|=N}H_K(u_S).$$
         </div>
         <p>
-          The budget $N$ is fixed and the weights remain uniform. Intuitively, we want to pick the set with the most "information", and it is self-evidently better to select points that are mutually dissimilar than to select near-duplicates. Is this achieved?
+          The budget $N$ is fixed and the weights remain uniform. Intuitively, we want to pick the set with the most "information", and we want points that are mutually dissimilar rather than near-duplicates. Is this achieved?
         </p>
         <h3>Redundancy</h3>
         <p>
@@ -187,7 +187,7 @@
           This all suggests to me that we need a more principled approach. Instead, the framework I'm developing separates the probabilistic model from the task. We can define the task and model once, transport them back or forward to any representation, and then use the same objective to select a coreset or evaluate its performance.
         </p>
         <p>
-          That is, with similarity-sensitive scoring, $q$ remains an atomic distribution over the retained observations. The kernel now appears in the evaluation rule and states how much credit probability on $z_j$ receives when $x$ occurs. The model and scoring rule have separate jobs: $q$ states where the probability mass is, while $K$ states how that mass should be valued for the task. The same construction applies to text, graphs, molecules, or any other objects for which an appropriate pairwise similarity is available.
+          That is, with similarity-sensitive scoring, $q$ remains an atomic distribution over the retained observations. The kernel now appears in the evaluation rule and states how much credit probability on $z_j$ receives when $x$ occurs. The model and the scoring rule play different roles: $q$ states where the probability mass is, while $K$ states how that mass should be valued for the task. The same construction applies to text, graphs, molecules, or any other objects for which a pairwise similarity is available.
         </p>
         <p>
           The two kernel-related constructions are still closely related. With gaussian similarity, the normalized overlap of two Gaussians is an RBF kernel:

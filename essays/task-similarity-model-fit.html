@@ -48,7 +48,7 @@
       <section class="abstract" aria-labelledby="abstract-heading">
         <h2 id="abstract-heading">Abstract</h2>
         <p class="summary">
-          Ordinary cross-entropy tries to fit every distinction in a probability law with infinite resolution. That is sometimes what is wanted, but when a model has only a few degrees of freedom, CE can spend them resolving distinctions that a downstream task doesn't actually value instead of fitting more useful things. We can use a similarity kernel to change the relative cost of those errors.
+          Ordinary cross-entropy tries to fit every distinction in a probability law with infinite resolution. That is sometimes what is wanted, but when a model has only a few degrees of freedom, CE may use them to resolve distinctions that the downstream task doesn't actually value instead of fitting more useful things. We can use a similarity kernel to change the relative cost of those errors.
         </p>
       </section>
     </header>
@@ -130,7 +130,7 @@
           We now fit $Q$ directly to the true density $P$ with only three Gaussian components, where each can have its own weight, mean, and width.
         </p>
         <p>
-          CE uses two components to reproduce the large nearby modes almost exactly, then spends its last component covering both modes on the right with one wide Gaussian centered near $1.50$. Broad-kernel $K$-CE makes the opposite tradeoff, using one wide component centered near $-0.68$ for the nearby pair.
+          CE uses two components to reproduce the large nearby modes almost exactly, and uses its third component to cover both right-hand modes with one wide Gaussian centered near $1.50$. Broad-kernel $K$-CE makes the opposite tradeoff, using one wide component centered near $-0.68$ for the nearby pair.
         </p>
         <figure class="figure-wide">
           <div class="figure-scroll">
@@ -176,7 +176,7 @@
           </table>
         </div>
         <p>
-          With a narrow kernel, $K$-CE and CE spend the three components in essentially the same way, indicating that the more computationally simple CE is sufficient. With four components, the truth is in the model family and both objectives recover it exactly, so fitting with local CE is also preferred. Different models are chosen when the kernel gives meaningful partial credit and the capacity is too small to fit everything.
+          With a narrow kernel, $K$-CE and CE place the three components in nearly the same locations, indicating that the more computationally simple CE is sufficient. With four components, the truth is in the model family and both objectives recover it exactly, so fitting with local CE is also preferred. Different models are chosen when the kernel gives meaningful partial credit and the capacity is too small to fit everything.
         </p>
       </section>
 

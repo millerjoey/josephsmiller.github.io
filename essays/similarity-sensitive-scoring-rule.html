@@ -136,7 +136,7 @@
         </figure>
         <h3>Finite atoms</h3>
         <p>
-          Taking a different direction, we now approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is annoyingly infinite for any finite-atom approximation, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
+          Taking a different direction, we now approximate a continuous uniform distribution with a finite number of atoms. Ordinary log loss is infinite for any discrete approximation, because the model has zero density between atoms. But the local typicality $(Kq)(x)$ is positive between atoms, so a similarity-aware loss should be able to compare these approximations rather than declare all of them infinitely bad.
         </p>
         <figure class="figure-wide">
           <div class="figure-scroll">
@@ -386,59 +386,6 @@
             <strong>Gaussian mixture singularity.</strong> The left panel shows the fitted models. The right panel shows how CE and $K$-CE change as the variance of the second component changes.
           </figcaption>
         </figure>
-        <div class="fit-lab" id="gmm-fit-lab">
-          <p class="fit-note">
-            To show how favored this degenerate fit is by MLE, you can click the plot to add an observation and refit. The sample button draws the corresponding number of samples from a synthetic distribution with the selected number of components. The -infinite loss in ordinary CE leads to fits strongly favoring individual points; Laplace-kernel $K$-CE keeps a finite objective and encourages more balanced allocation here. When it does optimize at a degenerate fit, the risk is still interpretable and finite.
-          </p>
-          <div class="fit-lab-controls">
-            <label class="fit-control">
-              <span>Samples</span>
-              <input data-role="sample-count" type="number" min="3" max="40" step="1" value="3">
-            </label>
-            <label class="fit-control">
-              <span>Components</span>
-              <select data-role="components">
-                <option value="1">1</option>
-                <option value="2" selected>2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-            </label>
-            <label class="fit-control">
-              <span>$\ell$</span>
-              <input data-role="ell" type="number" min="0.04" max="0.5" step="0.01" value="0.15">
-            </label>
-            <div class="fit-actions-wrap">
-              <div class="fit-actions-label">Data</div>
-              <div class="fit-actions">
-                <button type="button" data-action="sample">Sample</button>
-                <button type="button" data-action="clear">Clear</button>
-              </div>
-            </div>
-          </div>
-            <div class="fit-lab-stage">
-            <svg class="fit-plot" data-role="plot" viewBox="0 0 840 430" role="img" aria-labelledby="fit-lab-title fit-lab-desc">
-              <title id="fit-lab-title">Interactive Gaussian mixture fitting comparison</title>
-              <desc id="fit-lab-desc">A one-dimensional plot comparing ordinary cross-entropy and Laplace-kernel tangent K-cross-entropy mixture fits.</desc>
-            </svg>
-            <div class="fit-metrics">
-              <div class="fit-status" data-role="status">Ready</div>
-              <div class="fit-metric">
-                <strong>Ordinary CE</strong>
-                <div class="fit-summary" data-role="ce-summary">-</div>
-              </div>
-              <div class="fit-metric">
-                <strong>Laplace K-CE</strong>
-                <div class="fit-summary" data-role="k-summary">-</div>
-              </div>
-            </div>
-          </div>
-          <p class="fit-note">
-            The comparison below shows how much empirical risk is reduced by moving from the best $k-1$ component fit to the best $k$ component fit.
-          </p>
-          <div class="component-gain" data-role="component-gain"></div>
-        </div>
       </section>
 
       <section class="panel">
@@ -476,6 +423,5 @@
       </section>
     </main>
   </div>
-  <script src="assets/interactive_gmm_fit.js?v=tradeoff-31"></script>
 </body>
 </html>

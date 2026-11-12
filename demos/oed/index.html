@@ -1,98 +1,13 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y06DGSC9SW"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-Y06DGSC9SW');
-    </script>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Optimal Experiment Design Demos</title>
-    <meta
-      name="description"
-      content="Adaptive experiment design and active learning demos for faster decisions with fewer samples."
-    />
-    <meta name="theme-color" content="#8b3a3a" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <main class="shell">
-      <header class="hero" id="top">
-        <div class="nav">
-          <div class="nav-brand">Demos</div>
-          <nav class="nav-links" aria-label="Primary">
-            <a href="https://josephsmiller.com/">Home</a>
-            <a href="#demos">Demos</a>
-            <a href="#method">Method</a>
-          </nav>
-        </div>
-
-        <div class="hero-content">
-          <div class="eyebrow">Optimal experiment design</div>
-          <h1>Optimal Experiment Design Demos</h1>
-          <p class="lede">
-            These demos show how to choose what data to collect next, based on what we expect to learn from it.
-          </p>
-          <div class="actions">
-            <a class="button" href="#demos">View demos</a>
-            <a class="button secondary" href="mailto:joe@josephsmiller.com">Email</a>
-          </div>
-        </div>
-      </header>
-
-      <section class="section" id="what-is">
-        <h2>What this is</h2>
-        <p>
-          Choosing measurements this way can help us fit a model with less data.
-        </p>
-        <p class="muted">
-          For example, when looking for duplicate records, most randomly chosen pairs won’t match. We can instead label pairs the model expects to learn more from, often ones it isn’t sure about.
-        </p>
-        <p class="muted small">
-          Typical applications include A/B testing with covariates, record linkage, pricing experiments, adaptive surveys, and ML data labeling.
-        </p>
-      </section>
-
-      <section class="section" id="demos">
-        <div class="section-header">
-          <h2>Demos</h2>
-        </div>
-        <div class="grid">
-          <a class="card" href="data-linkage.html">
-            <div class="card-title">Record linkage + deduplication</div>
-            <p class="muted">
-              Label pairs of records and see the model learn which ones are likely to match.
-              The demo chooses which pairs to show you next.
-            </p>
-          </a>
-          <a class="card" href="ab-oed.html">
-            <div class="card-title">Adaptive A/B testing with customer features</div>
-            <p class="muted">
-              The A/B demo tends to allocate observations to regions of covariate space where the preferred treatment is uncertain and the outcome covaries with the decision of interest.
-              The page contains a 41-step run of decision regions, decision uncertainty, and expected information gain.
-            </p>
-          </a>
-        </div>
-      </section>
-
-      <section class="section" id="method">
-        <div class="section-header">
-          <h2>Method</h2>
-        </div>
-        <p class="muted" style="margin-top: 0.75rem">
-          The model estimates how much each possible measurement would teach us, then chooses the most informative one.
-        </p>
-        <p class="muted" style="margin-top: 0.75rem">
-          We can focus on a decision, such as which treatment to choose, instead of trying to learn every detail of the model.
-          In my implementation, evaluating one possible measurement takes about as long as fitting the model.
-        </p>
-      </section>
-
-    </main>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <title>Moved</title>
+  <!-- Restore when experiment-design/ is published:
+  <meta http-equiv="refresh" content="0; url=../../experiment-design/index.html">
+  <link rel="canonical" href="https://josephsmiller.com/experiment-design/"> -->
+</head>
+<body>
+  <p>This page has moved.</p>
+</body>
 </html>
